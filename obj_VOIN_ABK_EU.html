@@ -458,22 +458,22 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <div style="display:flex;gap:5px;margin-bottom:7px;flex-wrap:wrap">
     <div style="flex:1;min-width:80px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Проект</label>
-      <input id="aosr-project" type="text" placeholder="ВОИН" style="width:100%;background:#0d1117;color:#e2e8f0;
+      <input id="aosr-project" type="text" placeholder="ВОИН" oninput="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none;text-transform:uppercase">
     </div>
     <div style="flex:1;min-width:70px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Корпус</label>
-      <input id="aosr-korpus" type="text" placeholder="8" style="width:100%;background:#0d1117;color:#e2e8f0;
+      <input id="aosr-korpus" type="text" placeholder="8" oninput="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none">
     </div>
     <div style="flex:1;min-width:70px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Марка</label>
-      <input id="aosr-marka" type="text" placeholder="ЭО" style="width:100%;background:#0d1117;color:#e2e8f0;
+      <input id="aosr-marka" type="text" placeholder="ЭО" oninput="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none;text-transform:uppercase">
     </div>
     <div style="flex:1;min-width:60px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Этап</label>
-      <select id="aosr-etap" style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
+      <select id="aosr-etap" onchange="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
         border-radius:5px;padding:6px 8px;font-size:12px;outline:none">
         <option value="КЛ">КЛ</option><option value="ОСР">ОСР</option>
         <option value="ОБ">ОБ</option><option value="ЗР">ЗР</option>
@@ -485,8 +485,10 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none">
     </div>
   </div>
+  <div id="aosr-shifr-preview" style="font-size:10.5px;color:#4ade80;background:#0d1117;border:1px solid #166534;
+    border-radius:5px;padding:5px 8px;margin-bottom:8px;font-family:monospace">Шифр ИД: —</div>
   <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Объект (полное наименование в шапку акта)</label>
-  <textarea id="aosr-object" placeholder="Центр военно-спортивной подготовки... Учебный корпус." style="width:100%;min-height:36px;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
+  <textarea id="aosr-object" placeholder="Центр военно-спортивной подготовки... Учебный корпус." oninput="_aosrUpdateShifrPreview()" style="width:100%;min-height:36px;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
     border-radius:5px;padding:7px;font-size:11.5px;outline:none;resize:vertical;margin-bottom:7px"></textarea>
 
   <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Шифр проектной документации (п.2)</label>
@@ -558,6 +560,11 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Лицо, выполнившее работы (обычно = ваша компания)</label>
       <textarea id="req-ispolnitel" placeholder="ООО «СК Армада+»…" style="width:100%;min-height:32px;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none;resize:vertical;margin-bottom:8px"></textarea>
 
+      <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">
+        Доп. исполнитель-субподрядчик (если работы по факту выполняла другая ваша организация внутри общего подряда — необязательно)
+      </label>
+      <textarea id="req-subcontractor" placeholder="Производитель работ ООО «СК Армада+», генеральный директор…, ОГРН…, ИНН…, адрес…" style="width:100%;min-height:32px;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none;resize:vertical;margin-bottom:8px"></textarea>
+
       <div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:5px">Подписанты (ФИО + должность/приказ)</div>
       <div style="display:flex;gap:6px;margin-bottom:5px">
         <input id="req-sign-zakaz-fio" placeholder="Представитель заказчика — ФИО" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
@@ -571,9 +578,12 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
         <input id="req-sign-sk-fio" placeholder="Стройконтроль — ФИО" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
         <input id="req-sign-sk-det" placeholder="должность, приказ №…" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:5px">
         <input id="req-sign-isp-fio" placeholder="Исполнитель работ — ФИО" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
         <input id="req-sign-isp-det" placeholder="должность, приказ №…" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
+      </div>
+      <div style="margin-bottom:8px">
+        <input id="req-sign-sub-fio" placeholder="Субподрядчик-исполнитель — ФИО (если заполнено поле выше)" style="width:100%;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:6px">
@@ -1261,7 +1271,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn b-pur" onclick="openLayerModal()" title="Новый слой / защита ИД">📑 Слой</button>
   <button class="btn" onclick="openM('mcloud')" title="Сохранить в облако (Google Drive / Яндекс.Диск)" style="background:#1a73e8;color:#fff">☁ Облако</button>
   <button class="btn" onclick="openM('mshare')" title="Создать ссылку для проектировщика" style="background:#0891b2;color:#fff">🔗 Ссылка</button>
-  <button class="btn" onclick="openM('maosr');aosrUpdateKeyStatus();aosrLoadRequisites();aosrUpdateSysLabel();if(!document.getElementById('aosr-materials').children.length)aosrAddMaterialRow();" title="АОСР с помощью ИИ (Claude)" style="background:#6d28d9;color:#fff">🤖 АОСР</button>
+  <button class="btn" onclick="openM('maosr');aosrUpdateKeyStatus();aosrLoadRequisites();aosrUpdateSysLabel();_aosrUpdateShifrPreview();if(!document.getElementById('aosr-materials').children.length)aosrAddMaterialRow();" title="АОСР с помощью ИИ (Claude)" style="background:#6d28d9;color:#fff">🤖 АОСР</button>
   <button class="btn b-grn" style="font-weight:900;font-size:12px" onclick="showReady()">✅ ГОТОВО</button>
 </div>
 
@@ -2550,9 +2560,15 @@ function aosrFillFromDrawing(){
     `${sysWorkText} кабелем ${marks.join(', ')||'—'} по потолку в гофротрубе и в стенах в штробе, согласно проектной документации.`
     + (CUR_MARKA_OVERRIDE ? ' ⚠️ Марка без своего шаблона черчения — сверь формулировку и материалы с ПТО.' : '');
 
-  // 4. Исполнительная схема — по умолчанию ссылка на текущий чертёж
-  document.getElementById('aosr-execschema').value =
-    `Исполнительная схема — ${sys.name} — см. приложенный чертёж (📥 из раздела «✅ ГОТОВО» / «🔗 Ссылка»). (1 л.)`;
+  // 4. Исполнительная схема — имя по регламенту компании: ИД_Проект_Объект_Марка_ВидРабот
+  const _p = document.getElementById('aosr-project')?.value.trim().toUpperCase() || '';
+  const _k = document.getElementById('aosr-korpus')?.value.trim().toUpperCase() || '';
+  const _m = (CUR_MARKA_OVERRIDE ? CUR_MARKA_OVERRIDE.marka : (document.getElementById('aosr-marka')?.value.trim() || curMarkaCode())).toUpperCase();
+  const _e = document.getElementById('aosr-etap')?.value || 'КЛ';
+  const _shifrIS = _p ? ('ИД_'+_p+(_k?'_'+_k:'')+(_m?'_'+_m:'')+'_'+_e) : '';
+  document.getElementById('aosr-execschema').value = _shifrIS
+    ? `Исполнительная схема ${_shifrIS} — см. приложенный чертёж (📥 из раздела «✅ ГОТОВО» / «🔗 Ссылка»). (1 л.)`
+    : `Исполнительная схема — ${sys.name} — см. приложенный чертёж (📥 из раздела «✅ ГОТОВО» / «🔗 Ссылка»). (1 л.)`;
 
   tip(`📐 Подставлено из чертежа: ${sys.short||sys.name}, марки: ${marks.join(', ')||'—'}. Проверь и при желании уточни формулировку кнопкой ✍️ ниже.`);
 }
@@ -2578,7 +2594,7 @@ async function aosrExtract(){
 {"project":"","korpus":"","marka":"","etap":"","object":"","proj_doc":"","exec_schema":"","materials":[{"name":"","unit":"","qty":""}]}
 "etap" — один из: КЛ, ОСР, ОБ, ЗР.
 "marka" — марка ЭОМ (ЭМ,ЭО,ЭАО,ЭУ,НКУ,ЭГ,ЭС,ЭН,АХО,МЗ и т.п.). Если в шифре стоит обобщённое "ЭОМ" — определи фактическую марку по содержанию: светильники → ЭО, кабельные линии без конкретики → ЭМ, розетки/выключатели → ЭУ, щитовое оборудование → НКУ.
-"exec_schema" строго форматом: "Исполнительная схема — {шифр} — {название}. ({N} л.)" если данные позволяют это собрать, иначе пустая строка.`;
+"exec_schema" строго форматом: "Исполнительная схема ИД_{Проект}_{Объект}_{Марка}_{ВидРабот} — {название}. ({N} л.)" по регламенту компании (пять смысловых блоков шифра через "_": ИД, проект, объект/корпус — если корпусов нет, блок не указывается —, марка ЭОМ, вид работ ОБ/ОСР/КЛ/ЗР). Собери только если данные позволяют, иначе пустая строка.`;
 
     const data = await callClaudeAPI({system: sys, messages:[{role:'user', content:parts}], max_tokens:1600});
     const parsed = _extractJSON(claudeText(data));
@@ -2746,8 +2762,30 @@ async function aosrCertLookup(rowId){
 // ── Сборка и выгрузка JSON акта (для generate_aosr.py или будущего JS-генератора) ──
 // ── Реквизиты акта: сохранение/загрузка (localStorage, один раз на объект) ──
 const AOSR_REQ_FIELDS = ['req-date','req-date-start','req-date-end','req-zakazchik','req-licostr',
-  'req-proekt','req-ispolnitel','req-sign-zakaz-fio','req-sign-zakaz-det','req-sign-str-fio','req-sign-str-det',
-  'req-sign-sk-fio','req-sign-sk-det','req-sign-isp-fio','req-sign-isp-det','req-next-works','req-copies'];
+  'req-proekt','req-ispolnitel','req-subcontractor','req-sign-zakaz-fio','req-sign-zakaz-det','req-sign-str-fio','req-sign-str-det',
+  'req-sign-sk-fio','req-sign-sk-det','req-sign-isp-fio','req-sign-isp-det','req-sign-sub-fio',
+  'req-next-works','req-copies'];
+
+// Реальные значения, взятые из образца готового акта компании (АОСР Стрелковая
+// галерея ЭОМ) — подставляются один раз, только если реквизиты для этого браузера
+// ещё ни разу не сохранялись. Дальше всё полностью редактируется и сохраняется
+// уже под конкретный объект через 💾.
+const AOSR_REQ_DEFAULTS = {
+  'req-zakazchik': 'ПУБЛИЧНО-ПРАВОВАЯ КОМПАНИЯ «ЕДИНЫЙ ЗАКАЗЧИК В СФЕРЕ СТРОИТЕЛЬСТВА», ОГРН 1217700030162, ИНН 7707448255, юр. адрес: 127051, г. Москва, ул. Садовая-Самотёчная, д. 10, стр. 1',
+  'req-licostr': 'Фонд капитального ремонта общего имущества многоквартирных домов, ОГРН 1137799018081, ИНН 7701169833, юр. адрес: Московская область, г.о. Орехово-Зуевский, г. Ликино-Дулёво, ул. Текстильщиков, д. 3, к. А, помещение 20',
+  'req-proekt': 'ООО «Энергостройпроект», ОГРН 1163123052290, ИНН 3123380728, юр. адрес: 308001, Белгородская область, г. Белгород, ул. Белгородского Полка, д. 50',
+  'req-ispolnitel': 'ООО «Энергостройпроект», ОГРН 1163123052290, ИНН 3123380728, юр. адрес: 308001, Белгородская область, г. Белгород, ул. Белгородского Полка, д. 50',
+  'req-subcontractor': 'Производитель работ ООО «СК Армада+», генеральный директор Пшеничный Андрей Андреевич, ОГРН 1223100005600, ИНН 3100000232, юр. адрес: 308006, Белгородская область, г. Белгород, ул. Корочанская, д. 84, офис 202',
+  'req-sign-zakaz-fio': 'Хоцанян Д.Н.',
+  'req-sign-zakaz-det': 'Главный специалист строительного контроля Отдела строительного контроля объектов социального назначения Управления строительного контроля Дирекции по развитию территорий ППК «Единый заказчик», НРС №С-16-295176, приказ №ППК-СК-01-63/25 от 25.08.2025 г.',
+  'req-sign-str-fio': 'Шилкин Е.В.',
+  'req-sign-str-det': 'Руководитель проекта дирекции по реализации СИП в ЗО, ХО Фонда капитального ремонта общего имущества многоквартирных домов, приказ №73-П от 27.06.2025 г.',
+  'req-sign-sk-fio': 'Куклин М.Б.',
+  'req-sign-sk-det': 'Инженер производственно-технического отдела инженерного центра Фонда капитального ремонта общего имущества многоквартирных домов, НРС №С-58-055517, приказ №101-П от 25.10.2024 г.',
+  'req-sign-isp-fio': 'Грибанов В.Л.',
+  'req-sign-isp-det': 'Начальник участка ООО «Энергостройпроект», приказ №11/25 от 25.06.2025 г.',
+  'req-sign-sub-fio': 'Пшеничный А.А.',
+};
 
 function aosrSaveRequisites(){
   const data = {};
@@ -2758,8 +2796,33 @@ function aosrSaveRequisites(){
 
 function aosrLoadRequisites(){
   let data = {};
-  try{ data = JSON.parse(localStorage.getItem('eom_aosr_requisites')||'{}'); }catch(e){}
-  AOSR_REQ_FIELDS.forEach(id=>{ const el=document.getElementById(id); if(el && data[id]!=null) el.value = data[id]; });
+  let hadSaved = false;
+  try{
+    const raw = localStorage.getItem('eom_aosr_requisites');
+    if(raw){ data = JSON.parse(raw); hadSaved = true; }
+  }catch(e){}
+  AOSR_REQ_FIELDS.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    if(data[id]!=null) el.value = data[id];
+    else if(!hadSaved && AOSR_REQ_DEFAULTS[id]) el.value = AOSR_REQ_DEFAULTS[id]; // первый запуск — берём образец
+  });
+  // Название объекта — из того же образца, только если поле ещё пустое (не затираем уже введённое/полученное с чертежа)
+  const objEl = document.getElementById('aosr-object');
+  if(objEl && !objEl.value.trim() && !hadSaved){
+    objEl.value = 'Полевой военно-спортивный лагерь филиала Центра военно-спортивной подготовки и патриотического воспитания молодёжи «ВОИН» по адресу: ДНР, г. Мариуполь, ул. Виноградная, 29. Стрелковая галерея.';
+  }
+  if(!hadSaved) tip('ℹ️ Реквизиты подставлены по образцу реального акта — проверь и поправь под текущий объект, затем сохрани 💾');
+}
+
+// Живой предпросмотр шифра ИД прямо в разделе АОСР (та же формула, что и в «Ссылке»)
+function _aosrUpdateShifrPreview(){
+  const p=(document.getElementById('aosr-project')?.value||'').trim().toUpperCase();
+  const k=(document.getElementById('aosr-korpus')?.value||'').trim().toUpperCase();
+  const m=(document.getElementById('aosr-marka')?.value||'').trim().toUpperCase();
+  const e=document.getElementById('aosr-etap')?.value||'КЛ';
+  const el=document.getElementById('aosr-shifr-preview');
+  if(!el) return;
+  el.textContent = 'Шифр ИД: ' + (p ? ('ИД_'+p+(k?'_'+k:'')+(m?'_'+m:'')+'_'+e) : '—');
 }
 
 function _reqVal(id, fallback){
@@ -2783,6 +2846,8 @@ function aosrBuildJSON(){
     lico_str: _reqVal('req-licostr','ЗАПОЛНИТЬ'),
     proektirovshik: _reqVal('req-proekt','ЗАПОЛНИТЬ'),
     ispolnitel: _reqVal('req-ispolnitel','ЗАПОЛНИТЬ'),
+    subcontractor_details: (document.getElementById('req-subcontractor')?.value.trim()) || '',
+    subcontractor_fio_short: (document.getElementById('req-sign-sub-fio')?.value.trim()) || '',
     works: document.getElementById('aosr-works').value.trim(),
     proj_doc: document.getElementById('aosr-projdoc').value.trim(),
     exec_schema: document.getElementById('aosr-execschema').value.trim(),
