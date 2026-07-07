@@ -1356,20 +1356,20 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <!-- Счётчики -->
     <div id="cnt">
       <div style="font-size:8.5px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📊 Итого</div>
-      Кабель: <b id="ck">11.1м</b><br>
-      ×1.06: <b id="ckz">11.8м</b><br>
-      Коробок: <b id="cb2">1</b><br>
+      Кабель: <b id="ck">0.0м</b><br>
+      ×1.06: <b id="ckz">0.0м</b><br>
+      Коробок: <b id="cb2">0</b><br>
       Розеток: <b id="cr">0</b><br>
       <span style="color:#10b981">Подрозетники:</span> <b id="cpr">0</b><br>
       Светильн.: <b id="cl">0</b><br>
-      Гильзы: <b id="cg" class="warn">1</b><br>
-      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">11.1м</b><br>
+      Гильзы: <b id="cg" class="warn">0</b><br>
+      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">0.0м</b><br>
       <span style="color:#c084fc">Гофра штроба:</span> <b id="csthr">0.0м</b><br>
       <span style="color:#818cf8">Лоток:</span> <b id="clot">0.0м</b><br>
-      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">23</b><br>
+      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">0</b><br>
       Несвязан: <b id="ce" class="warn">0</b><br>
       <span style="color:#a78bfa">Опусков:</span> <b id="co">0</b><br>
-      <span style="color:#facc15">Бирки:</span> <b id="cbk">6</b>
+      <span style="color:#facc15">Бирки:</span> <b id="cbk">0</b>
     </div>
 
     <div style="margin-top:5px">
@@ -1377,7 +1377,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.1с</div>
-      <div class="ms">11.1м</div></div>
+      <div class="ms">0.0м</div></div>
     </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.2с</div>
@@ -9858,19 +9858,6 @@ window.addEventListener('load', function(){
     var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
     if(typeof updateShifrPreview==='function') updateShifrPreview();
     if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
-  }catch(e){}
-});
-</script>
-
-<script>
-// Автозаполнение шифра при первом открытии этого именного шаблона объекта
-window.addEventListener('load', function(){
-  try{
-    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
-    var sk=document.getElementById('share-korpus');  if(sk) sk.value="КПП1";
-    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
-    if(typeof updateShifrPreview==='function') updateShifrPreview();
-    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/КПП1 — ЭУ");
   }catch(e){}
 });
 </script>
