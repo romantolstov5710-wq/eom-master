@@ -1175,7 +1175,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">1%</span>
   </label>
 
   <!-- Строка 1: КАБЕЛЬ -->
@@ -1392,7 +1392,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="1760" height="837"></canvas></div>
+  <div id="cw"><canvas id="cv" width="390" height="600"></canvas></div>
 </div>
 
 <div id="st">
@@ -10091,6 +10091,19 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+  }catch(e){}
+});
+</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
