@@ -133,6 +133,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 </style>
 <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -171,7 +172,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       Фактическое расстояние (рулетка), мм:
     </label>
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-      <input id="calib-real" type="number" min="100" max="99000" value="3000" step="50" style="flex:1;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
+      <input id="calib-real" type="number" min="100" max="99000" value="3000" step="50" onfocus="_maybeShowNumpad(this,'Фактическое расстояние, мм')" style="flex:1;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
         border-radius:5px;padding:8px 10px;font-size:18px;font-weight:700;outline:none">
       <span style="color:#64748b;font-size:11px;white-space:nowrap">мм</span>
     </div>
@@ -458,22 +459,22 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <div style="display:flex;gap:5px;margin-bottom:7px;flex-wrap:wrap">
     <div style="flex:1;min-width:80px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Проект</label>
-      <input id="aosr-project" type="text" placeholder="ВОИН" style="width:100%;background:#0d1117;color:#e2e8f0;
+      <input id="aosr-project" type="text" placeholder="ВОИН" oninput="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none;text-transform:uppercase">
     </div>
     <div style="flex:1;min-width:70px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Корпус</label>
-      <input id="aosr-korpus" type="text" placeholder="8" style="width:100%;background:#0d1117;color:#e2e8f0;
+      <input id="aosr-korpus" type="text" placeholder="8" oninput="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none">
     </div>
     <div style="flex:1;min-width:70px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Марка</label>
-      <input id="aosr-marka" type="text" placeholder="ЭО" style="width:100%;background:#0d1117;color:#e2e8f0;
+      <input id="aosr-marka" type="text" placeholder="ЭО" oninput="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none;text-transform:uppercase">
     </div>
     <div style="flex:1;min-width:60px">
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Этап</label>
-      <select id="aosr-etap" style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
+      <select id="aosr-etap" onchange="_aosrUpdateShifrPreview()" style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
         border-radius:5px;padding:6px 8px;font-size:12px;outline:none">
         <option value="КЛ">КЛ</option><option value="ОСР">ОСР</option>
         <option value="ОБ">ОБ</option><option value="ЗР">ЗР</option>
@@ -485,8 +486,10 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
         border:1px solid #334155;border-radius:5px;padding:6px 8px;font-size:12px;outline:none">
     </div>
   </div>
+  <div id="aosr-shifr-preview" style="font-size:10.5px;color:#4ade80;background:#0d1117;border:1px solid #166534;
+    border-radius:5px;padding:5px 8px;margin-bottom:8px;font-family:monospace">Шифр ИД: —</div>
   <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Объект (полное наименование в шапку акта)</label>
-  <textarea id="aosr-object" placeholder="Центр военно-спортивной подготовки... Учебный корпус." style="width:100%;min-height:36px;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
+  <textarea id="aosr-object" placeholder="Центр военно-спортивной подготовки... Учебный корпус." oninput="_aosrUpdateShifrPreview()" style="width:100%;min-height:36px;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
     border-radius:5px;padding:7px;font-size:11.5px;outline:none;resize:vertical;margin-bottom:7px"></textarea>
 
   <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Шифр проектной документации (п.2)</label>
@@ -558,6 +561,11 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">Лицо, выполнившее работы (обычно = ваша компания)</label>
       <textarea id="req-ispolnitel" placeholder="ООО «СК Армада+»…" style="width:100%;min-height:32px;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none;resize:vertical;margin-bottom:8px"></textarea>
 
+      <label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px">
+        Доп. исполнитель-субподрядчик (если работы по факту выполняла другая ваша организация внутри общего подряда — необязательно)
+      </label>
+      <textarea id="req-subcontractor" placeholder="Производитель работ ООО «СК Армада+», генеральный директор…, ОГРН…, ИНН…, адрес…" style="width:100%;min-height:32px;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none;resize:vertical;margin-bottom:8px"></textarea>
+
       <div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:5px">Подписанты (ФИО + должность/приказ)</div>
       <div style="display:flex;gap:6px;margin-bottom:5px">
         <input id="req-sign-zakaz-fio" placeholder="Представитель заказчика — ФИО" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
@@ -571,9 +579,12 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
         <input id="req-sign-sk-fio" placeholder="Стройконтроль — ФИО" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
         <input id="req-sign-sk-det" placeholder="должность, приказ №…" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:5px">
         <input id="req-sign-isp-fio" placeholder="Исполнитель работ — ФИО" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
         <input id="req-sign-isp-det" placeholder="должность, приказ №…" style="flex:1;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
+      </div>
+      <div style="margin-bottom:8px">
+        <input id="req-sign-sub-fio" placeholder="Субподрядчик-исполнитель — ФИО (если заполнено поле выше)" style="width:100%;background:#0a0f1a;color:#e2e8f0;border:1px solid #334155;border-radius:5px;padding:6px 7px;font-size:11px;outline:none">
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:6px">
@@ -604,20 +615,21 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <!-- МОДАЛ: НОВЫЙ СЛОЙ / ЗАЩИТА ИД -->
 <div class="mbg" id="mlayer"><div class="mbox" style="max-width:380px">
-  <h3>📑 Этажи и защиты ИД</h3>
+  <h3>📑 Слои и защиты ИД</h3>
   <p style="font-size:11px;color:#9ca3af;margin-bottom:12px;line-height:1.6">
-    Один документ ИД может включать несколько этажей — у каждого свой план, свой масштаб,
-    своя высота потолка. Считаются как единая ИД: у каждого этажа своя ведомость,
-    плюс одна общая ведомость на всё внизу.<br>
-    Также подходит для новой защиты ИД на том же этаже (без нового плана).
+    Новый слой — для новой защиты ИД: текущий чертёж «замораживается» и остаётся виден
+    чёрно-белым фоном, а новый слой рисуется цветом поверх того же плана.<br>
+    Если внутри одной ИД несколько РАЗНЫХ этажей — план для нового слоя можно
+    сменить вручную (🗺 План) после создания. Считается как единая ИД: своя
+    ведомость на каждый слой, плюс одна общая ведомость на всё внизу.
   </p>
-  <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">Название этажа/защиты</label>
-  <input id="layer-name" value="" placeholder="Этаж 2 / Подвал / Защита ИД №2 / ..." style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
+  <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">Название слоя/защиты</label>
+  <input id="layer-name" value="" placeholder="Защита ИД №2 / Этаж 2 / ..." style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
     border-radius:5px;padding:8px 10px;font-size:13px;outline:none;margin-bottom:10px">
   <div id="layer-list" style="margin-bottom:12px;max-height:140px;overflow-y:auto"></div>
   <div style="display:flex;gap:8px;margin-bottom:8px">
     <button class="btn b-grn" style="flex:1;padding:9px" onclick="addLayer()">
-      ➕ Новый этаж / защита
+      ➕ Новый слой / защита
     </button>
     <button class="btn b-gray" style="padding:9px" onclick="closeM('mlayer')">✕</button>
   </div>
@@ -628,16 +640,16 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       🔗 Объединение слоёв
     </div>
     <p style="font-size:10px;color:#64748b;margin-bottom:8px;line-height:1.5">
-      Для слоёв ОДНОГО этажа (несколько защит подряд) — сливает в один чертёж, объёмы суммируются.
-      Для РАЗНЫХ этажей объединять нельзя (разные планы) — используй только общую ведомость.
+      Для слоёв на ОДНОМ плане (несколько защит подряд) — сливает в один чертёж, объёмы суммируются.
+      Если среди слоёв есть разные планы (разные этажи) — объединять нельзя, используй только общую ведомость.
       Операция необратима (только Ctrl+Z сразу после).
     </p>
     <div style="display:flex;gap:7px">
       <button class="btn b-or" style="flex:1;padding:8px;font-size:11px" onclick="showMergeVed()">
-        📋 Общая ведомость (по этажам + итого)
+        📋 Общая ведомость (по слоям + итого)
       </button>
       <button class="btn b-red" style="flex:1;padding:8px;font-size:11px" onclick="mergeLayers()">
-        🔗 Объединить (только один этаж)
+        🔗 Объединить (только один план)
       </button>
     </div>
   </div>
@@ -852,8 +864,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 <!-- МОДАЛ: ВЫСОТЫ -->
 <div class="mbg" id="mh"><div class="mbox">
   <h3>📐 Высоты помещения</h3>
-  <label>Высота потолка, мм</label><input id="mh-m" type="number" value="3100">
-  <label>Фальш-потолок, мм (0 = нет)</label><input id="mh-f" type="number" value="0">
+  <label>Высота потолка, мм</label><input id="mh-m" type="number" value="3100" onfocus="_maybeShowNumpad(this,'Высота потолка, мм')">
+  <label>Фальш-потолок, мм (0 = нет)</label><input id="mh-f" type="number" value="0" onfocus="_maybeShowNumpad(this,'Фальш-потолок, мм')">
   <div class="mbtns">
     <button class="btn b-grn" onclick="doHpot()">✅ Применить</button>
     <button class="btn b-gray" onclick="closeM('mh')">✕ Отмена</button>
@@ -1163,7 +1175,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">3%</span>
   </label>
 
   <!-- Строка 1: КАБЕЛЬ -->
@@ -1197,15 +1209,45 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn b-teal" onclick="autoDetectWalls()" title="Автораспознать стены по загруженному плану">🏗 Стены</button>
   <button class="btn b-teal" onclick="openCalib()" title="Проверить масштаб">📏 Масштаб</button>
   <button class="btn b-blue" onclick="save()">💾</button>
-  <button id="kd-btn" class="btn b-or" onclick="startKDDist()" title="Нажми → кликни кабель → кликни стену → введи размер">📏 КЛ</button>
+  <button id="kd-btn" class="btn b-or" onclick="startKDDist('cable')" title="Нажми → кликни кабель → кликни стену → введи размер">📏 КЛ</button>
+  <button id="od-btn" class="btn b-or" onclick="startKDDist('opusk')" title="Нажми → кликни один или несколько опусков → кликни стену → введи общий размер" style="background:#ea580c;color:#fff">📏 Оп-стена</button>
   <span id="kd-panel" style="display:none;align-items:center;gap:5px">
     <span id="kd-hint" style="font-size:11px;color:#f59e0b;white-space:nowrap">кликни кабель…</span>
     <input id="kd-dist" type="text" placeholder="мм" inputmode="numeric" style="width:72px;background:#0d1117;color:#e2e8f0;border:1px solid #f59e0b;
-      border-radius:5px;padding:3px 7px;font-size:13px;font-weight:700;outline:none;display:none;text-align:center" onkeydown="if(event.key==='Enter')applyKDDist()" oninput="renderKDHighlight()">
+      border-radius:5px;padding:3px 7px;font-size:13px;font-weight:700;outline:none;display:none;text-align:center" onkeydown="if(event.key==='Enter')applyKDDist()" oninput="_kdNpVal=this.value;renderKDHighlight()">
     <button id="kd-ok" class="btn b-or" onclick="applyKDDist()" style="display:none;padding:3px 10px;font-size:12px;font-weight:700">✓</button>
     <button class="btn b-gray" onclick="cancelKDDist()" style="padding:3px 8px;font-size:12px">✕</button>
   </span>
   <!-- Числовая клавиатура КЛ (появляется на планшете) -->
+  <!-- УНИВЕРСАЛЬНАЯ цифровая клавиатура — для высоты потолка, масштаба, КЛ и т.п. -->
+  <div id="np-panel" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;
+    background:#0f172a;border-top:2px solid #3b82f6;padding:8px;
+    flex-direction:column;gap:6px;max-width:400px;margin:0 auto;box-shadow:0 -4px 20px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 8px">
+      <span style="font-size:11px;color:#93c5fd;flex:1" id="np-label">размер</span>
+      <div id="np-display" style="background:#0d1117;color:#facc15;border:1px solid #3b82f6;
+        border-radius:5px;padding:5px 12px;font-size:18px;font-weight:700;min-width:90px;text-align:right">—</div>
+      <span style="font-size:11px;color:#64748b">мм</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:0 4px">
+      <button onclick="_npKey('7')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">7</button>
+      <button onclick="_npKey('8')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">8</button>
+      <button onclick="_npKey('9')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">9</button>
+      <button onclick="_npDel()" class="btn" style="padding:10px;font-size:16px;background:#334155;color:#f87171">⌫</button>
+      <button onclick="_npKey('4')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">4</button>
+      <button onclick="_npKey('5')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">5</button>
+      <button onclick="_npKey('6')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">6</button>
+      <button onclick="_npKey('00')" class="btn" style="padding:10px;font-size:14px;background:#1e293b;color:#e2e8f0">00</button>
+      <button onclick="_npKey('1')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">1</button>
+      <button onclick="_npKey('2')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">2</button>
+      <button onclick="_npKey('3')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">3</button>
+      <button onclick="_npKey('0')" class="btn" style="padding:10px;font-size:16px;font-weight:700;background:#1e293b;color:#e2e8f0">0</button>
+      <button onclick="_npClose()" class="btn" style="padding:10px;font-size:13px;background:#334155;color:#94a3b8">✕</button>
+      <button onclick="_npClear()" class="btn" style="padding:10px;font-size:13px;background:#334155;color:#fbbf24">C</button>
+      <button onclick="_npApply()" class="btn" style="padding:10px;font-size:15px;font-weight:700;background:#3b82f6;color:#fff;grid-column:span 2">✓ Применить</button>
+    </div>
+  </div>
+
   <div id="kd-numpad" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
     background:#0f172a;border-top:2px solid #f59e0b;padding:8px;
     display:none;flex-direction:column;gap:6px;max-width:400px;margin:0 auto">
@@ -1260,7 +1302,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn b-pur" onclick="openLayerModal()" title="Новый слой / защита ИД">📑 Слой</button>
   <button class="btn" onclick="openM('mcloud')" title="Сохранить в облако (Google Drive / Яндекс.Диск)" style="background:#1a73e8;color:#fff">☁ Облако</button>
   <button class="btn" onclick="openM('mshare')" title="Создать ссылку для проектировщика" style="background:#0891b2;color:#fff">🔗 Ссылка</button>
-  <button class="btn" onclick="openM('maosr');aosrUpdateKeyStatus();aosrLoadRequisites();aosrUpdateSysLabel();if(!document.getElementById('aosr-materials').children.length)aosrAddMaterialRow();" title="АОСР с помощью ИИ (Claude)" style="background:#6d28d9;color:#fff">🤖 АОСР</button>
+  <button class="btn" onclick="openM('maosr');aosrUpdateKeyStatus();aosrLoadRequisites();aosrUpdateSysLabel();_aosrUpdateShifrPreview();if(!document.getElementById('aosr-materials').children.length)aosrAddMaterialRow();" title="АОСР с помощью ИИ (Claude)" style="background:#6d28d9;color:#fff">🤖 АОСР</button>
   <button class="btn b-grn" style="font-weight:900;font-size:12px" onclick="showReady()">✅ ГОТОВО</button>
 </div>
 
@@ -1350,7 +1392,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="1760" height="844"></canvas></div>
+  <div id="cw"><canvas id="cv" width="918" height="553"></canvas></div>
 </div>
 
 <div id="st">
@@ -1369,7 +1411,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb" id="mb-lamp" onclick="sT('lamp')" style="color:#fde68a">○<span>Свет.</span></button>
   <button class="mb teal" id="mb-wall" onclick="openM('mw');sT('wall')">🧱<span>Стена</span></button>
   <button class="mb red" id="mb-er" onclick="sT('er')">✕<span>Ластик</span></button>
-  <button class="mb" onclick="startKDDist()" style="color:#f59e0b">📏<span>КЛ</span></button>
+  <button class="mb" onclick="startKDDist('cable')" style="color:#f59e0b">📏<span>КЛ</span></button>
+  <button class="mb" onclick="startKDDist('opusk')" style="color:#fb923c">📏<span>Оп-ст.</span></button>
   <button class="mb" onclick="undo()" style="color:#f97316">↩<span>Отмена</span></button>
   <button class="mb" onclick="openM('mplan')" style="color:#fed7aa">🗺<span>План</span></button>
   <button class="mb teal" onclick="openCalib()">📏<span>Масштаб</span></button>
@@ -2549,9 +2592,15 @@ function aosrFillFromDrawing(){
     `${sysWorkText} кабелем ${marks.join(', ')||'—'} по потолку в гофротрубе и в стенах в штробе, согласно проектной документации.`
     + (CUR_MARKA_OVERRIDE ? ' ⚠️ Марка без своего шаблона черчения — сверь формулировку и материалы с ПТО.' : '');
 
-  // 4. Исполнительная схема — по умолчанию ссылка на текущий чертёж
-  document.getElementById('aosr-execschema').value =
-    `Исполнительная схема — ${sys.name} — см. приложенный чертёж (📥 из раздела «✅ ГОТОВО» / «🔗 Ссылка»). (1 л.)`;
+  // 4. Исполнительная схема — имя по регламенту компании: ИД_Проект_Объект_Марка_ВидРабот
+  const _p = document.getElementById('aosr-project')?.value.trim().toUpperCase() || '';
+  const _k = document.getElementById('aosr-korpus')?.value.trim().toUpperCase() || '';
+  const _m = (CUR_MARKA_OVERRIDE ? CUR_MARKA_OVERRIDE.marka : (document.getElementById('aosr-marka')?.value.trim() || curMarkaCode())).toUpperCase();
+  const _e = document.getElementById('aosr-etap')?.value || 'КЛ';
+  const _shifrIS = _p ? ('ИД_'+_p+(_k?'_'+_k:'')+(_m?'_'+_m:'')+'_'+_e) : '';
+  document.getElementById('aosr-execschema').value = _shifrIS
+    ? `Исполнительная схема ${_shifrIS} — см. приложенный чертёж. (1 л.)`
+    : `Исполнительная схема — ${sys.name} — см. приложенный чертёж. (1 л.)`;
 
   tip(`📐 Подставлено из чертежа: ${sys.short||sys.name}, марки: ${marks.join(', ')||'—'}. Проверь и при желании уточни формулировку кнопкой ✍️ ниже.`);
 }
@@ -2577,7 +2626,7 @@ async function aosrExtract(){
 {"project":"","korpus":"","marka":"","etap":"","object":"","proj_doc":"","exec_schema":"","materials":[{"name":"","unit":"","qty":""}]}
 "etap" — один из: КЛ, ОСР, ОБ, ЗР.
 "marka" — марка ЭОМ (ЭМ,ЭО,ЭАО,ЭУ,НКУ,ЭГ,ЭС,ЭН,АХО,МЗ и т.п.). Если в шифре стоит обобщённое "ЭОМ" — определи фактическую марку по содержанию: светильники → ЭО, кабельные линии без конкретики → ЭМ, розетки/выключатели → ЭУ, щитовое оборудование → НКУ.
-"exec_schema" строго форматом: "Исполнительная схема — {шифр} — {название}. ({N} л.)" если данные позволяют это собрать, иначе пустая строка.`;
+"exec_schema" строго форматом: "Исполнительная схема ИД_{Проект}_{Объект}_{Марка}_{ВидРабот} — {название}. ({N} л.)" по регламенту компании (пять смысловых блоков шифра через "_": ИД, проект, объект/корпус — если корпусов нет, блок не указывается —, марка ЭОМ, вид работ ОБ/ОСР/КЛ/ЗР). Собери только если данные позволяют, иначе пустая строка.`;
 
     const data = await callClaudeAPI({system: sys, messages:[{role:'user', content:parts}], max_tokens:1600});
     const parsed = _extractJSON(claudeText(data));
@@ -2615,6 +2664,14 @@ async function aosrGenerateWorks(){
   const stageDefault  = (cfg.stage_types||{})[etap]?.normative_default;
   const localNorm     = normOverride || stageDefault || '';
   const markaDict     = (cfg.eom_marks_dictionary||{})[marka] || '';
+  // Жёсткий запасной вариант: поле «Нормативная база» не должно оставаться
+  // пустым НИ ПРИ КАКИХ обстоятельствах после нажатия этой кнопки — ни если
+  // ИИ вернул пустоту, ни если запрос к ИИ целиком провалился (нет ключа,
+  // нет интернета, лимит и т.п.). Подставляем его сразу же, до попытки ИИ —
+  // а если ИИ ответит успешно, ниже перезапишем более точным значением.
+  const hardFallback = 'ФЗ от 22.07.2008 №123-ФЗ «Технический регламент о требованиях пожарной безопасности»; СП 76.13330.2016 «Электротехнические устройства»; ПУЭ 7-е издание';
+  const normEl = document.getElementById('aosr-normative');
+  if(normEl && !normEl.value.trim()) normEl.value = localNorm || hardFallback;
 
   try{
     tip('🧠 Формулирую…');
@@ -2628,10 +2685,12 @@ ${objName?('Объект: '+objName+'.'):''}${materials?(' Материалы п
     const data = await callClaudeAPI({system: sys, messages:[{role:'user', content:'Сформулируй п.1 и нормативную базу.'}], max_tokens:700});
     const parsed = _extractJSON(claudeText(data));
     if(parsed.works) document.getElementById('aosr-works').value = parsed.works;
-    document.getElementById('aosr-normative').value = parsed.normative || localNorm || '';
+    if(normEl) normEl.value = parsed.normative || localNorm || hardFallback;
     tip('✅ Готово — проверь формулировку перед использованием в акте');
   }catch(e){
-    tip('❌ '+e.message);
+    // Даже при сбое ИИ — нормативная база уже подставлена запасным вариантом выше,
+    // просто честно сообщаем, что именно с ИИ не получилось.
+    tip('⚠️ ИИ не ответил ('+e.message+') — нормативная база подставлена типовая, п.1 не изменён. Проверь вручную.');
   }
 }
 
@@ -2745,8 +2804,30 @@ async function aosrCertLookup(rowId){
 // ── Сборка и выгрузка JSON акта (для generate_aosr.py или будущего JS-генератора) ──
 // ── Реквизиты акта: сохранение/загрузка (localStorage, один раз на объект) ──
 const AOSR_REQ_FIELDS = ['req-date','req-date-start','req-date-end','req-zakazchik','req-licostr',
-  'req-proekt','req-ispolnitel','req-sign-zakaz-fio','req-sign-zakaz-det','req-sign-str-fio','req-sign-str-det',
-  'req-sign-sk-fio','req-sign-sk-det','req-sign-isp-fio','req-sign-isp-det','req-next-works','req-copies'];
+  'req-proekt','req-ispolnitel','req-subcontractor','req-sign-zakaz-fio','req-sign-zakaz-det','req-sign-str-fio','req-sign-str-det',
+  'req-sign-sk-fio','req-sign-sk-det','req-sign-isp-fio','req-sign-isp-det','req-sign-sub-fio',
+  'req-next-works','req-copies'];
+
+// Реальные значения, взятые из образца готового акта компании (АОСР Стрелковая
+// галерея ЭОМ) — подставляются один раз, только если реквизиты для этого браузера
+// ещё ни разу не сохранялись. Дальше всё полностью редактируется и сохраняется
+// уже под конкретный объект через 💾.
+const AOSR_REQ_DEFAULTS = {
+  'req-zakazchik': 'ПУБЛИЧНО-ПРАВОВАЯ КОМПАНИЯ «ЕДИНЫЙ ЗАКАЗЧИК В СФЕРЕ СТРОИТЕЛЬСТВА», ОГРН 1217700030162, ИНН 7707448255, юр. адрес: 127051, г. Москва, ул. Садовая-Самотёчная, д. 10, стр. 1',
+  'req-licostr': 'Фонд капитального ремонта общего имущества многоквартирных домов, ОГРН 1137799018081, ИНН 7701169833, юр. адрес: Московская область, г.о. Орехово-Зуевский, г. Ликино-Дулёво, ул. Текстильщиков, д. 3, к. А, помещение 20',
+  'req-proekt': 'ООО «Энергостройпроект», ОГРН 1163123052290, ИНН 3123380728, юр. адрес: 308001, Белгородская область, г. Белгород, ул. Белгородского Полка, д. 50',
+  'req-ispolnitel': 'ООО «Энергостройпроект», ОГРН 1163123052290, ИНН 3123380728, юр. адрес: 308001, Белгородская область, г. Белгород, ул. Белгородского Полка, д. 50',
+  'req-subcontractor': 'Производитель работ ООО «СК Армада+», генеральный директор Пшеничный Андрей Андреевич, ОГРН 1223100005600, ИНН 3100000232, юр. адрес: 308006, Белгородская область, г. Белгород, ул. Корочанская, д. 84, офис 202',
+  'req-sign-zakaz-fio': 'Хоцанян Д.Н.',
+  'req-sign-zakaz-det': 'Главный специалист строительного контроля Отдела строительного контроля объектов социального назначения Управления строительного контроля Дирекции по развитию территорий ППК «Единый заказчик», НРС №С-16-295176, приказ №ППК-СК-01-63/25 от 25.08.2025 г.',
+  'req-sign-str-fio': 'Шилкин Е.В.',
+  'req-sign-str-det': 'Руководитель проекта дирекции по реализации СИП в ЗО, ХО Фонда капитального ремонта общего имущества многоквартирных домов, приказ №73-П от 27.06.2025 г.',
+  'req-sign-sk-fio': 'Куклин М.Б.',
+  'req-sign-sk-det': 'Инженер производственно-технического отдела инженерного центра Фонда капитального ремонта общего имущества многоквартирных домов, НРС №С-58-055517, приказ №101-П от 25.10.2024 г.',
+  'req-sign-isp-fio': 'Грибанов В.Л.',
+  'req-sign-isp-det': 'Начальник участка ООО «Энергостройпроект», приказ №11/25 от 25.06.2025 г.',
+  'req-sign-sub-fio': 'Пшеничный А.А.',
+};
 
 function aosrSaveRequisites(){
   const data = {};
@@ -2757,8 +2838,33 @@ function aosrSaveRequisites(){
 
 function aosrLoadRequisites(){
   let data = {};
-  try{ data = JSON.parse(localStorage.getItem('eom_aosr_requisites')||'{}'); }catch(e){}
-  AOSR_REQ_FIELDS.forEach(id=>{ const el=document.getElementById(id); if(el && data[id]!=null) el.value = data[id]; });
+  let hadSaved = false;
+  try{
+    const raw = localStorage.getItem('eom_aosr_requisites');
+    if(raw){ data = JSON.parse(raw); hadSaved = true; }
+  }catch(e){}
+  AOSR_REQ_FIELDS.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    if(data[id]!=null) el.value = data[id];
+    else if(!hadSaved && AOSR_REQ_DEFAULTS[id]) el.value = AOSR_REQ_DEFAULTS[id]; // первый запуск — берём образец
+  });
+  // Название объекта — из того же образца, только если поле ещё пустое (не затираем уже введённое/полученное с чертежа)
+  const objEl = document.getElementById('aosr-object');
+  if(objEl && !objEl.value.trim() && !hadSaved){
+    objEl.value = 'Полевой военно-спортивный лагерь филиала Центра военно-спортивной подготовки и патриотического воспитания молодёжи «ВОИН» по адресу: ДНР, г. Мариуполь, ул. Виноградная, 29. Стрелковая галерея.';
+  }
+  if(!hadSaved) tip('ℹ️ Реквизиты подставлены по образцу реального акта — проверь и поправь под текущий объект, затем сохрани 💾');
+}
+
+// Живой предпросмотр шифра ИД прямо в разделе АОСР (та же формула, что и в «Ссылке»)
+function _aosrUpdateShifrPreview(){
+  const p=(document.getElementById('aosr-project')?.value||'').trim().toUpperCase();
+  const k=(document.getElementById('aosr-korpus')?.value||'').trim().toUpperCase();
+  const m=(document.getElementById('aosr-marka')?.value||'').trim().toUpperCase();
+  const e=document.getElementById('aosr-etap')?.value||'КЛ';
+  const el=document.getElementById('aosr-shifr-preview');
+  if(!el) return;
+  el.textContent = 'Шифр ИД: ' + (p ? ('ИД_'+p+(k?'_'+k:'')+(m?'_'+m:'')+'_'+e) : '—');
 }
 
 function _reqVal(id, fallback){
@@ -2782,6 +2888,8 @@ function aosrBuildJSON(){
     lico_str: _reqVal('req-licostr','ЗАПОЛНИТЬ'),
     proektirovshik: _reqVal('req-proekt','ЗАПОЛНИТЬ'),
     ispolnitel: _reqVal('req-ispolnitel','ЗАПОЛНИТЬ'),
+    subcontractor_details: (document.getElementById('req-subcontractor')?.value.trim()) || '',
+    subcontractor_fio_short: (document.getElementById('req-sign-sub-fio')?.value.trim()) || '',
     works: document.getElementById('aosr-works').value.trim(),
     proj_doc: document.getElementById('aosr-projdoc').value.trim(),
     exec_schema: document.getElementById('aosr-execschema').value.trim(),
@@ -3143,6 +3251,54 @@ function _buildAosrWorkbook(dataList){
   return wb;
 }
 
+// xlsx-js-style не сохраняет разрывы страниц (проверено: свойство ws['!rowBreaks']
+// теряется при записи) — это ограничение самой библиотеки. Обходим это, вручную
+// дописывая нужный XML-элемент <rowBreaks> прямо в готовый файл через JSZip —
+// протестировано и подтверждено (реальная проверка через LibreOffice: страница
+// действительно разбивается точно по нужной строке).
+async function _patchRowBreaks(wbArrayBuffer, sheetBreaksMap){
+  const zip = await JSZip.loadAsync(wbArrayBuffer);
+  for(const [sheetFile, rowNums] of Object.entries(sheetBreaksMap)){
+    const path = `xl/worksheets/${sheetFile}`;
+    const f = zip.file(path);
+    if(!f) continue;
+    let xml = await f.async('string');
+
+    // sheetPr — говорит Excel/LibreOffice реально ВПИСЫВАТЬ содержимое по ширине
+    // страницы при печати (без этого элемента атрибут fitToWidth в pageSetup
+    // игнорируется). Идёт САМЫМ первым дочерним элементом <worksheet>.
+    if(!xml.includes('<sheetPr')){
+      xml = xml.replace(/(<worksheet[^>]*>)/, `$1<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>`);
+    }
+
+    // pageSetup — собственно масштабирование (вписать по ширине в 1 страницу,
+    // высота не ограничена — только по нашим ручным разрывам строк)
+    if(!xml.includes('<pageSetup')){
+      const pageSetupXml = `<pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="0"/>`;
+      if(xml.includes('<pageMargins')){
+        xml = xml.replace(/(<pageMargins[^/]*\/>)/, `$1${pageSetupXml}`);
+      }else if(xml.includes('<ignoredErrors')){
+        xml = xml.replace('<ignoredErrors', pageSetupXml+'<ignoredErrors');
+      }else{
+        xml = xml.replace('</worksheet>', pageSetupXml+'</worksheet>');
+      }
+    }
+
+    if(rowNums && rowNums.length){
+      const brks = rowNums.map(r=>`<brk id="${r}" max="16383" man="1"/>`).join('');
+      const breaksXml = `<rowBreaks count="${rowNums.length}" manualBreakCount="${rowNums.length}">${brks}</rowBreaks>`;
+      // Порядок элементов по схеме OOXML: rowBreaks идёт ПЕРЕД ignoredErrors (если есть)
+      if(xml.includes('<ignoredErrors')){
+        xml = xml.replace('<ignoredErrors', breaksXml+'<ignoredErrors');
+      }else{
+        xml = xml.replace('</worksheet>', breaksXml+'</worksheet>');
+      }
+    }
+    zip.file(path, xml);
+  }
+  return zip.generateAsync({type:'arraybuffer'});
+}
+
 async function aosrGenerateXlsx(){
   try{
     tip('⏳ Формирую .xlsx…');
@@ -3161,12 +3317,47 @@ async function aosrGenerateXlsx(){
       }
     });
 
-    const wb = _buildAosrWorkbook(data);
+    // Строим книгу и ЗАПОМИНАЕМ, на каких строках нужны разрывы (по листам)
+    if(typeof XLSX === 'undefined') throw new Error('Библиотека XLSX не загрузилась — проверь интернет-соединение и обнови страницу');
+    const wb = XLSX.utils.book_new();
+    const ctx = _buildAosrSheetData(data);
+    const ws = ctx.ws;
+    ws['!merges'] = ctx.merges;
+    ws['!cols'] = [
+      {wch:1.2},{wch:3.5},{wch:32},{wch:4.5},{wch:4.5},{wch:4.5},{wch:4.5},{wch:4.5},
+      {wch:4.5},{wch:4.5},{wch:4.5},{wch:4.5},{wch:4.5},{wch:4.5},{wch:4.5},
+      {wch:4.5},{wch:4.5},{wch:4.5},{wch:6.5},{wch:6.5}
+    ];
+    const maxRow = ctx.lastRow;
+    const rows = [];
+    for(let i=1;i<=maxRow;i++){ rows[i-1] = ctx.rowHeights[i] ? {hpt: ctx.rowHeights[i]} : {}; }
+    ws['!rows'] = rows;
+    ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:maxRow-1,c:19}});
+    ws['!pageSetup'] = {paperSize:9, orientation:'portrait', fitToWidth:1, fitToHeight:0};
+    ws['!margins'] = {left:0.39, right:0.2, top:0.39, bottom:0.39, header:0.2, footer:0.2};
+    XLSX.utils.book_append_sheet(wb, ws, '1');
+
+    let out = XLSX.write(wb, {type:'array', bookType:'xlsx'});
+    if(typeof JSZip !== 'undefined'){
+      try{
+        out = await _patchRowBreaks(out, {'sheet1.xml': ctx.rowBreaks||[]});
+      }catch(e){
+        console.error('Не удалось применить разметку страниц, файл будет без неё:', e);
+      }
+    }
+
     const fname = 'aosr_'+data.aosr_num.replace(/\//g,'-')+'.xlsx';
-    XLSX.writeFile(wb, fname);
-    tip('✅ '+fname+' сформирован — обязательно проверь перед подписанием (реквизиты, даты, разбиение на страницы)');
+    const blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fname;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+
+    tip('✅ '+fname+' сформирован (со страницами по форме) — обязательно проверь перед подписанием');
   }catch(e){
     tip('❌ Ошибка формирования xlsx: '+e.message);
+    console.error('aosrGenerateXlsx error:', e);
   }
 }
 
@@ -3194,8 +3385,6 @@ const ID_SYSTEMS = {
       {name:'Труба гофрированная ПВХ лёгкая чёрная с/з д20 — штроба/опуски (50м/уп)', art:'PR01.0056 Промрукав', unit:'м', calc:'gofra_sthr'},
       {name:'Коробка распр. IP55 100×100×50мм', art:'IMT35091 Systeme Electric', unit:'шт', calc:'boxes_ip55'},
       {name:'Коробка огнестойкая FR Е15-Е120 100×100×50мм', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes_fr'},
-      {name:'Клемма 3-проводная 221-613', art:'WAGO', unit:'шт', calc:'wago3'},
-      {name:'Клемма 5-проводная 0,5-6мм² 221-615', art:'WAGO', unit:'шт', calc:'wago5'},
       {name:'Подрозетник для полых стен 68×45мм IP30 синий С3Е3', art:'GUSI ELECTRIC', unit:'шт', calc:'rozets'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
@@ -3240,6 +3429,8 @@ const ID_SYSTEMS = {
       {name:'Труба гофрированная ПВХ лёгкая чёрная с/з д20 — штроба/опуски', art:'PR01.0056 Промрукав', unit:'м', calc:'gofra_sthr'},
       {name:'Комплект крепления ОКЛ: саморез+дюбель+скоба СМО 19-20 (100шт)', art:'PR08.4996 Промрукав', unit:'компл.', calc:'clips_fr'},
       {name:'Коробка огнестойкая для о/п Е15-Е120 100×100×50', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes'},
+      {name:'Клемма 3-проводная 221-613', art:'WAGO', unit:'шт', calc:'wago3'},
+      {name:'Клемма 5-проводная 0,5-6мм² 221-615', art:'WAGO', unit:'шт', calc:'wago5'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
@@ -4558,15 +4749,14 @@ function click(mm){
       const cnt=S.opPend.cnt||1;
       const lm=S.opPend.lm;
 
-      // ── 1. Snap: находим ближайшую точку на трассе (крепление коробки) ──
+      // ── 1. Snap: находим ближайший КОНЕЦ кабельной линии (начало или конец
+      //    сегмента) — коробка ставится именно на конце трассы, а не в
+      //    произвольной точке где-то посередине (по перпендикуляру к клику).
       let snapX=x, snapY=y, snapD=1e9;
       for(const seg of g.segs){
-        const dx=seg.x2-seg.x1, dy=seg.y2-seg.y1, l2=dx*dx+dy*dy;
-        if(l2>0){
-          const t=Math.max(0,Math.min(1,((x-seg.x1)*dx+(y-seg.y1)*dy)/l2));
-          const px=seg.x1+t*dx, py=seg.y1+t*dy;
-          const d=Math.hypot(px-x, py-y);
-          if(d<snapD){snapD=d; snapX=px; snapY=py;}
+        for(const ep of [[seg.x1,seg.y1],[seg.x2,seg.y2]]){
+          const d=Math.hypot(ep[0]-x, ep[1]-y);
+          if(d<snapD){snapD=d; snapX=ep[0]; snapY=ep[1];}
         }
       }
 
@@ -5359,6 +5549,7 @@ function calcGroupBreakdown(g){
 }
 
 function exportDrawingWithLegend(){
+ try{
   finDraw();
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
   const mat = calcMat(CUR_SYS, S.groups);
@@ -5448,15 +5639,15 @@ function exportDrawingWithLegend(){
 
   // ── УГО (условные графические обозначения) ──
   const ugoRows = [
-    ['↗<sub>2</sub>','Опуск к розетке (где 2 — число опусков, уст. коробок)'],
-    ['🔲→','Опуск к силовому щиту'],
-    ['↗','Подъём/опуск кабельной линии'],
-    ['⌀','Коробка распределительная'],
-    ['────','Прокладка кабеля в трубе гофрированной'],
-    [`<span style="color:#2563eb;font-weight:700">Гр.N<br>L=...</span>`,'Группа подключения электрооборудования, длина опуска (L), м'],
+    ['↓','Опуск к розетке'],
+    ['⊠','Опуск к силовому щиту'],
+    ['↕','Подъём/опуск кабельной линии'],
+    ['○','Коробка распределительная'],
+    ['—','Прокладка кабеля в трубе гофрированной'],
+    ['Гр.N','Группа подключения электрооборудования, длина опуска (L), м'],
   ];
   const ugoHtml = ugoRows.map(([sym,desc])=>`
-    <tr><td style="text-align:center;font-size:16px">${sym}</td><td>${desc}</td></tr>`).join('');
+    <tr><td style="text-align:center;font-size:16px;font-weight:700;color:#1a4a8a">${sym}</td><td>${desc}</td></tr>`).join('');
 
   // ── Ведомость материалов (автозаполняемая, с формулами в примечании) ──
   const vals = { cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
@@ -5484,6 +5675,9 @@ function exportDrawingWithLegend(){
       <td style="text-align:center;font-weight:700">${qty}</td>
       <td style="font-size:10px;color:#555">${note}</td></tr>`;
   });
+  if(!matRows){
+    matRows = `<tr><td colspan="5" style="text-align:center;color:#999">Нет данных для ведомости — проверь, что материалы заданы в системе ${sys.name}</td></tr>`;
+  }
 
   const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
 <title>Чертёж ЭОМ — ${sys.name}</title>
@@ -5525,10 +5719,17 @@ ${matRows}
 </div>
 </body></html>`;
 
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
-  tip('📐 Чертёж с подписями, УГО и ведомостью открыт в новой вкладке — можно печатать');
+  // Открытие в новой вкладке (через window.open) ненадёжно работает в мобильных
+  // браузерах — вкладка может остаться пустой без предупреждения. Вместо этого
+  // используем ТОТ ЖЕ проверенный способ, что уже работает для скачивания
+  // ведомости в этом приложении — обычное скачивание HTML-файла.
+  const fname = `ЭОМ_чертёж_УГО_ведомость_${new Date().toLocaleDateString('ru').replace(/\./g,'-')}.html`;
+  dl(html, 'text/html;charset=utf-8', fname);
+  tip('📐 Скачан файл «'+fname+'» — открой его (двойной клик/тап), там чертёж, УГО и ведомость целиком');
+ }catch(e){
+  tip('❌ Ошибка при формировании чертежа с ведомостью: '+e.message);
+  console.error('exportDrawingWithLegend error:', e);
+ }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -5722,10 +5923,105 @@ function buildCableJournal(groups){
 }
 
 function expV(){
+ try{
   finDraw();
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
   const mat = calcMat(CUR_SYS, S.groups);
   const birki = mat.birki;
+  const activeGroups = S.groups.filter(g=>g.segs.length>0);
+
+  // ── Чертёж с выносками групп (тот же приём, что и в отдельном экспорте) ──
+  let drawingDataURL = '', groupCallouts = '';
+  try{
+  if(activeGroups.length && BLD[0]>0 && BLD[1]>0){
+    const PAD=40, pw=1400, ph=Math.round(pw*BLD[1]/BLD[0]);
+    const OC2=document.createElement('canvas'); OC2.width=pw+PAD*2; OC2.height=ph+PAD*2;
+    const OX2=OC2.getContext('2d');
+    OX2.fillStyle='#fff'; OX2.fillRect(0,0,OC2.width,OC2.height);
+    OX2.save(); OX2.translate(PAD,PAD);
+    const s2=pw/BLD[0]; OX2.scale(s2,s2);
+    if(bgImg){ OX2.globalAlpha=.35; OX2.drawImage(bgImg,0,0,BLD[0],BLD[1]); OX2.globalAlpha=1; }
+    OX2.strokeStyle='rgba(100,130,200,.15)'; OX2.lineWidth=.4/s2;
+    for(let x=0;x<=BLD[0];x+=GRID){OX2.beginPath();OX2.moveTo(x,0);OX2.lineTo(x,BLD[1]);OX2.stroke();}
+    for(let y=0;y<=BLD[1];y+=GRID){OX2.beginPath();OX2.moveTo(0,y);OX2.lineTo(BLD[0],y);OX2.stroke();}
+    const F2=12/s2, FSM2=10/s2, LW2=1.8/s2, SZ2=11/s2;
+    for(const w of S.walls){
+      OX2.strokeStyle=w.t==='cap'?'#0d9488':'#2dd4bf';
+      OX2.lineWidth=w.t==='cap'?4/s2:2.2/s2; OX2.setLineDash(w.t==='cap'?[]:[20/s2,10/s2]);
+      OX2.beginPath();OX2.moveTo(w.x1,w.y1);OX2.lineTo(w.x2,w.y2);OX2.stroke();OX2.setLineDash([]);
+    }
+    for(const g of activeGroups){
+      OX2.strokeStyle=g.color; OX2.lineWidth=LW2;
+      for(const seg of g.segs){ OX2.beginPath();OX2.moveTo(seg.x1,seg.y1);OX2.lineTo(seg.x2,seg.y2);OX2.stroke(); }
+      for(const b of g.boxes) OX2.strokeRect(b.x-SZ2,b.y-SZ2,SZ2*2,SZ2*2);
+      for(const r of g.rozets){ if(r.auto) continue;
+        OX2.beginPath();OX2.arc(r.x,r.y,SZ2,0,Math.PI*2);OX2.stroke();
+        OX2.beginPath();OX2.moveTo(r.x-SZ2,r.y);OX2.lineTo(r.x+SZ2,r.y);OX2.stroke();
+      }
+      // Опуски — с настоящей выноской (линия + полка), как в образце ИД
+      for(const op of (g.opuski||[])){
+        OX2.fillStyle=g.color; OX2.beginPath();OX2.arc(op.x,op.y,SZ2,0,Math.PI*2);OX2.fill();
+        OX2.strokeStyle=g.color; OX2.lineWidth=LW2*.7;
+        const VX=op.x+SZ2*2.5, VY=op.y-SZ2*2.5, shelfLen=SZ2*6;
+        OX2.beginPath();OX2.moveTo(op.x,op.y);OX2.lineTo(VX,VY);OX2.lineTo(VX+shelfLen,VY);OX2.stroke();
+        const cnt=op.cnt||1;
+        OX2.font=`bold ${FSM2}px Arial`;
+        OX2.fillText(`опуск, L=${((op.lm||0)/1000).toFixed(2)}м${cnt>1?', n='+cnt+'шт':''}`, VX+4/s2, VY-3/s2);
+      }
+      for(const l of g.lamps){
+        OX2.strokeStyle=g.color; OX2.beginPath();OX2.arc(l.x,l.y,SZ2*1.1,0,Math.PI*2);OX2.stroke();
+      }
+      for(const gl of g.gilzy){
+        OX2.strokeStyle='#ea580c'; OX2.lineWidth=LW2*.8;
+        OX2.beginPath();OX2.arc(gl.x,gl.y,SZ2,0,Math.PI*2);OX2.stroke();
+      }
+      if(g.segs[0]){
+        OX2.font=`bold ${F2}px Arial`; OX2.fillStyle=g.color;
+        OX2.fillText(g.name, g.segs[0].x1+7/s2, g.segs[0].y1-8/s2);
+      }
+    }
+    const SW2=17/s2, SHw2=12/s2;
+    for(const sh of S.schits){
+      OX2.strokeStyle='#0891b2'; OX2.fillStyle='rgba(8,145,178,.12)'; OX2.lineWidth=LW2;
+      OX2.fillRect(sh.x-SW2/2,sh.y-SHw2/2,SW2,SHw2); OX2.strokeRect(sh.x-SW2/2,sh.y-SHw2/2,SW2,SHw2);
+      OX2.font=`bold ${F2}px Arial`; OX2.fillStyle='#0891b2'; OX2.textAlign='center';
+      OX2.fillText(sh.name, sh.x, sh.y-SHw2/2-4/s2); OX2.textAlign='left';
+    }
+    OX2.restore();
+    drawingDataURL = OC2.toDataURL('image/png');
+
+    activeGroups.forEach(g=>{
+      const b = calcGroupBreakdown(g);
+      const kab = KN[g.kab]||g.kab;
+      const formula = b.segParts.length ? b.segParts.join('+')+'='+b.segParts.reduce((a,c)=>a+c,0).toFixed(2)+'м' : '—';
+      groupCallouts += `
+      <div style="border:2px solid ${g.color};border-radius:4px;padding:8px 10px;margin-bottom:10px;background:#fafbfc">
+        <div style="font-weight:700;color:${g.color};font-size:13px;margin-bottom:3px">Гр.${g.name.replace(/^Гр\.?/i,'')}</div>
+        <div style="font-size:11px;color:#111;margin-bottom:2px">Кабель ${kab}</div>
+        <div style="font-size:10.5px;color:#333;line-height:1.6">
+          L=${formula}<br>
+          ${b.gofCeil>0?`в гофре: L=${b.gofCeil.toFixed(2)}м<br>`:''}
+          ${b.gofSthr>0?`в штробе в гофре: L=${b.gofSthr.toFixed(2)}м<br>`:''}
+          ${b.boxCnt>0?`подключение коробок: L=0,1*${b.boxCnt}=${b.boxConn.toFixed(2)}м<br>`:''}
+          ${b.rozetCnt>0?`подключение розеток: L=0,1*${b.rozetCnt}=${b.rozetConn.toFixed(2)}м<br>`:''}
+          ${b.schitEntry>0?`заход в щит: L=${b.schitEntry.toFixed(2)}м<br>`:''}
+          ${(b.gilzyCap+b.gilzyPerg)>0?`в закладной мет. трубе: L=0,25*${b.gilzyCap+b.gilzyPerg}=${(b.pipeCap+b.pipePerg).toFixed(2)}м<br>`:''}
+        </div>
+        <div style="font-size:11px;font-weight:700;color:${g.color};margin-top:3px">Итого: ${b.cableTotal.toFixed(2)}м</div>
+      </div>`;
+    });
+  }
+  }catch(e){
+    console.error('Ведомость: не удалось построить чертёж с выносками —', e);
+    drawingDataURL=''; groupCallouts='';
+  }
+  const ugoRows = [
+    ['↓','Опуск к розетке'], ['⊠','Опуск к силовому щиту'], ['↕','Подъём/опуск кабельной линии'],
+    ['○','Коробка распределительная'], ['—','Прокладка кабеля в трубе гофрированной'],
+    ['Гр.N','Группа подключения электрооборудования, длина опуска (L), м'],
+  ];
+  const ugoHtml = ugoRows.map(([sym,desc])=>`
+    <tr><td style="text-align:center;font-size:16px;font-weight:700;color:#1a4a8a">${sym}</td><td>${desc}</td></tr>`).join('');
 
   // ── Кабельный журнал ──
   let cableRows='', gC=0, gP=0;
@@ -5816,10 +6112,20 @@ function expV(){
     birki:      mat.birki
   };
 
+  const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
+  const cableBase = +cableParts.reduce((a,b)=>a+b,0).toFixed(2);
+  const gofParts = activeGroups.map(g=>calcGroupBreakdown(g).gofCeil).filter(v=>v>0.005);
+  const gofBase = +gofParts.reduce((a,b)=>a+b,0).toFixed(2);
+
   sys.materials.forEach((item, i)=>{
     const qty = vals[item.calc] || 0;
     if(qty<=0 && !['cable','gofra','boxes'].includes(item.calc)) return;
     const bg = i%2===0?'':'background:#f7f9ff';
+    let note='';
+    if(item.calc==='cable' && cableParts.length)
+      note=`${cableParts.map(v=>v.toFixed(2)).join('+')}=${cableBase.toFixed(2)}<br>с учётом прим.4: ${cableBase.toFixed(2)}×1.06=${qty}`;
+    else if(item.calc==='gofra' && gofParts.length)
+      note=`${gofParts.map(v=>v.toFixed(2)).join('+')}=${gofBase.toFixed(2)}<br>с учётом прим.4: ${gofBase.toFixed(2)}×1.06=${qty}`;
     matRows+=`<tr style="${bg}">
       <td>${i+1}</td>
       <td>${item.name}</td>
@@ -5827,6 +6133,7 @@ function expV(){
       <td style="text-align:center">${item.unit}</td>
       <td style="text-align:center;font-weight:700">${qty}</td>
       <td style="text-align:center;font-weight:700;color:#1a4a8a">${qty}</td>
+      <td style="font-size:9px;color:#555">${note}</td>
     </tr>`;
   });
 
@@ -5861,8 +6168,30 @@ td{border:1px solid #ddd;padding:3px 5px;vertical-align:top}
   <button class="btn" onclick="window.print()">🖨 Печать/PDF</button>
 </div>
 <div class="sys-badge">${sys.name}</div>
+${(()=>{
+  const p=(document.getElementById('share-project')?.value||document.getElementById('aosr-project')?.value||'').trim().toUpperCase();
+  const k=(document.getElementById('share-korpus')?.value||document.getElementById('aosr-korpus')?.value||'').trim().toUpperCase();
+  const m=(document.getElementById('share-marka')?.value||document.getElementById('aosr-marka')?.value||curMarkaCode()||'').trim().toUpperCase();
+  const e=document.getElementById('share-etap')?.value||document.getElementById('aosr-etap')?.value||'КЛ';
+  const n=document.getElementById('share-aosr-n')?.value||document.getElementById('aosr-n')?.value||'1';
+  if(!p) return '';
+  const shifr='ИД_'+p+(k?'_'+k:'')+(m?'_'+m:'')+'_'+e;
+  const aosrNum=p+(k?'/'+k:'')+(m?'-'+m:'')+'-'+n;
+  return `<div style="font-size:11px;color:#1a4a8a;font-weight:700;margin-bottom:4px">Шифр ИД: ${shifr} &nbsp;|&nbsp; № АОСР: ${aosrNum}</div>`;
+})()}
 <h2>Кабельный журнал | 1 этаж</h2>
 <div class="meta">Потолок: ${S.hpot}мм${S.hfal?' | Фальш: '+S.hfal+'мм':''} | ${new Date().toLocaleDateString('ru')} | Групп: ${S.groups.length}</div>
+
+${drawingDataURL ? `
+<h3>Чертёж кабельных трасс</h3>
+<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:nowrap;margin-bottom:10px">
+  <div style="flex:0 0 62%;max-width:62%"><img src="${drawingDataURL}" style="width:100%;border:1px solid #ccc"></div>
+  <div style="flex:1;min-width:220px">${groupCallouts}</div>
+</div>
+
+<h3>УГО (условные графические обозначения)</h3>
+<table><tr><th style="width:70px">УГО</th><th>Наименование</th></tr>${ugoHtml}</table>
+` : `<div class="note">⚠️ Не удалось встроить чертёж с выносками и УГО в этот раз — сама ведомость ниже посчитана верно. Попробуй нажать «📋» ещё раз; если повторится — сообщи об этом.</div>`}
 
 <h3>1. Кабельный журнал</h3>
 ${buildCableJournal(S.groups)}
@@ -5882,7 +6211,7 @@ ${cableRows}
 <h3>3. Перечень материалов — ${sys.name}</h3>
 <table>
 <tr><th>#</th><th>Наименование</th><th class="wide">Артикул / Поставщик</th>
-<th>Ед.</th><th>База</th><th>К закупке</th></tr>
+<th>Ед.</th><th>База</th><th>К закупке</th><th>Примечание</th></tr>
 ${matRows}
 <tr class="birki-row">
   <td>—</td>
@@ -5890,7 +6219,7 @@ ${matRows}
   <span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
   <td class="wide">1000шт+риббон 75м</td>
   <td>компл.</td>
-  <td>${birki}</td><td><b>${birki}</b></td>
+  <td>${birki}</td><td><b>${birki}</b></td><td></td>
 </tr>
 </table>
 
@@ -5908,8 +6237,16 @@ ${matRows}
 <\/body><\/html>`;
   // Добавляем таблицу высот монтажа перед закрывающим тегом
   const hWithHeights = h.replace('<\/body>', heightsTableHTML() + '<\/body>');
-  const w=window.open('','_blank');if(w){w.document.write(hWithHeights);w.document.close();}
-  tip('📋 Ведомость открыта ('+sys.name+')');
+  // window.open+document.write ненадёжно работает в мобильных браузерах, особенно
+  // с крупной картинкой чертежа внутри — страница может остаться пустой без
+  // предупреждения. Используем проверенное скачивание файла (как для PNG/DXF).
+  const fname = `Ведомость_${sys.short||sys.name}_${new Date().toLocaleDateString('ru').replace(/\./g,'-')}.html`;
+  dl(hWithHeights, 'text/html;charset=utf-8', fname);
+  tip('📋 Ведомость скачана («'+fname+'») — открой файл, там чертёж с выносками, УГО и расчёты');
+ }catch(e){
+  tip('❌ Не удалось сформировать ведомость: '+e.message);
+  console.error('expV error:', e);
+ }
 }
 
 function showReady(){
@@ -6858,8 +7195,10 @@ function renderCalibPoints(){
 
 function addLayer(){
   const name = document.getElementById('layer-name').value.trim()
-    || `Этаж/защита №${S.layers.length+2}`;
-  // Сохраняем текущий слой (этаж) — включая ЕГО собственный план, масштаб и высоты
+    || `Слой №${S.layers.length+2}`;
+  // Сохраняем текущий слой — включая его план/масштаб/высоты (на случай, если
+  // это всё же был отдельный этаж со своим планом — переключение между такими
+  // слоями восстановит именно его собственные план/масштаб)
   S.layers.push({
     name: name,
     idx:  S.curLayer,
@@ -6870,7 +7209,12 @@ function addLayer(){
     savedAt: new Date().toISOString()
   });
   S.curLayer = S.layers.length; // новый текущий
-  // Сбрасываем данные для нового слоя/этажа (начинаем с чистого листа)
+  // Сбрасываем ЧЕРТЁЖ для нового слоя (начинаем с чистого листа групп),
+  // но план (подложку), масштаб и высоты потолка НЕ трогаем — старый слой
+  // остаётся виден чёрно-белым «призраком» (renderLayersGhost) поверх ТОГО ЖЕ
+  // плана, а новый слой рисуется цветом поверх него. Это обычный сценарий —
+  // новая защита ИД на том же этаже. Если нужен именно другой этаж с другим
+  // планом — просто открой 🗺 План и загрузи новый файл вручную.
   push();
   S.groups=[]; S.schits=[]; S.walls=[];
   // Инициализируем стандартные группы
@@ -6878,16 +7222,11 @@ function addLayer(){
   addG('Гр.2с','ЩС1','пом.10','gof20','ros25',null,'ip55');
   addG('Гр.1о','ЩО1','Освещение','gof20','o15',null,'ip55');
   S.cur=S.groups[0].id;
-  // Обнуляем план — новый этаж начинается с чистого листа, старый план не переносим
-  bgImg = null; _curPlanDataURL = null;
   rSel();rList();updCnt();updMountBtns();updKabBtns();
   renderLayerList();
   closeM('mlayer');
   render();
-  tip(`📑 Новый этаж/слой: «${name}». Загрузи для него свой план.`);
-  // Новый этаж обычно = другой план помещения — сразу предлагаем его загрузить.
-  // Старый фон намеренно НЕ переносим, чтобы не перепутать этажи.
-  setTimeout(()=>{ openM('mplan'); }, 300);
+  tip(`📑 Новый слой: «${name}». Предыдущий слой виден чёрно-белым — план тот же, при необходимости смени его вручную (🗺 План).`);
 }
 
 function switchLayer(idx){
@@ -7793,7 +8132,7 @@ function exportDXF(){
 // Сдвигает ТОЛЬКО выбранный сегмент перпендикулярно стене.
 // Соседние сегменты (до и после поворота) автоматически растягиваются
 // / сжимаются, сохраняя непрерывность трассы.
-const KD={active:false, step:0, g:null, seg:null, segIdx:-1, wall:null};
+const KD={active:false, step:0, mode:'cable', g:null, seg:null, segIdx:-1, op:null, ops:[], wall:null};
 
 function _kdHint(txt){
   const h=document.getElementById('kd-hint');
@@ -7808,40 +8147,85 @@ function _kdShowInput(show){
   const ok =document.getElementById('kd-ok');
   if(inp){inp.style.display=show?'':'none';}
   if(ok)  ok.style.display=show?'':'none';
-  // На тач-устройствах показываем числовую клавиатуру
-  const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
-  _kdShowNumpad(show&&isTouch);
-  if(show&&!isTouch&&inp){inp.focus();inp.select();}
+  // Показываем единую числовую клавиатуру всегда (не только на touch-устройствах —
+  // определение "это тач или нет" бывает ненадёжным на ноутбуках с сенсорным
+  // экраном и т.п.), плюс поле остаётся доступным и для обычного ввода с клавиатуры
+  if(show){
+    showNumpadFor('kd-dist', 'Расстояние от стены, мм');
+    if(inp){ inp.focus(); inp.select(); }
+  }else{
+    _npClose();
+  }
   if(show){
     _kdNpVal=inp?.value||'';
-    const disp=document.getElementById('kd-np-display');
-    if(disp) disp.textContent=_kdNpVal||'—';
   }
 }
 
-function startKDDist(){
-  KD.active=true; KD.step=0; KD.g=null; KD.seg=null; KD.segIdx=-1; KD.wall=null;
+function startKDDist(mode){
+  mode = mode||'cable';
+  KD.active=true; KD.step=0; KD.mode=mode; KD.g=null; KD.seg=null; KD.segIdx=-1; KD.op=null; KD.ops=[]; KD.wall=null;
   _kdShowPanel(true); _kdShowInput(false);
-  _kdHint('① кликни участок кабеля…');
-  const btn=document.getElementById('kd-btn');
+  _kdHint(mode==='opusk' ? '① кликни один или несколько опусков…' : '① кликни участок кабеля…');
+  const btn=document.getElementById(mode==='opusk' ? 'od-btn' : 'kd-btn');
   if(btn) btn.style.background='#92400e';
   render();
-  tip('📏 Кликни на нужный участок кабельной линии');
+  tip(mode==='opusk' ? '📏 Кликни нужные опуски (можно несколько), потом кликни стену' : '📏 Кликни на нужный участок кабельной линии');
 }
 
 function cancelKDDist(){
-  KD.active=false; KD.step=0; KD.g=null; KD.seg=null; KD.segIdx=-1; KD.wall=null;
+  KD.active=false; KD.step=0; KD.g=null; KD.seg=null; KD.segIdx=-1; KD.op=null; KD.ops=[]; KD.wall=null;
   _kdShowPanel(false); _kdShowInput(false);
-  const btn=document.getElementById('kd-btn');
-  if(btn) btn.style.background='';
+  const btn1=document.getElementById('kd-btn'); if(btn1) btn1.style.background='';
+  const btn2=document.getElementById('od-btn'); if(btn2) btn2.style.background='';
   render(); tip('📏 Режим отменён');
 }
 
 function handleKDClick(x,y){
   if(!KD.active) return false;
 
-  // ── Шаг 1: выбор конкретного сегмента ─────────────────
+  // ── Шаг 1: выбор цели (участок кабеля ИЛИ один/несколько опусков) ──
   if(KD.step===0){
+    if(KD.mode==='opusk'){
+      // Сначала проверяем — не клик ли это по опуску (добавить/убрать из выборки)
+      let bestD=600, bestOp=null, bestG=null;
+      for(const g of S.groups){
+        for(const op of g.opuski){
+          const d=Math.hypot(op.x-x, op.y-y);
+          if(d<bestD){bestD=d; bestOp=op; bestG=g;}
+        }
+      }
+      if(bestOp){
+        const idx=KD.ops.findIndex(o=>o.op===bestOp);
+        if(idx>=0) KD.ops.splice(idx,1); // повторный клик — снять выбор
+        else KD.ops.push({g:bestG, op:bestOp});
+        KD.g=bestG; // нужно для renderKDHighlight — иначе подсветка выбранных опусков не рисуется вообще
+        _kdHint(`выбрано опусков: ${KD.ops.length} — кликай ещё или кликни стену`);
+        render();
+        tip(KD.ops.length ? `📏 Выбрано опусков: ${KD.ops.length} — кликни стену, когда закончишь` : '📏 Выбор снят');
+        return true;
+      }
+      // Клик не по опуску — если хоть один опуск уже выбран, это должна быть стена
+      if(!KD.ops.length){ tip('📏 Сначала выбери хотя бы один опуск'); return true; }
+      let bestWD=600, bestW=null;
+      for(const w of S.walls){
+        const dx=w.x2-w.x1, dy=w.y2-w.y1, L2=dx*dx+dy*dy;
+        if(L2<1) continue;
+        const t=Math.max(0,Math.min(1,((x-w.x1)*dx+(y-w.y1)*dy)/L2));
+        const d=Math.hypot(x-(w.x1+t*dx), y-(w.y1+t*dy));
+        if(d<bestWD){bestWD=d; bestW=w;}
+      }
+      if(!bestW){ tip('📏 Стена не найдена — кликни ближе, либо выбери ещё опуски'); return true; }
+      KD.wall=bestW; KD.step=2;
+      const first=KD.ops[0].op;
+      const cur=Math.round(_kdPointDist(first.x, first.y, bestW));
+      const inp=document.getElementById('kd-dist');
+      if(inp) inp.value=cur;
+      _kdHint(`опусков: ${KD.ops.length} ↔ стена: `);
+      _kdShowInput(true);
+      render();
+      tip(`📏 Сейчас ${cur}мм у первого опуска — введи общее расстояние и Enter`);
+      return true;
+    }
     let bestD=600, bestSeg=null, bestG=null, bestIdx=-1;
     for(const g of S.groups){
       for(let i=0;i<g.segs.length;i++){
@@ -7874,17 +8258,36 @@ function handleKDClick(x,y){
     if(!bestW){ tip('📏 Стена не найдена — кликни ближе'); return true; }
     KD.wall=bestW; KD.step=2;
 
-    // Текущее расстояние от выбранного сегмента до стены
-    const cur=Math.round(_kdSegDist(KD.seg, bestW));
+    // Текущее расстояние — от сегмента (режим "кабель") или от точки опуска (режим "опуск")
+    const cur = KD.mode==='opusk'
+      ? Math.round(_kdPointDist(KD.op.x, KD.op.y, bestW))
+      : Math.round(_kdSegDist(KD.seg, bestW));
     const inp=document.getElementById('kd-dist');
     if(inp) inp.value=cur;
-    _kdHint(`уч.${KD.segIdx+1} ↔ стена: `);
+    _kdHint(KD.mode==='opusk' ? 'опуск ↔ стена: ' : `уч.${KD.segIdx+1} ↔ стена: `);
     _kdShowInput(true);
     render();
     tip(`📏 Сейчас ${cur}мм — введи нужное расстояние и Enter`);
     return true;
   }
   return false;
+}
+
+// Расстояние от ОДНОЙ ТОЧКИ (например, опуска) до края стены
+function _kdPointDist(px, py, w){
+  const halfThick=wallThick(w)/2;
+  const wdx=w.x2-w.x1, wdy=w.y2-w.y1, wL2=wdx*wdx+wdy*wdy;
+  if(wL2<1) return 0;
+  const wallIsH=Math.abs(wdx)>Math.abs(wdy);
+  const wallIsV=Math.abs(wdy)>Math.abs(wdx);
+  let distToAxis;
+  if(wallIsH) distToAxis=Math.abs(py-w.y1);
+  else if(wallIsV) distToAxis=Math.abs(px-w.x1);
+  else{
+    const t=((px-w.x1)*wdx+(py-w.y1)*wdy)/wL2;
+    distToAxis=Math.hypot(px-(w.x1+t*wdx), py-(w.y1+t*wdy));
+  }
+  return Math.max(0, distToAxis-halfThick);
 }
 
 // Расстояние от сегмента до стены (ортогональное — по нужной оси)
@@ -7915,9 +8318,53 @@ function _kdSegDist(seg, w){
 // Применяем — сдвигаем выбранный участок строго ортогонально,
 // соседи растягиваются по своей оси (всё остаётся вертикальным/горизонтальным)
 function applyKDDist(){
-  const _rawVal=_kdNpVal||document.getElementById('kd-dist').value;
+  // Приоритет — то, что реально видно и введено в поле (десктоп: прямой ввод текстом;
+  // мобильный numpad тоже пишет сюда же через _kdNpSync). _kdNpVal как запасной
+  // вариант — раньше был первым, из-за чего прямой набор текста в поле (без
+  // использования numpad-кнопок) применялся неправильно: оставался «залипший»
+  // старый снимок значения на момент открытия панели, и линия визуально не двигалась.
+  const _inpEl=document.getElementById('kd-dist');
+  const _rawVal=(_inpEl && _inpEl.value!=='') ? _inpEl.value : _kdNpVal;
   const dist=+_rawVal;
   if(!dist||dist<=0){ tip('❌ Введи расстояние > 0'); return; }
+
+  // ── Режим «Опуск ↔ стена» — двигаем ВСЕ выбранные опуски на одно и то же
+  // расстояние от края стены (каждый по своей оси относительно этой стены), и
+  // вместе с каждым — подтягиваем конец его «мостика» к трассе, чтобы не
+  // разорвать связь с кабельной линией.
+  if(KD.mode==='opusk'){
+    if(!KD.ops.length||!KD.wall){ tip('❌ Выбери хотя бы один опуск и стену'); return; }
+    push();
+    const w=KD.wall;
+    const wdx=w.x2-w.x1, wdy=w.y2-w.y1;
+    const wallIsH=Math.abs(wdx)>Math.abs(wdy);
+    const halfT=wallThick(w)/2;
+    for(const {g,op} of KD.ops){
+      const oldX=op.x, oldY=op.y;
+      let newX=oldX, newY=oldY;
+      if(wallIsH){
+        const sideY=oldY<w.y1 ? -1 : 1;
+        newY = w.y1 + sideY*(halfT+dist);
+      }else{
+        const sideX=oldX<w.x1 ? -1 : 1;
+        newX = w.x1 + sideX*(halfT+dist);
+      }
+      op.x=newX; op.y=newY;
+      for(const seg of g.segs){
+        if(!seg._opuskBridge) continue;
+        if(Math.hypot(seg.x2-oldX, seg.y2-oldY)<10){ seg.x2=newX; seg.y2=newY; }
+        else if(Math.hypot(seg.x1-oldX, seg.y1-oldY)<10){ seg.x1=newX; seg.y1=newY; }
+      }
+      rebuildGilzy(g); rebuildBirki(g); chkConn(g);
+    }
+    updCnt(); render();
+    tip(`📏 Сдвинуто опусков: ${KD.ops.length}, все на ${dist}мм от стены`);
+    KD.step=0; KD.g=null; KD.op=null; KD.ops=[]; KD.wall=null;
+    _kdHint('① кликни один или несколько опусков…');
+    _kdShowInput(false);
+    return;
+  }
+
   if(!KD.g||!KD.seg||!KD.wall){ tip('❌ Выбери участок и стену'); return; }
 
   push();
@@ -8108,6 +8555,32 @@ function applyKDDist(){
   // Убираем вырожденные сегменты
   g.segs=g.segs.filter(s=>Math.hypot(s.x2-s.x1,s.y2-s.y1)>5);
 
+  // ── Доп. защита от «отрыва» мостика к опуску ────────────────────
+  // Общая логика выше (соседи/на-сегменте) обычно справляется, но если
+  // сдвиг всё же оставил мостик оторванным от трассы (например, из-за
+  // погрешности определения соседа) — принудительно подтягиваем его
+  // «коробочный» конец (тот, что НЕ у опуска) к ближайшей точке трассы.
+  for(const bridgeSeg of g.segs){
+    if(!bridgeSeg._opuskBridge) continue;
+    for(const endKey of ['1','2']){
+      const bxp = endKey==='1'?bridgeSeg.x1:bridgeSeg.x2;
+      const byp = endKey==='1'?bridgeSeg.y1:bridgeSeg.y2;
+      const isOpuskEnd = g.opuski.some(o=>Math.hypot(o.x-bxp,o.y-byp)<15);
+      if(isOpuskEnd) continue; // стеновой конец — не трогаем, он у своего опуска
+      let bestD=400, bestX=null, bestY=null;
+      for(const other of g.segs){
+        if(other===bridgeSeg) continue;
+        for(const [px,py] of [[other.x1,other.y1],[other.x2,other.y2]]){
+          const d=Math.hypot(px-bxp,py-byp);
+          if(d<bestD){bestD=d;bestX=px;bestY=py;}
+        }
+      }
+      if(bestX!==null){
+        if(endKey==='1'){bridgeSeg.x1=bestX;bridgeSeg.y1=bestY;} else {bridgeSeg.x2=bestX;bridgeSeg.y2=bestY;}
+      }
+    }
+  }
+
   rebuildGilzy(g); rebuildBirki(g); chkConn(g); updCnt(); render();
 
   tip(`📏 Участок сдвинут: ${dist}мм от стены`);
@@ -8140,6 +8613,11 @@ function renderKDHighlight(){
         CX.beginPath();CX.arc(px,py,10/s,0,Math.PI*2);
         CX.fillStyle='#60a5fa';CX.fill();
       }
+    }
+    // Выбранные опуски (режим «Опуск ↔ стена») — яркая подсветка каждого
+    for(const {op} of KD.ops){
+      CX.beginPath();CX.arc(op.x,op.y,14/s,0,Math.PI*2);
+      CX.strokeStyle='#fb923c';CX.lineWidth=4/s;CX.stroke();
     }
   }
 
@@ -8864,6 +9342,60 @@ function _kdNpSync(){
   if(inp){ inp.value=v; renderKDHighlight(); }
 }
 
+// ══════════════════════════════════════════════════════════════
+// УНИВЕРСАЛЬНАЯ цифровая клавиатура — для любого числового поля:
+// высота потолка, фальш-потолок, масштаб (калибровка), КЛ и т.п.
+// На touch-устройствах заменяет нативную клавиатуру (чтобы не закрывать
+// чертёж/контекст), на компьютере просто не мешает обычному вводу с клавиатуры.
+// ══════════════════════════════════════════════════════════════
+let _npTargetId = null, _npVal = '';
+
+function _isTouchDevice(){
+  return ('ontouchstart' in window) || navigator.maxTouchPoints>0;
+}
+
+// Вызывается через onfocus у числовых полей — на touch показывает нашу
+// панель вместо нативной клавиатуры, на десктопе не делает ничего (обычный ввод)
+function _maybeShowNumpad(inp, label){
+  showNumpadFor(inp.id, label);
+}
+
+function showNumpadFor(inputId, label){
+  const inp=document.getElementById(inputId);
+  if(!inp) return;
+  _npTargetId = inputId;
+  _npVal = String(inp.value||'').replace(/[^\d.]/g,'');
+  const lab=document.getElementById('np-label'); if(lab) lab.textContent=label||'размер';
+  const disp=document.getElementById('np-display'); if(disp) disp.textContent=_npVal||'—';
+  const panel=document.getElementById('np-panel'); if(panel) panel.style.display='flex';
+}
+function _npKey(k){
+  _npVal = (_npVal==='0'&&k!=='.') ? k : _npVal+k;
+  _npSync();
+}
+function _npDel(){ _npVal=_npVal.slice(0,-1); _npSync(); }
+function _npClear(){ _npVal=''; _npSync(); }
+function _npSync(){
+  const disp=document.getElementById('np-display'); if(disp) disp.textContent=_npVal||'—';
+  const inp=document.getElementById(_npTargetId);
+  if(inp) inp.value=_npVal;
+}
+function _npApply(){
+  const inp=document.getElementById(_npTargetId);
+  if(inp){
+    inp.value=_npVal;
+    inp.dispatchEvent(new Event('input',{bubbles:true}));
+    inp.dispatchEvent(new Event('change',{bubbles:true}));
+    // Для КЛ — сразу применяем расстояние, как при нажатии Enter
+    if(_npTargetId==='kd-dist') applyKDDist();
+  }
+  _npClose();
+}
+function _npClose(){
+  const panel=document.getElementById('np-panel'); if(panel) panel.style.display='none';
+  _npTargetId=null;
+}
+
 function _kdShowNumpad(show){
   const np=document.getElementById('kd-numpad');
   if(!np) return;
@@ -9320,6 +9852,7 @@ const GH_SHARE_BASE = 'https://romantolstov5710-wq.github.io/eom-master/';
 let _pendingObjectSlug = null, _pendingObjectLink = null;
 
 async function startWorkFlow(){
+ try{
   const proj   = _mobjProjectValue();
   const korpus = _mobjKorpusValue();
   const name   = document.getElementById('mobj-name').value.trim();
@@ -9352,14 +9885,20 @@ async function startWorkFlow(){
   _pendingObjectLink = null; // навигация нужна, только если объект реально другой
 
   if(isDifferentObject){
-    push();
-    S.groups=[]; S.schits=[]; S.walls=[]; S.layers=[]; S.curLayer=0;
-    addG('Гр.1с','ЩС1','пом.9','gof20','ros25',null,'ip55');
-    addG('Гр.2с','ЩС1','пом.10','gof20','ros25',null,'ip55');
-    addG('Гр.1о','ЩО1','Освещение','gof20','o15',null,'ip55');
-    S.cur=S.groups[0].id;
-    bgImg=null; _curPlanDataURL=null;
-    rSel();rList();updCnt();updMountBtns();updKabBtns();render();
+    try{
+      push();
+      S.groups=[]; S.schits=[]; S.walls=[]; S.layers=[]; S.curLayer=0;
+      addG('Гр.1с','ЩС1','пом.9','gof20','ros25',null,'ip55');
+      addG('Гр.2с','ЩС1','пом.10','gof20','ros25',null,'ip55');
+      addG('Гр.1о','ЩО1','Освещение','gof20','o15',null,'ip55');
+      S.cur=S.groups[0].id;
+      bgImg=null; _curPlanDataURL=null;
+      rSel();rList();updCnt();updMountBtns();updKabBtns();render();
+    }catch(e){
+      console.error('startWorkFlow: ошибка при очистке холста для нового объекта —', e);
+      // Не прерываем публикацию ссылки из-за этого — холст мог остаться неидеально
+      // чистым, но сама ссылка на объект всё равно должна создаться ниже.
+    }
 
     // Явная перезапись онлайн-данных ИМЕННО нового слага (не через автоопределение —
     // оно может указать на СТАРУЮ страницу, если мы физически остались на ней)
@@ -9370,7 +9909,10 @@ async function startWorkFlow(){
         await _ghPutFile('data_'+slug+'.json', JSON.stringify(blankSnap), 'ЭОМ: новый объект — чистый лист');
         if(_urlSlug()===slug) _lastSyncedSaved = blankSnap.saved; // актуально, только если мы и правда на этой странице
       }
-    }catch(e){ /* тихо — если не получилось, страница нового объекта всё равно опубликуется ниже с чистым состоянием внутри снапшота */ }
+    }catch(e){
+      console.error('startWorkFlow: не удалось перезаписать онлайн-данные нового объекта —', e);
+      /* тихо — если не получилось, страница нового объекта всё равно опубликуется ниже с чистым состоянием внутри снапшота */
+    }
   }
 
   localStorage.setItem('eom_share_slug', slug);
@@ -9412,6 +9954,10 @@ async function startWorkFlow(){
       }
       tip('❌ Ссылка пока не опубликована: '+e.message);
     });
+ }catch(e){
+   console.error('startWorkFlow: непредвиденная ошибка —', e);
+   tip('❌ Не удалось начать работу: '+e.message+' (попробуй ещё раз или сообщи об этом)');
+ }
 }
 
 async function _publishStartPlaceholder(proj, korpus, marka, slug){
