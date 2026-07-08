@@ -9926,4 +9926,17 @@ window.addEventListener('load', function(){
   }catch(e){}
 });
 </script>
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+  }catch(e){}
+});
+</script>
 </body></html>
