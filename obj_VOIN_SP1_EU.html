@@ -16,7 +16,7 @@
   %22theme_color%22:%22%230f172a%22,
   %22start_url%22:%22.%22
 }">
-<title>ЭОМ Мастер</title>
+<title>АРМАДА | ЭОМ Мастер</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;user-select:none;font-family:system-ui,Arial,sans-serif}
@@ -771,6 +771,11 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label>Название</label><input id="mg-n" value="Гр.1с">
   <label>Щит</label><input id="mg-s" value="ЩС1">
   <label>Помещение</label><input id="mg-p" value="пом.1">
+  <label>План (необязательно) — сколько точек должно получиться в этой группе, для индикатора прогресса</label>
+  <div style="display:flex;gap:6px">
+    <input id="mg-plan-rozet" type="number" min="0" placeholder="розеток" style="flex:1">
+    <input id="mg-plan-lamp" type="number" min="0" placeholder="светильников" style="flex:1">
+  </div>
   <label>Кабель</label>
   <select id="mg-k">
     <optgroup label="🔌 Розеточная сеть">
@@ -927,7 +932,24 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   background:rgba(15,23,42,.97);align-items:center;justify-content:center;padding:20px">
 <div style="background:#1e293b;border:1px solid #334155;border-radius:14px;
   max-width:380px;width:100%;padding:24px;color:#e2e8f0;text-align:center">
-  <div style="font-size:48px;margin-bottom:12px">📱</div>
+  <svg width="88" height="88" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:8px">
+    <defs>
+      <linearGradient id="splashHullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#60a5fa"></stop>
+        <stop offset="100%" stop-color="#1e3a8a"></stop>
+      </linearGradient>
+      <linearGradient id="splashBoltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fde047"></stop>
+        <stop offset="100%" stop-color="#f59e0b"></stop>
+      </linearGradient>
+    </defs>
+    <path d="M36 4 L68 68 L54 68 L47 52 L25 52 L18 68 L4 68 Z" fill="url(#splashHullGrad)" stroke="#1e3a8a" stroke-width="1.5"></path>
+    <path d="M36 22 L44 44 L28 44 Z" fill="#0b1220"></path>
+    <path d="M39 24 L30 40 L35 40 L32 50 L44 36 L38 36 Z" fill="url(#splashBoltGrad)" stroke="#92400e" stroke-width="0.6"></path>
+    <path d="M-2 66 Q9 61 20 66 T42 66 T64 66 T86 66" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" opacity="0.85"></path>
+  </svg>
+  <div style="font-size:15px;font-weight:900;color:#e2e8f0;letter-spacing:1px">АРМАДА</div>
+  <div style="font-size:9px;font-weight:700;color:#60a5fa;letter-spacing:1.5px;margin-bottom:10px">ИНЖЕНЕРНЫЕ СЕТИ</div>
   <div style="font-size:18px;font-weight:800;color:#60a5fa;margin-bottom:8px">
     ЭОМ Мастер — черчение ИД
   </div>
@@ -1147,23 +1169,61 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <!-- ШАПКА -->
 <div id="bar">
+  <div id="armada-logo" title="Приложение компании АРМАДА — инженерные сети" style="display:flex;align-items:center;gap:6px;margin-right:6px;flex-shrink:0">
+    <svg width="30" height="30" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="armHullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#60a5fa"></stop>
+          <stop offset="100%" stop-color="#1e3a8a"></stop>
+        </linearGradient>
+        <linearGradient id="armBoltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fde047"></stop>
+          <stop offset="100%" stop-color="#f59e0b"></stop>
+        </linearGradient>
+      </defs>
+      <path d="M36 4 L68 68 L54 68 L47 52 L25 52 L18 68 L4 68 Z" fill="url(#armHullGrad)" stroke="#1e3a8a" stroke-width="1.5"></path>
+      <path d="M36 22 L44 44 L28 44 Z" fill="#0b1220"></path>
+      <path d="M39 24 L30 40 L35 40 L32 50 L44 36 L38 36 Z" fill="url(#armBoltGrad)" stroke="#92400e" stroke-width="0.6"></path>
+      <path d="M-2 66 Q9 61 20 66 T42 66 T64 66 T86 66" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" opacity="0.85"></path>
+    </svg>
+    <div style="line-height:1.05">
+      <div style="font-size:13px;font-weight:900;color:#e2e8f0;letter-spacing:.5px">АРМАДА</div>
+      <div style="font-size:7px;font-weight:700;color:#60a5fa;letter-spacing:1px">ИНЖЕНЕРНЫЕ СЕТИ</div>
+    </div>
+  </div>
   <h1>ЭОМ</h1>
+
+  <!-- Переключатель раздела: у каждого своя ИД, свои кнопки, свой материал -->
+  <div id="sec-switch" style="display:flex;gap:2px;background:#0d1117;border-radius:6px;padding:2px;margin-right:4px">
+    <button id="sec-btn-kl" class="btn" onclick="setUISection('kl')" style="padding:6px 10px;font-size:11px;font-weight:700;background:#1e40af;color:#fff;border-radius:4px" title="Раздел: кабельные линии (щиты, трассы, штробы, гофра)">🔌 Кабельные линии</button>
+    <button id="sec-btn-ob" class="btn" onclick="setUISection('ob')" style="padding:6px 10px;font-size:11px;font-weight:700;background:transparent;color:#94a3b8;border-radius:4px" title="Раздел: оборудование (розетки, светильники — отдельная ИД)">💡 Оборудование</button>
+  </div>
+
   <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
     <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
-    <button class="btn b-blue" onclick="openM('mg')" title="Новая группа">＋</button>
+    <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
 
+  <span class="sec-kl">
   <button id="t-cable" class="btn b-blue on" onclick="sT('cable')">⟿ Кабель</button>
   <button id="t-opusk" class="btn b-pur" onclick="sT('opusk')">↓ Опуск</button>
   <button id="t-box" class="btn b-yel" onclick="sT('box')">⊡ Коробка</button>
+  </span>
+  <span class="sec-ob" style="display:none">
   <button id="t-rozet" class="btn b-grn" onclick="sT('rozet')">⊙ Розетка</button>
   <button id="t-lamp" class="btn b-yel" onclick="sT('lamp')" style="color:#fde68a">○ Свет.</button>
+  </span>
+  <span class="sec-kl">
   <button id="t-schit" class="btn b-blue" onclick="openM('ms');sT('schit')">⊠ Щит</button>
   <button id="t-wall" class="btn b-teal" onclick="openM('mw');sT('wall')">🧱 Стена</button>
+  </span>
   <button id="t-er" class="btn b-red" onclick="sT('er')">✕ Ластик</button>
 
+  <button id="more-toggle-btn" class="btn" onclick="toggleMoreTools()" style="background:#334155;color:#cbd5e1;font-size:11px" title="Показать/скрыть остальные инструменты">⋯ Ещё</button>
+
+  <span class="more-tools" style="display:none">
   <label style="font-size:10px;color:#64748b;display:flex;align-items:center;gap:3px">
     <input type="checkbox" id="cb-o" checked=""> Выровн.</label>
   <label style="font-size:10px;color:#64748b;display:flex;align-items:center;gap:3px">
@@ -1177,6 +1237,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
     <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">3%</span>
   </label>
+  </span>
 
   <!-- Строка 1: КАБЕЛЬ -->
   <div class="mount-row" title="Марка кабеля текущей группы">
@@ -1188,8 +1249,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <button class="mnt-btn" id="mkb-r25" style="color:#60a5fa" onclick="setKab('r25')">3×2,5</button>
     <button class="mnt-btn" id="mkb-s4" style="color:#a3e635" onclick="setKab('s4')">5×4 Сил.</button>
   </div>
-  <!-- Строка 2: МОНТАЖ -->
-  <div class="mount-row" title="Способ прокладки текущей группы">
+  <!-- Строка 2: МОНТАЖ (только для раздела КЛ — при рисовании кабельных трасс) -->
+  <div class="mount-row sec-kl" title="Способ прокладки текущей группы">
     <span class="mnt-label">Монтаж:</span>
     <span id="cur-mount-badge" title="Текущий способ прокладки — переключай прямо во время рисования" style="display: inline-block; padding: 1px 8px; border-radius: 9px; font-size: 10px; font-weight: 700; background: rgb(23, 37, 84); color: rgb(147, 197, 253); border: 1px solid rgb(147, 197, 253); margin-right: 3px; vertical-align: middle; cursor: help;">гф.д20</span>
     <button class="mnt-btn on" id="mnt-gof20" style="color:#3b82f6" onclick="setMount('gof20')">🔄 Гофра d20</button>
@@ -1203,14 +1264,21 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <button class="mnt-btn" id="mnt-open" style="color:#9ca3af" onclick="setMount('open')">— Открыто</button>
   </div>
 
-  <button class="btn b-gray" onclick="undo()" title="Ctrl+Z">↩</button>
-  <button class="btn b-or" onclick="openM('mh')">📐</button>
+  <button class="btn" onclick="undo()" title="Отменить последнее действие (Ctrl+Z)" style="background:#7c2d12;color:#fed7aa;font-size:14px;font-weight:900;padding:7px 14px;border:1px solid #f97316">↩️ Отменить</button>
+  <button class="btn b-blue" onclick="save()">💾</button>
+  <button id="hand-btn" class="btn" onclick="toggleHandMode()" title="Включить/выключить режим «Рука» — таскать чертёж пальцем/мышью вместо рисования">✋ Рука</button>
+
+  <span class="more-tools sec-kl" style="">
+  <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения">📐</button>
   <button class="btn b-or" onclick="openM('mplan')" title="Загрузить план / фон">🗺 План</button>
   <button class="btn b-teal" onclick="autoDetectWalls()" title="Автораспознать стены по загруженному плану">🏗 Стены</button>
   <button class="btn b-teal" onclick="openCalib()" title="Проверить масштаб">📏 Масштаб</button>
-  <button class="btn b-blue" onclick="save()">💾</button>
   <button id="kd-btn" class="btn b-or" onclick="startKDDist('cable')" title="Нажми → кликни кабель → кликни стену → введи размер">📏 КЛ</button>
   <button id="od-btn" class="btn b-or" onclick="startKDDist('opusk')" title="Нажми → кликни один или несколько опусков → кликни стену → введи общий размер" style="background:#ea580c;color:#fff">📏 Оп-стена</button>
+  </span>
+  <span class="more-tools" style="display:none">
+  <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения (для раздела Оборудование)" id="mh-btn-ob">📐</button>
+  </span>
   <span id="kd-panel" style="display:none;align-items:center;gap:5px">
     <span id="kd-hint" style="font-size:11px;color:#f59e0b;white-space:nowrap">кликни кабель…</span>
     <input id="kd-dist" type="text" placeholder="мм" inputmode="numeric" style="width:72px;background:#0d1117;color:#e2e8f0;border:1px solid #f59e0b;
@@ -1293,14 +1361,17 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <span style="display:none"><!-- kd close -->
   </span>
   <button class="btn b-grn" onclick="expV()" title="Ведомость в браузере">📋</button>
+  <span class="more-tools" style="display:none">
   <button class="btn b-blue" onclick="exportVedFile()" title="Скачать HTML для телефона">📱</button>
   <button class="btn b-or" onclick="open1C()" title="1С: Склад и ЛФУ">🏭 1С</button>
+  </span>
   <button class="btn" onclick="openStartModal()" title="Сменить объект / систему" style="background:#334155;color:#93c5fd">🏗️ Объект</button>
+  <span class="more-tools" style="display:none">
   <button class="btn" onclick="clearProjectAll()" title="Очистить всё: локально и в онлайн-данных этого объекта" style="background:#7f1d1d;color:#fca5a5">🗑 Очистить всё</button>
   <button class="btn" id="working-here-btn" onclick="markWorkingHere()" title="Отметить, что сейчас активно работаешь именно на этом устройстве — полезно при переходе с компьютера на планшет и обратно" style="background:#334155;color:#fbbf24">🖐️ Работаю здесь</button>
   <button class="btn b-pur" onclick="openLayerModal()" title="Новый слой / защита ИД">📑 Слой</button>
-  <button class="btn b-pur" onclick="openLayerModal()" title="Новый слой / защита ИД">📑 Слой</button>
   <button class="btn" onclick="openM('mcloud')" title="Сохранить в облако (Google Drive / Яндекс.Диск)" style="background:#1a73e8;color:#fff">☁ Облако</button>
+  </span>
   <button class="btn" onclick="openM('mshare')" title="Создать ссылку для проектировщика" style="background:#0891b2;color:#fff">🔗 Ссылка</button>
   <button class="btn" onclick="openM('maosr');aosrUpdateKeyStatus();aosrLoadRequisites();aosrUpdateSysLabel();_aosrUpdateShifrPreview();if(!document.getElementById('aosr-materials').children.length)aosrAddMaterialRow();" title="АОСР с помощью ИИ (Claude)" style="background:#6d28d9;color:#fff">🤖 АОСР</button>
   <button class="btn b-grn" style="font-weight:900;font-size:12px" onclick="showReady()">✅ ГОТОВО</button>
@@ -1312,8 +1383,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;letter-spacing:.8px;
       padding-bottom:3px;border-bottom:1px solid #334155;margin-bottom:4px">📦 Материалы</div>
 
-    <div class="sec-t">🎨 Цвета кабелей</div>
-    <div style="font-size:9px;line-height:1.8;padding:2px 4px">
+    <div class="sec-t sec-kl">🎨 Цвета кабелей</div>
+    <div class="sec-kl" style="font-size:9px;line-height:1.8;padding:2px 4px">
       <span style="color:#3b82f6">■</span> ВВГ-Пнг 3×2,5 розетки<br>
       <span style="color:#f59e0b">■</span> ВВГ-Пнг 3×1,5 освещение<br>
       <span style="color:#ef4444">■</span> ВВГнг-FR 4×1,5 аварийное<br>
@@ -1321,36 +1392,36 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <span style="color:#f59e0b">⊡</span> Коробка IP55 &nbsp;
       <span style="color:#ef4444">⊡</span> Коробка FR
     </div>
-    <div class="sec-t">🔌 Розетки</div>
-    <div class="mi on" data-t="cable" onclick="selM(this)">
+    <div class="sec-t sec-ob" style="display:none">🔌 Розетки</div>
+    <div class="mi on sec-ob" style="display:none" data-t="cable" onclick="selM(this)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">ВВГнг LSLTx 3×2,5</div><div class="ms">⟿ гофра потолок</div></div>
     </div>
-    <div class="mi" data-t="box" onclick="selM(this)">
+    <div class="mi sec-ob" style="display:none" data-t="box" onclick="selM(this)">
       <div class="md" style="background:#f59e0b"></div>
       <div><div class="mn">Коробка HEGEL КР26</div><div class="ms">⊡ IP55</div></div>
     </div>
-    <div class="mi" data-t="rozet" onclick="selM(this)">
+    <div class="mi sec-ob" style="display:none" data-t="rozet" onclick="selM(this)">
       <div class="md" style="background:#10b981"></div>
       <div><div class="mn">Розетка 1-мест.</div><div class="ms">⊙ опуск штроба</div></div>
     </div>
 
-    <div class="sec-t">💡 Освещение</div>
-    <div class="mi" data-t="cable" onclick="selM(this)">
+    <div class="sec-t sec-ob" style="display:none">💡 Освещение</div>
+    <div class="mi sec-ob" style="display:none" data-t="cable" onclick="selM(this)">
       <div class="md" style="background:#8b5cf6"></div>
       <div><div class="mn">ВВГнг LSLTx 3×1,5</div><div class="ms">⟿ гофра потолок</div></div>
     </div>
-    <div class="mi" data-t="lamp" onclick="selM(this)">
+    <div class="mi sec-ob" style="display:none" data-t="lamp" onclick="selM(this)">
       <div class="md" style="background:#fbbf24"></div>
       <div><div class="mn">Светильник встр.</div><div class="ms">○ фальш-потолок</div></div>
     </div>
 
-    <div class="sec-t">🧱 Конструкции</div>
-    <div class="mi" data-t="wall" onclick="selM(this);openM('mw')">
+    <div class="sec-t sec-kl">🧱 Конструкции</div>
+    <div class="mi sec-kl" data-t="wall" onclick="selM(this);openM('mw')">
       <div class="md" style="background:#14b8a6"></div>
       <div><div class="mn">Кап. стена</div><div class="ms">→ гильза L550</div></div>
     </div>
-    <div class="mi" data-t="wall" onclick="selM(this);document.getElementById('mw-t').value='perg';openM('mw')">
+    <div class="mi sec-kl" data-t="wall" onclick="selM(this);document.getElementById('mw-t').value='perg';openM('mw')">
       <div class="md" style="background:#5eead4"></div>
       <div><div class="mn">Перегородка</div><div class="ms">→ гильза L300</div></div>
     </div>
@@ -1379,20 +1450,23 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.1с</div>
-      <div class="ms">0.0м</div></div>
+      <div class="ms">0.0м</div>
+      </div>
     </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.2с</div>
-      <div class="ms">0.0м</div></div>
+      <div class="ms">0.0м</div>
+      </div>
     </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
       <div class="md" style="background:#f59e0b"></div>
       <div><div class="mn">Гр.1о</div>
-      <div class="ms">0.0м</div></div>
+      <div class="ms">0.0м</div>
+      </div>
     </div></div>
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="918" height="553"></canvas></div>
+  <div id="cw"><canvas id="cv" width="918" height="565"></canvas></div>
 </div>
 
 <div id="st">
@@ -1404,24 +1478,24 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <!-- ПЛАНШЕТНАЯ ПАНЕЛЬ -->
 <div id="mob">
-  <button class="mb" id="mb-cable" onclick="sT('cable')">⟿<span>Кабель</span></button>
-  <button class="mb pur" id="mb-opusk" onclick="sT('opusk')">↓<span>Опуск</span></button>
-  <button class="mb yel" id="mb-box" onclick="sT('box')">⊡<span>Коробка</span></button>
-  <button class="mb grn" id="mb-rozet" onclick="sT('rozet')">⊙<span>Розетка</span></button>
-  <button class="mb" id="mb-lamp" onclick="sT('lamp')" style="color:#fde68a">○<span>Свет.</span></button>
-  <button class="mb teal" id="mb-wall" onclick="openM('mw');sT('wall')">🧱<span>Стена</span></button>
+  <button class="mb sec-kl" id="mb-cable" onclick="sT('cable')">⟿<span>Кабель</span></button>
+  <button class="mb pur sec-kl" id="mb-opusk" onclick="sT('opusk')">↓<span>Опуск</span></button>
+  <button class="mb yel sec-kl" id="mb-box" onclick="sT('box')">⊡<span>Коробка</span></button>
+  <button class="mb grn sec-ob" id="mb-rozet" style="display:none" onclick="sT('rozet')">⊙<span>Розетка</span></button>
+  <button class="mb sec-ob" id="mb-lamp" style="display:none;color:#fde68a" onclick="sT('lamp')">○<span>Свет.</span></button>
+  <button class="mb teal sec-kl" id="mb-wall" onclick="openM('mw');sT('wall')">🧱<span>Стена</span></button>
   <button class="mb red" id="mb-er" onclick="sT('er')">✕<span>Ластик</span></button>
-  <button class="mb" onclick="startKDDist('cable')" style="color:#f59e0b">📏<span>КЛ</span></button>
-  <button class="mb" onclick="startKDDist('opusk')" style="color:#fb923c">📏<span>Оп-ст.</span></button>
+  <button class="mb" id="hand-btn-m" onclick="toggleHandMode()" style="color:#4ade80">✋<span>Рука</span></button>
+  <button class="mb more-tools sec-kl" style="color: rgb(245, 158, 11);" onclick="startKDDist('cable')">📏<span>КЛ</span></button>
+  <button class="mb more-tools sec-kl" style="color: rgb(251, 146, 60);" onclick="startKDDist('opusk')">📏<span>Оп-ст.</span></button>
   <button class="mb" onclick="undo()" style="color:#f97316">↩<span>Отмена</span></button>
-  <button class="mb" onclick="openM('mplan')" style="color:#fed7aa">🗺<span>План</span></button>
-  <button class="mb teal" onclick="openCalib()">📏<span>Масштаб</span></button>
-  <button class="mb" onclick="openM('mg')" style="color:#a78bfa">+<span>Группа</span></button>
+  <button class="mb more-tools sec-kl" style="color: rgb(254, 215, 170);" onclick="openM('mplan')">🗺<span>План</span></button>
+  <button class="mb teal more-tools sec-kl" style="" onclick="openCalib()">📏<span>Масштаб</span></button>
+  <button class="mb" onclick="openNewGroupModal()" style="color:#a78bfa">+<span>Группа</span></button>
   <button class="mb or" onclick="expV()" style="color:#fed7aa">📋<span>Ведом.</span></button>
-  <button class="mb" onclick="open1C()" style="color:#f97316">🏭<span>1С</span></button>
-  <button class="mb" onclick="exportVedFile()" style="color:#93c5fd">📱<span>HTML</span></button>
+  <button class="mb more-tools" onclick="open1C()" style="display:none;color:#f97316">🏭<span>1С</span></button>
+  <button class="mb more-tools" onclick="exportVedFile()" style="display:none;color:#93c5fd">📱<span>HTML</span></button>
   <button class="mb" onclick="exportDXF()" style="color:#a78bfa">📐<span>DXF</span></button>
-  <button class="mb pur" onclick="openLayerModal()">📑<span>Слой</span></button>
   <button class="mb pur" onclick="openLayerModal()">📑<span>Слой</span></button>
   <button class="mb" onclick="exportDraft()" style="color:#60a5fa" title="Скачать чертёж PNG">🖼<span>Чертёж</span></button>
   <button class="mb" onclick="exportDrawingWithLegend()" style="color:#4ade80" title="Чертёж + подписи групп + УГО + ведомость">📐<span>+Ведом.</span></button>
@@ -3940,10 +4014,11 @@ function rebuildBirki(g){
 // ══════════════════════════════════════════════════════════════
 // ГРУППЫ
 // ══════════════════════════════════════════════════════════════
-function mkG(n,s,p,m,k,c,boxType){
+function mkG(n,s,p,m,k,c,boxType,plan){
   return{id:++_id,name:n,schit:s,pom:p,mount:m,kab:k,
     color: c||kabColor(k),
     boxType: boxType||boxTypeForSys(CUR_SYS),
+    plan: plan||{rozet:0, lamp:0}, // план по количеству — для индикатора прогресса «факт/план»
     segs:[],boxes:[],rozets:[],lamps:[],gilzy:[],opuski:[],birki:[],ok:true};
 }
 // Длина кабеля в штробе (опуски) в метрах
@@ -3973,8 +4048,8 @@ function gRozetCount(g){
 }
 // Длина кабеля на потолке (трасса)
 function gCeilLen(g){ return gL(g); }
-function addG(n,s,p,m,k,c){
-  const g=mkG(n,s,p,m,k,c);S.groups.push(g);S.cur=g.id;
+function addG(n,s,p,m,k,c,boxType,plan){
+  const g=mkG(n,s,p,m,k,c,boxType,plan);S.groups.push(g);S.cur=g.id;
   rSel();rList();return g;
 }
 function cg(){
@@ -4031,12 +4106,34 @@ function rSel(){
 function rList(){
   document.getElementById('glist').innerHTML=S.groups.map(g=>{
     const err=!g.ok&&g.segs.length>1;
+    const plan = g.plan||{rozet:0,lamp:0};
+    let progressHtml='';
+    if(plan.rozet>0 || plan.lamp>0){
+      const factR=gRozetCount(g), factL=g.lamps.length;
+      const parts=[];
+      if(plan.rozet>0) parts.push(`<span style="color:${factR>=plan.rozet?'#4ade80':'#fbbf24'}">🔌${factR}/${plan.rozet}</span>`);
+      if(plan.lamp>0) parts.push(`<span style="color:${factL>=plan.lamp?'#4ade80':'#fbbf24'}">💡${factL}/${plan.lamp}</span>`);
+      progressHtml = `<div class="ms" style="font-size:9px;cursor:pointer" onclick="event.stopPropagation();editGroupPlan(${g.id})" title="Нажми, чтобы изменить план">${parts.join(' ')}</div>`;
+    }
     return`<div class="gi${g.id===S.cur?' on':''}" style="border-color:${g.color}" onclick="swG(${g.id})">
       <div class="md" style="background:${g.color}"></div>
       <div><div class="mn">${g.name}${err?' ⚠':''}</div>
-      <div class="ms">${gL(g).toFixed(1)}м</div></div>
+      <div class="ms">${gL(g).toFixed(1)}м</div>
+      ${progressHtml}</div>
     </div>`;
   }).join('');
+}
+// Быстрое редактирование плана количества розеток/светильников прямо из списка
+function editGroupPlan(id){
+  const g = S.groups.find(gr=>gr.id===id);
+  if(!g) return;
+  const plan = g.plan||{rozet:0,lamp:0};
+  const r = prompt('План розеток для «'+g.name+'» (0 = не отслеживать):', plan.rozet||0);
+  if(r===null) return;
+  const l = prompt('План светильников для «'+g.name+'» (0 = не отслеживать):', plan.lamp||0);
+  if(l===null) return;
+  g.plan = {rozet:Math.max(0,+r||0), lamp:Math.max(0,+l||0)};
+  rList();
 }
 function swG(id){finDraw();S.cur=id;rSel();rList();updCnt();updMountBtns();}
 
@@ -4641,7 +4738,62 @@ function render(){
 // ══════════════════════════════════════════════════════════════
 // СОБЫТИЯ
 // ══════════════════════════════════════════════════════════════
-let _lastTap=0, _pinch=0, _panStart=null, _panOrig=null;
+let _lastTap=0, _pinch=0, _panStart=null, _panOrig=null, _handMode=false;
+
+// ══════════════════════════════════════════════════════════════
+// РАЗДЕЛЫ: «🔌 Кабельные линии» и «💡 Оборудование» — у каждого свои кнопки
+// инструментов и свой видимый материал (для мастера это как два разных,
+// более простых приложения вместо одного большого). Данные (группы, розетки,
+// светильники) хранятся как и раньше — переключение только показывает/прячет
+// нужные элементы интерфейса, ничего не удаляет и не пересчитывает.
+// ══════════════════════════════════════════════════════════════
+let _uiSection = 'kl';
+
+function setUISection(sec){
+  _uiSection = sec;
+  document.querySelectorAll('.sec-kl').forEach(el=>{ el.style.display = sec==='kl' ? '' : 'none'; });
+  document.querySelectorAll('.sec-ob').forEach(el=>{ el.style.display = sec==='ob' ? '' : 'none'; });
+  const btnKL=document.getElementById('sec-btn-kl'), btnOB=document.getElementById('sec-btn-ob');
+  if(btnKL){ btnKL.style.background = sec==='kl' ? '#1e40af' : 'transparent'; btnKL.style.color = sec==='kl' ? '#fff' : '#94a3b8'; }
+  if(btnOB){ btnOB.style.background = sec==='ob' ? '#7c3aed' : 'transparent'; btnOB.style.color = sec==='ob' ? '#fff' : '#94a3b8'; }
+  // При переходе в «Оборудование» удобнее сразу включить инструмент Розетка;
+  // при переходе в «Кабельные линии» — инструмент Кабель.
+  if(sec==='ob' && S.t!=='rozet' && S.t!=='lamp') sT('rozet');
+  if(sec==='kl' && (S.t==='rozet'||S.t==='lamp')) sT('cable');
+  localStorage.setItem('eom_ui_section', sec);
+}
+
+let _moreToolsShown = false;
+function toggleMoreTools(){
+  _moreToolsShown = !_moreToolsShown;
+  document.querySelectorAll('.more-tools').forEach(el=>{
+    // Учитываем текущий раздел: показываем «Ещё» только те элементы, что
+    // относятся к активному разделу (sec-kl/sec-ob), либо не привязаны ни к
+    // какому разделу вовсе (универсальные инструменты).
+    const belongsKL = el.classList.contains('sec-kl');
+    const belongsOB = el.classList.contains('sec-ob');
+    const relevant = (!belongsKL && !belongsOB) || (belongsKL && _uiSection==='kl') || (belongsOB && _uiSection==='ob');
+    el.style.display = (_moreToolsShown && relevant) ? '' : 'none';
+  });
+  const btn=document.getElementById('more-toggle-btn');
+  if(btn){ btn.textContent = _moreToolsShown ? '⋯ Скрыть' : '⋯ Ещё'; btn.style.background = _moreToolsShown ? '#475569' : '#334155'; }
+}
+
+function toggleHandMode(){
+  _handMode=!_handMode;
+  const btn=document.getElementById('hand-btn');
+  if(btn){
+    btn.style.background=_handMode?'#16a34a':'';
+    btn.style.color=_handMode?'#fff':'';
+  }
+  const btnM=document.getElementById('hand-btn-m');
+  if(btnM){
+    btnM.style.background=_handMode?'#16a34a':'';
+    btnM.style.color=_handMode?'#fff':'#4ade80';
+  }
+  CV.style.cursor=_handMode?'grab':'crosshair';
+  tip(_handMode ? '✋ Режим «Рука» включён — таскай пальцем/мышью, чтобы двигать чертёж' : '✋ Режим «Рука» выключен — обычное рисование');
+}
 
 CV.addEventListener('touchstart',onTS,{passive:false});
 CV.addEventListener('touchmove', onTM,{passive:false});
@@ -4657,6 +4809,11 @@ function onTS(e){
   if(e.touches.length===2){
     _pinch=tDist(e);return;
   }
+  if(_handMode){
+    const t=e.touches[0];
+    _panStart={x:t.clientX,y:t.clientY};_panOrig={x:S.panX,y:S.panY};
+    return;
+  }
   const mm=evMM(e);
   const now=Date.now();
   if(now-_lastTap<320){_lastTap=0;finDraw();return;}
@@ -4671,11 +4828,18 @@ function onTM(e){
     const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
     zoom(f,cx,cy);_pinch=d;return;
   }
+  if(_handMode && _panStart){
+    const t=e.touches[0];
+    const s=sc();
+    S.panX=_panOrig.x-(t.clientX-_panStart.x)/s;
+    S.panY=_panOrig.y-(t.clientY-_panStart.y)/s;
+    render();return;
+  }
   move(evMM(e));
 }
-function onTE(e){_pinch=0;}
+function onTE(e){_pinch=0;_panStart=null;}
 function onMD(e){
-  if(e.button===1||e.altKey){
+  if(e.button===1||e.altKey||_handMode){
     _panStart={x:e.clientX,y:e.clientY};_panOrig={x:S.panX,y:S.panY};
     CV.style.cursor='grabbing';return;
   }
@@ -4693,7 +4857,7 @@ function onMM(e){
   }
   move(evMM(e));
 }
-function onMU(){if(_panStart){_panStart=null;CV.style.cursor='crosshair';}}
+function onMU(){if(_panStart){_panStart=null;CV.style.cursor=_handMode?'grab':'crosshair';}}
 function onWH(e){e.preventDefault();zoom(e.deltaY<0?1.12:.89,e.clientX,e.clientY);}
 function tDist(e){
   const dx=e.touches[0].clientX-e.touches[1].clientX;
@@ -5075,18 +5239,37 @@ function selM(el){
 // ══════════════════════════════════════════════════════════════
 function openM(id){document.getElementById(id).classList.add('s');}
 function closeM(id){document.getElementById(id).classList.remove('s');}
+// Открыть модалку «Новая группа» с ПОДСТАВЛЕННЫМИ марка кабеля/монтажом от
+// текущей активной группы — обычно следующая группа делается тем же способом,
+// что и предыдущая (не нужно каждый раз выбирать заново). Название/щит/
+// помещение всё равно нужно поменять руками — их не подставляем, чтобы не
+// создать случайно тёзку.
+function openNewGroupModal(){
+  const g = cg();
+  if(g){
+    const kSel=document.getElementById('mg-k'); if(kSel) kSel.value=g.kab;
+    const mSel=document.getElementById('mg-m'); if(mSel) mSel.value=g.mount;
+  }
+  const nEl=document.getElementById('mg-n'); if(nEl) nEl.value=`Гр.${S.groups.length+1}`;
+  const prEl=document.getElementById('mg-plan-rozet'); if(prEl) prEl.value='';
+  const plEl=document.getElementById('mg-plan-lamp'); if(plEl) plEl.value='';
+  openM('mg');
+}
 function doGrp(){
   const kab = document.getElementById('mg-k').value;
   const colorInput = document.getElementById('mg-c').value;
   // Если цвет не менялся (дефолтный #3b82f6) — берём из палитры кабеля
   const color = colorInput==='#3b82f6' ? kabColor(kab) : colorInput;
+  const planRozet = +document.getElementById('mg-plan-rozet').value || 0;
+  const planLamp = +document.getElementById('mg-plan-lamp').value || 0;
   addG(
     document.getElementById('mg-n').value.trim()||`Гр.${S.groups.length+1}`,
     document.getElementById('mg-s').value.trim()||'ЩС1',
     document.getElementById('mg-p').value.trim()||'—',
     document.getElementById('mg-m').value,
     kab, color,
-    boxTypeForSys(CUR_SYS)
+    boxTypeForSys(CUR_SYS),
+    {rozet:planRozet, lamp:planLamp}
   );
   closeM('mg');updCnt();updMountBtns();updKabBtns();
 }
@@ -6609,7 +6792,7 @@ tr:last-child td{border-bottom:none}
   • Гофра ПВХ — ГОСТ Р МЭК 61386, самозатухающая IP55<br>
   • Гильзы — по пересечениям стен; окраска ГФ-021; заделка пеной EI60
 </div>
-<div class="footer">ЭОМ Мастер v5 &nbsp;|&nbsp; Для передачи в ПТО</div>
+<div class="footer">АРМАДА &nbsp;•&nbsp; ЭОМ Мастер v5 &nbsp;|&nbsp; Для передачи в ПТО</div>
 <\/body><\/html>`;
 
   // Вставляем таблицу высот перед <\/body>
@@ -8317,125 +8500,49 @@ function _kdSegDist(seg, w){
 
 // Применяем — сдвигаем выбранный участок строго ортогонально,
 // соседи растягиваются по своей оси (всё остаётся вертикальным/горизонтальным)
-function applyKDDist(){
-  // Приоритет — то, что реально видно и введено в поле (десктоп: прямой ввод текстом;
-  // мобильный numpad тоже пишет сюда же через _kdNpSync). _kdNpVal как запасной
-  // вариант — раньше был первым, из-за чего прямой набор текста в поле (без
-  // использования numpad-кнопок) применялся неправильно: оставался «залипший»
-  // старый снимок значения на момент открытия панели, и линия визуально не двигалась.
-  const _inpEl=document.getElementById('kd-dist');
-  const _rawVal=(_inpEl && _inpEl.value!=='') ? _inpEl.value : _kdNpVal;
-  const dist=+_rawVal;
-  if(!dist||dist<=0){ tip('❌ Введи расстояние > 0'); return; }
-
-  // ── Режим «Опуск ↔ стена» — двигаем ВСЕ выбранные опуски на одно и то же
-  // расстояние от края стены (каждый по своей оси относительно этой стены), и
-  // вместе с каждым — подтягиваем конец его «мостика» к трассе, чтобы не
-  // разорвать связь с кабельной линией.
-  if(KD.mode==='opusk'){
-    if(!KD.ops.length||!KD.wall){ tip('❌ Выбери хотя бы один опуск и стену'); return; }
-    push();
-    const w=KD.wall;
-    const wdx=w.x2-w.x1, wdy=w.y2-w.y1;
-    const wallIsH=Math.abs(wdx)>Math.abs(wdy);
-    const halfT=wallThick(w)/2;
-    for(const {g,op} of KD.ops){
-      const oldX=op.x, oldY=op.y;
-      let newX=oldX, newY=oldY;
-      if(wallIsH){
-        const sideY=oldY<w.y1 ? -1 : 1;
-        newY = w.y1 + sideY*(halfT+dist);
-      }else{
-        const sideX=oldX<w.x1 ? -1 : 1;
-        newX = w.x1 + sideX*(halfT+dist);
-      }
-      op.x=newX; op.y=newY;
-      for(const seg of g.segs){
-        if(!seg._opuskBridge) continue;
-        if(Math.hypot(seg.x2-oldX, seg.y2-oldY)<10){ seg.x2=newX; seg.y2=newY; }
-        else if(Math.hypot(seg.x1-oldX, seg.y1-oldY)<10){ seg.x1=newX; seg.y1=newY; }
-      }
-      rebuildGilzy(g); rebuildBirki(g); chkConn(g);
-    }
-    updCnt(); render();
-    tip(`📏 Сдвинуто опусков: ${KD.ops.length}, все на ${dist}мм от стены`);
-    KD.step=0; KD.g=null; KD.op=null; KD.ops=[]; KD.wall=null;
-    _kdHint('① кликни один или несколько опусков…');
-    _kdShowInput(false);
-    return;
-  }
-
-  if(!KD.g||!KD.seg||!KD.wall){ tip('❌ Выбери участок и стену'); return; }
-
-  push();
-
-  const g=KD.g, seg=KD.seg, si=KD.segIdx, w=KD.wall, segs=g.segs;
+// Общая логика: сдвинуть СЕГМЕНТ на нужное расстояние от стены (перпендикулярно
+// её оси), подтянуть/пересоединить соседние сегменты (трасса не рвётся), сдвинуть
+// объекты группы (коробки/опуски/розетки/светильники), которые лежат НА этом
+// сегменте — включая его концы. Используется и для «КЛ» (обычный участок
+// кабеля), и для «Оп-стена» (мостик к опуску передаётся как «сегмент») — так
+// коробка и мостик двигаются вместе с опуском на то же расстояние, а связь с
+// остальной трассой перестраивается автоматически, ровно как у обычной КЛ.
+function _kdMoveSegmentToWall(g, seg, si, w, dist){
   const EPS=5;
-
-  // ── Определяем ось выбранного сегмента ────────────────────
-  const segIsH = Math.abs(seg.y2-seg.y1) < Math.abs(seg.x2-seg.x1); // горизонтальный
-  const segIsV = !segIsH;                                              // вертикальный
-
-  // ── Расстояние от сегмента до стены ────────────────────────
-  // Для горизонтального сегмента расстояние — по Y (до горизонтальной стены)
-  // Для вертикального сегмента расстояние — по X (до вертикальной стены)
-  // Вычисляем фактическое расстояние по перпендикуляру нужной оси
+  const segIsH = Math.abs(seg.y2-seg.y1) < Math.abs(seg.x2-seg.x1);
   const wdx=w.x2-w.x1, wdy=w.y2-w.y1;
   const wL=Math.hypot(wdx,wdy)||1;
-  const wnx=-wdy/wL, wny=wdx/wL; // нормаль к стене
-
-  // Координата сегмента по нужной оси (середина)
+  const wnx=-wdy/wL, wny=wdx/wL;
   const segMX=(seg.x1+seg.x2)/2, segMY=(seg.y1+seg.y2)/2;
-  // Проекция середины сегмента на стену
   const wL2=wdx*wdx+wdy*wdy;
   const tP=((segMX-w.x1)*wdx+(segMY-w.y1)*wdy)/wL2;
   const fpx=w.x1+tP*wdx, fpy=w.y1+tP*wdy;
   const curDist=Math.hypot(segMX-fpx, segMY-fpy);
   const side=Math.sign((segMX-fpx)*wnx+(segMY-fpy)*wny)||1;
-  const needed=dist*side; // нужное смещение со знаком вдоль нормали
+  const needed=dist*side;
 
-  // ── Вычисляем ОРТОГОНАЛЬНОЕ смещение ──────────────────────
-  // Сегмент горизонтальный → он может двигаться только по Y
-  // Сегмент вертикальный   → он может двигаться только по X
-  // Стена-ориентир может быть под любым углом, но мы проецируем
-  // смещение только на нужную ортогональную ось.
   let ddx=0, ddy=0;
   if(segIsH){
-    // Горизонтальный сегмент двигается по Y
-    // Компонента нормали по Y: wny
-    // Нужный сдвиг по Y = (нужное расстояние - текущее) * знак / компонент нормали
     const absWNY=Math.abs(wny);
-    if(absWNY<0.1){
-      tip('❌ Стена параллельна кабелю — выбери перпендикулярную стену');
-      return;
-    }
-    ddy=(needed - (segMY-fpy))/1; // проще: целевой Y = fpy + needed*wny/|wny|... используем прямой расчёт
-    // Прямой расчёт: целевое расстояние по Y от стены
-    // Знак: сегмент выше или ниже стены
-    const signY=Math.sign(segMY-(w.y1||w.y2||0))||1;
-    // Если стена горизонтальная (wdy≈0): расстояние = |segY - wY|
-    const wallIsH=Math.abs(wdx)>Math.abs(wdy);  // горизонт.стена: Y≈const → wdy≈0 → wdx больше
+    if(absWNY<0.1) return {error:'Стена параллельна выбранному участку — выбери перпендикулярную стену'};
+    const wallIsH=Math.abs(wdx)>Math.abs(wdy);
     if(wallIsH){
       const halfT=wallThick(w)/2;
       const wallY=w.y1;
       const curY=seg.y1;
       const sideY=curY<wallY ? -1 : 1;
-      // newY = ось стены ± (halfThick + dist) → расстояние до края = dist
       const newY=wallY+sideY*(halfT+dist);
       ddy=newY-curY;
     } else {
-      // Стена не горизонтальная — берём проекцию
       ddy=(needed-curDist*Math.sign((segMY-fpy)))*wny;
     }
   } else {
-    // Вертикальный сегмент двигается по X
-    const wallIsV=Math.abs(wdy)>Math.abs(wdx);  // вертикал.стена: X≈const → wdx≈0 → wdy больше
+    const wallIsV=Math.abs(wdy)>Math.abs(wdx);
     if(wallIsV){
       const halfT=wallThick(w)/2;
       const wallX=w.x1;
       const curX=seg.x1;
       const sideX=curX<wallX ? -1 : 1;
-      // newX = ось стены ± (halfThick + dist) → расстояние до края = dist
       const newX=wallX+sideX*(halfT+dist);
       ddx=newX-curX;
     } else {
@@ -8443,95 +8550,45 @@ function applyKDDist(){
     }
   }
 
-  // ── Новые координаты выбранного сегмента ──────────────────
   const ox1=seg.x1, oy1=seg.y1, ox2=seg.x2, oy2=seg.y2;
-  // Для горизонтального — двигаем Y, X не трогаем
-  // Для вертикального   — двигаем X, Y не трогаем
   const nx1=ox1+ddx, ny1=oy1+ddy;
   const nx2=ox2+ddx, ny2=oy2+ddy;
 
-  // ── Обновляем соседние сегменты ───────────────────────────
-  // Правило: всё остаётся горизонтальным/вертикальным.
-  // Если сосед ПЕРПЕНДИКУЛЯРЕН нашему — тянем его конец к новой точке.
-  // Если сосед ПАРАЛЛЕЛЕН нашему — вставляем новый перпендикулярный
-  // соединительный сегмент между ними (трасса не рвётся).
-
-  const extraSegs=[]; // новые соединительные сегменты
-
+  const segs=g.segs;
+  const extraSegs=[];
   for(let i=0;i<segs.length;i++){
     if(i===si) continue;
     const nb=segs[i];
     const nbIsH=Math.abs(nb.y2-nb.y1)<Math.abs(nb.x2-nb.x1);
-    const sameDir=(segIsH===nbIsH); // сосед той же ориентации
-
-    // ── Определяем: с каким концом нашего сегмента связан сосед ──
-    let connEnd=null; // 'A'=наше начало, 'B'=наш конец
-    let connSide=null; // 'start'=начало соседа, 'end'=конец соседа
+    const sameDir=(segIsH===nbIsH);
+    let connEnd=null, connSide=null;
     if(Math.hypot(nb.x2-ox1,nb.y2-oy1)<EPS){ connEnd='A'; connSide='end'; }
     else if(Math.hypot(nb.x1-ox2,nb.y1-oy2)<EPS){ connEnd='B'; connSide='start'; }
     else if(Math.hypot(nb.x2-ox2,nb.y2-oy2)<EPS){ connEnd='B'; connSide='end'; }
     else if(Math.hypot(nb.x1-ox1,nb.y1-oy1)<EPS){ connEnd='A'; connSide='start'; }
     if(!connEnd) continue;
-
-    // Новая точка стыка (куда переезжает наш конец)
     const newPt=connEnd==='A' ? {x:nx1,y:ny1} : {x:nx2,y:ny2};
-    // Старая точка стыка (где был конец соседа до сдвига)
     const oldPt=connEnd==='A' ? {x:ox1,y:oy1} : {x:ox2,y:oy2};
-
     if(!sameDir){
-      // ── Перпендикулярный сосед — просто тянем его конец ──────
       if(connSide==='end'){
-        if(nbIsH){ nb.x2=newPt.x; nb.y2=oldPt.y; }
-        else     { nb.x2=oldPt.x; nb.y2=newPt.y; }
+        if(nbIsH){ nb.x2=newPt.x; nb.y2=oldPt.y; } else { nb.x2=oldPt.x; nb.y2=newPt.y; }
       } else {
-        if(nbIsH){ nb.x1=newPt.x; nb.y1=oldPt.y; }
-        else     { nb.x1=oldPt.x; nb.y1=newPt.y; }
+        if(nbIsH){ nb.x1=newPt.x; nb.y1=oldPt.y; } else { nb.x1=oldPt.x; nb.y1=newPt.y; }
       }
     } else {
-      // ── Параллельный сосед — добавляем соединительный сегмент ──
-      // Наш сегмент сдвинулся, сосед остаётся. Между ними нужен
-      // перпендикулярный «локоть», соединяющий старую точку стыка
-      // с новой точкой стыка.
-      // Пример: оба горизонтальные, наш сдвинулся по Y.
-      //   Старая точка: (ox1, oy1). Новая: (nx1, ny1).
-      //   Соединитель: вертикаль (ox1, oy1)→(ox1, ny1)  — или (nx1, oy1)→(nx1, ny1)
-      //   Используем X соседа (фиксированный) → X нашего нового конца.
-      //   Соединитель идёт по X=ox1 (или ox2) от oy до ny.
-
-      // Координаты соединителя
       let cx1,cy1,cx2,cy2;
-      if(segIsH){
-        // Оба горизонтальные → соединитель вертикальный
-        cx1=oldPt.x; cy1=oldPt.y;
-        cx2=oldPt.x; cy2=newPt.y;
-      } else {
-        // Оба вертикальные → соединитель горизонтальный
-        cx1=oldPt.x; cy1=oldPt.y;
-        cx2=newPt.x; cy2=oldPt.y;
-      }
-
-      // Добавляем только если соединитель не нулевой длины
+      if(segIsH){ cx1=oldPt.x; cy1=oldPt.y; cx2=oldPt.x; cy2=newPt.y; }
+      else { cx1=oldPt.x; cy1=oldPt.y; cx2=newPt.x; cy2=oldPt.y; }
       if(Math.hypot(cx2-cx1,cy2-cy1)>5){
-        extraSegs.push({
-          x1:cx1,y1:cy1,x2:cx2,y2:cy2,
-          mount:seg.mount, kab:seg.kab
-        });
+        extraSegs.push({x1:cx1,y1:cy1,x2:cx2,y2:cy2, mount:seg.mount, kab:seg.kab});
       }
-      // Сосед НЕ трогаем — он остаётся на месте
-      // Наш сегмент соединён через новый локоть
     }
   }
-
-  // Добавляем соединительные сегменты к группе
   for(const es of extraSegs) segs.push(es);
 
-  // Двигаем сам сегмент
   seg.x1=nx1; seg.y1=ny1; seg.x2=nx2; seg.y2=ny2;
 
-  // ── Двигаем объекты группы которые лежат НА выбранном сегменте ──
-  // (коробки, опуски, розетки — если их позиция совпадает с сегментом)
   const _onSeg=(px,py)=>{
-    // Точка (px,py) лежит на отрезке (ox1,oy1)→(ox2,oy2) с допуском EPS
     const sdx=ox2-ox1,sdy=oy2-oy1,sL2=sdx*sdx+sdy*sdy;
     if(sL2<1) return false;
     const t=((px-ox1)*sdx+(py-oy1)*sdy)/sL2;
@@ -8539,34 +8596,23 @@ function applyKDDist(){
     const qx=ox1+t*sdx,qy=oy1+t*sdy;
     return Math.hypot(px-qx,py-qy)<EPS*3;
   };
-  for(const bx of g.boxes){
-    if(_onSeg(bx.x,bx.y)){ bx.x+=ddx; bx.y+=ddy; }
-  }
-  for(const op of g.opuski){
-    if(_onSeg(op.x,op.y)){ op.x+=ddx; op.y+=ddy; }
-  }
-  for(const la of g.lamps){
-    if(_onSeg(la.x,la.y)){ la.x+=ddx; la.y+=ddy; }
-  }
-  for(const rz of g.rozets){
-    if(_onSeg(rz.x,rz.y)){ rz.x+=ddx; rz.y+=ddy; }
-  }
+  for(const bx of g.boxes){ if(_onSeg(bx.x,bx.y)){ bx.x+=ddx; bx.y+=ddy; } }
+  for(const op of g.opuski){ if(_onSeg(op.x,op.y)){ op.x+=ddx; op.y+=ddy; } }
+  for(const la of g.lamps){ if(_onSeg(la.x,la.y)){ la.x+=ddx; la.y+=ddy; } }
+  for(const rz of g.rozets){ if(_onSeg(rz.x,rz.y)){ rz.x+=ddx; rz.y+=ddy; } }
 
-  // Убираем вырожденные сегменты
   g.segs=g.segs.filter(s=>Math.hypot(s.x2-s.x1,s.y2-s.y1)>5);
 
-  // ── Доп. защита от «отрыва» мостика к опуску ────────────────────
-  // Общая логика выше (соседи/на-сегменте) обычно справляется, но если
-  // сдвиг всё же оставил мостик оторванным от трассы (например, из-за
-  // погрешности определения соседа) — принудительно подтягиваем его
-  // «коробочный» конец (тот, что НЕ у опуска) к ближайшей точке трассы.
+  // Доп. защита от «отрыва» мостика к опуску (магнитный подхват): «коробочный»
+  // конец любого мостика в группе принудительно подтягивается к ближайшей точке
+  // трассы, если после сдвига между ними остался небольшой зазор.
   for(const bridgeSeg of g.segs){
     if(!bridgeSeg._opuskBridge) continue;
     for(const endKey of ['1','2']){
       const bxp = endKey==='1'?bridgeSeg.x1:bridgeSeg.x2;
       const byp = endKey==='1'?bridgeSeg.y1:bridgeSeg.y2;
       const isOpuskEnd = g.opuski.some(o=>Math.hypot(o.x-bxp,o.y-byp)<15);
-      if(isOpuskEnd) continue; // стеновой конец — не трогаем, он у своего опуска
+      if(isOpuskEnd) continue;
       let bestD=400, bestX=null, bestY=null;
       for(const other of g.segs){
         if(other===bridgeSeg) continue;
@@ -8581,8 +8627,156 @@ function applyKDDist(){
     }
   }
 
-  rebuildGilzy(g); rebuildBirki(g); chkConn(g); updCnt(); render();
+  rebuildGilzy(g); rebuildBirki(g); chkConn(g);
+  return {ok:true};
+}
 
+// Опуск — частный случай: мостик идёт ПЕРПЕНДИКУЛЯРНО стене (в отличие от
+// обычного кабеля, который у КЛ считается ПАРАЛЛЕЛЬНЫМ стене-ориентиру), поэтому
+// формула КЛ здесь не подходит напрямую. Вместо этого: считаем нужное смещение
+// «напрямую к стене» (та же надёжная формула, что уже была в опуске), и жёстко
+// переносим на него ВСЮ связку опуск+мостик+коробка целиком (как единое тело —
+// именно этого и просили: «кабель должен параллельно переместиться с опуском на
+// такое же расстояние»). Дальше «коробочный» конец переподключаем к остальной
+// трассе той же логикой, что и у КЛ (сосед либо подтягивается, либо между ними
+// вставляется соединительный участок) — трасса не рвётся.
+function _kdMoveOpuskRigid(g, op, bridgeSeg, w, dist){
+  const wdx=w.x2-w.x1, wdy=w.y2-w.y1;
+  const wallIsH=Math.abs(wdx)>Math.abs(wdy);
+  const wallIsV=Math.abs(wdy)>Math.abs(wdx);
+  if(!wallIsH && !wallIsV) return {error:'Стена под углом — выбери строго горизонтальную/вертикальную стену'};
+  const halfT=wallThick(w)/2;
+
+  let ddx=0, ddy=0;
+  if(wallIsH){
+    const sideY = op.y<w.y1 ? -1 : 1;
+    const newY = w.y1 + sideY*(halfT+dist);
+    ddy = newY-op.y;
+  }else{
+    const sideX = op.x<w.x1 ? -1 : 1;
+    const newX = w.x1 + sideX*(halfT+dist);
+    ddx = newX-op.x;
+  }
+
+  // Определяем «коробочный» конец моста (тот, что НЕ у опуска) — именно его
+  // нужно будет переподключить к остальной трассе после переноса.
+  const opIsAtEnd2 = Math.hypot(bridgeSeg.x2-op.x,bridgeSeg.y2-op.y) < Math.hypot(bridgeSeg.x1-op.x,bridgeSeg.y1-op.y);
+  const boxOldX = opIsAtEnd2 ? bridgeSeg.x1 : bridgeSeg.x2;
+  const boxOldY = opIsAtEnd2 ? bridgeSeg.y1 : bridgeSeg.y2;
+  const boxNewX = boxOldX+ddx, boxNewY = boxOldY+ddy;
+
+  // ── Жёсткий перенос: опуск, мост (обе точки), сама коробка — все на ddx,ddy ──
+  op.x+=ddx; op.y+=ddy;
+  bridgeSeg.x1+=ddx; bridgeSeg.y1+=ddy; bridgeSeg.x2+=ddx; bridgeSeg.y2+=ddy;
+  const EPS=5;
+  for(const bx of g.boxes){ if(Math.hypot(bx.x-boxOldX,bx.y-boxOldY)<EPS){ bx.x+=ddx; bx.y+=ddy; } }
+
+  // ── Переподключаем «коробочный» конец к остальной трассе ──
+  // НЕ трогаем существующие соседние сегменты вообще (чтобы гарантированно не
+  // сломать их горизонталь/вертикаль) — вместо этого добавляем/растягиваем
+  // отдельный соединительный участок от старой точки стыка до новой позиции
+  // коробки. Именно этот новый участок и «меняет размер» — сама трасса остаётся
+  // ровной. Если в старой точке сходится НЕСКОЛЬКО сегментов (проходная точка) —
+  // соединитель добавляется только ОДИН раз, а не по одному на каждого соседа
+  // (иначе длина задвоится в расчётах материалов).
+  let anyTouches=false, refNbIsH=null;
+  for(const nb of g.segs){
+    if(nb===bridgeSeg) continue;
+    if(Math.hypot(nb.x1-boxOldX,nb.y1-boxOldY)<EPS || Math.hypot(nb.x2-boxOldX,nb.y2-boxOldY)<EPS){
+      anyTouches=true;
+      if(refNbIsH===null) refNbIsH=Math.abs(nb.y2-nb.y1)<Math.abs(nb.x2-nb.x1);
+    }
+  }
+  const extraSegs=[];
+  if(anyTouches){
+    if(Math.abs(boxNewX-boxOldX)<1 || Math.abs(boxNewY-boxOldY)<1){
+      // Новая точка уже строго по одной оси от старой — один прямой соединитель
+      if(Math.hypot(boxNewX-boxOldX,boxNewY-boxOldY)>5){
+        extraSegs.push({x1:boxOldX,y1:boxOldY,x2:boxNewX,y2:boxNewY, mount:bridgeSeg.mount, kab:bridgeSeg.kab});
+      }
+    } else {
+      // Г-образно: сначала вдоль оси соседа (не отрываясь от него), затем
+      // перпендикулярно — к новой позиции коробки
+      const midX = refNbIsH ? boxNewX : boxOldX;
+      const midY = refNbIsH ? boxOldY : boxNewY;
+      if(Math.hypot(midX-boxOldX,midY-boxOldY)>5){
+        extraSegs.push({x1:boxOldX,y1:boxOldY,x2:midX,y2:midY, mount:bridgeSeg.mount, kab:bridgeSeg.kab});
+      }
+      if(Math.hypot(boxNewX-midX,boxNewY-midY)>5){
+        extraSegs.push({x1:midX,y1:midY,x2:boxNewX,y2:boxNewY, mount:bridgeSeg.mount, kab:bridgeSeg.kab});
+      }
+    }
+  }
+  for(const es of extraSegs) g.segs.push(es);
+
+  g.segs=g.segs.filter(s=>Math.hypot(s.x2-s.x1,s.y2-s.y1)>5);
+  rebuildGilzy(g); rebuildBirki(g); chkConn(g);
+  return {ok:true};
+}
+
+function applyKDDist(){
+  // Приоритет — то, что реально видно и введено в поле (десктоп: прямой ввод текстом;
+  // мобильный numpad тоже пишет сюда же через _kdNpSync). _kdNpVal как запасной
+  // вариант — раньше был первым, из-за чего прямой набор текста в поле (без
+  // использования numpad-кнопок) применялся неправильно: оставался «залипший»
+  // старый снимок значения на момент открытия панели, и линия визуально не двигалась.
+  const _inpEl=document.getElementById('kd-dist');
+  const _rawVal=(_inpEl && _inpEl.value!=='') ? _inpEl.value : _kdNpVal;
+  const dist=+_rawVal;
+  if(!dist||dist<=0){ tip('❌ Введи расстояние > 0'); return; }
+
+  // ── Режим «Опуск ↔ стена» — двигаем мостик КАЖДОГО выбранного опуска той же
+  // самой функцией, что и обычная КЛ. За счёт этого коробка на потолке и связь
+  // с остальной трассой ведут себя ТОЧНО так же, как при сдвиге обычного
+  // участка кабеля: коробка+мостик переезжают на то же расстояние, что и опуск,
+  // а соединение с остальной трассой перестраивается автоматически.
+  if(KD.mode==='opusk'){
+    if(!KD.ops.length||!KD.wall){ tip('❌ Выбери хотя бы один опуск и стену'); return; }
+    push();
+    let moved=0, lastErr=null;
+    for(const {g,op} of KD.ops){
+      let bridgeIdx=-1, bridgeSeg=null;
+      for(let i=0;i<g.segs.length;i++){
+        const s=g.segs[i];
+        if(!s._opuskBridge) continue;
+        if(Math.hypot(s.x2-op.x,s.y2-op.y)<10 || Math.hypot(s.x1-op.x,s.y1-op.y)<10){
+          bridgeIdx=i; bridgeSeg=s; break;
+        }
+      }
+      if(!bridgeSeg){
+        // Нет моста (опуск поставлен без привязки к стене) — двигаем только саму точку
+        const w=KD.wall;
+        const wdx=w.x2-w.x1, wdy=w.y2-w.y1;
+        const wallIsH=Math.abs(wdx)>Math.abs(wdy);
+        const halfT=wallThick(w)/2;
+        if(wallIsH){
+          const sideY=op.y<w.y1 ? -1 : 1;
+          op.y = w.y1 + sideY*(halfT+dist);
+        }else{
+          const sideX=op.x<w.x1 ? -1 : 1;
+          op.x = w.x1 + sideX*(halfT+dist);
+        }
+        moved++;
+        continue;
+      }
+      const res = _kdMoveOpuskRigid(g, op, bridgeSeg, KD.wall, dist);
+      if(res.error){ lastErr=res.error; continue; }
+      moved++;
+    }
+    updCnt(); render();
+    if(moved) tip(`📏 Сдвинуто опусков: ${moved}, все на ${dist}мм от стены`);
+    else if(lastErr) tip('❌ '+lastErr);
+    KD.step=0; KD.g=null; KD.op=null; KD.ops=[]; KD.wall=null;
+    _kdHint('① кликни один или несколько опусков…');
+    _kdShowInput(false);
+    return;
+  }
+
+  if(!KD.g||!KD.seg||!KD.wall){ tip('❌ Выбери участок и стену'); return; }
+  push();
+  const res = _kdMoveSegmentToWall(KD.g, KD.seg, KD.segIdx, KD.wall, dist);
+  if(res.error){ tip('❌ '+res.error); return; }
+  updCnt(); render();
   tip(`📏 Участок сдвинут: ${dist}мм от стены`);
   KD.step=0; KD.g=null; KD.seg=null; KD.segIdx=-1; KD.wall=null;
   _kdHint('① кликни участок кабеля…');
@@ -10066,6 +10260,9 @@ window.addEventListener('load',()=>{
   img.src=PLAN;
 
   rSel();rList();updCnt();
+
+  // Восстанавливаем последний выбранный раздел (Кабельные линии / Оборудование)
+  setUISection(localStorage.getItem('eom_ui_section')||'kl');
 
   // При открытии: сначала тихо подгружаем то, что уже есть локально в этом браузере
   // (если есть), затем — независимо от этого — сверяемся с онлайн-данными объекта
