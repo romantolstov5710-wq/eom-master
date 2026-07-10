@@ -1271,7 +1271,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="8" selected="">Гр.1с</option><option value="9">Гр.2с</option><option value="10">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="11" selected="">Гр.1с</option><option value="12">Гр.2с</option><option value="13">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1307,7 +1307,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">124%</span>
   </label>
   </span>
 
@@ -1520,17 +1520,17 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(8)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(11)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(9)">
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(12)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(10)">
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(13)">
       <div class="md" style="background:#f59e0b"></div>
       <div><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
@@ -1539,14 +1539,14 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="1760" height="850"></canvas></div>
+  <div id="cw"><canvas id="cv" width="1760" height="819"></canvas></div>
 </div>
 
 <div id="st">
   <span>Режим: <b id="stm">Кабель</b></span>
   <span>Группа: <b id="stg">Гр.1с</b></span>
-  <span>X:<b id="stx">0</b> Y:<b id="sty">0</b>мм</span>
-  <span>Отрезок: <b id="sts">0</b>м</span>
+  <span>X:<b id="stx">2599</b> Y:<b id="sty">2251</b>мм</span>
+  <span>Отрезок: <b id="sts">5.38</b>м</span>
 </div>
 
 <!-- ПЛАНШЕТНАЯ ПАНЕЛЬ -->
@@ -11260,6 +11260,19 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+  }catch(e){}
+});
+</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
