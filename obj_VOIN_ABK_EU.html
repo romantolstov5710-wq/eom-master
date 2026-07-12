@@ -872,7 +872,10 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 <div class="mbg" id="mg"><div class="mbox">
   <h3>➕ Кабельная группа</h3>
   <label>Название</label><input id="mg-n" value="Гр.1с">
-  <label>Щит</label><input id="mg-s" value="ЩС1">
+  <label>Щит</label>
+  <select id="mg-s-sel" onchange="_mgSchitSelChange()"></select>
+  <input id="mg-s" value="ЩС1" style="display:none;margin-top:5px" placeholder="Название нового щита">
+  <div id="mg-s-hint" style="font-size:9.5px;color:#f59e0b;margin:2px 0 0;line-height:1.4"></div>
   <label>Помещение</label><input id="mg-p" value="пом.1">
   <label>План (необязательно) — сколько точек должно получиться в этой группе, для индикатора прогресса</label>
   <div style="display:flex;gap:6px">
@@ -3902,11 +3905,17 @@ function snapO(px,py,x,y){
   return Math.abs(x-px)>Math.abs(y-py)?{x,y:py}:{x:px,y};
 }
 function snapAll(x,y,fromPt){
-  // Snap к щиту группы (только для первой точки трассы)
+  // Snap к щиту группы (только для первой точки трассы) — привязываем ТОЛЬКО
+  // к щиту, реально закреплённому за этой группой по имени. Раньше при
+  // несовпадении имени (например, для группы поставили новый щит, а поле
+  // группы ещё указывало на старое/дефолтное имя) шёл откат на S.schits[0] —
+  // первый когда-либо поставленный щит на плане, из-за чего трасса
+  // «прилипала» к чужому/старому щиту. Теперь без точного совпадения имени
+  // снапа к щиту просто не будет — безопаснее, чем привязка не туда.
   if(!fromPt){
     const g=cg();
     const schitName=g?g.schit:null;
-    const sch=S.schits.find(s=>s.name===schitName)||S.schits[0];
+    const sch=S.schits.find(s=>s.name===schitName);
     if(sch){
       const ds=Math.hypot(x-sch.x,y-sch.y);
       if(ds<1500) return {x:sch.x, y:sch.y}; // привязка 1500мм
@@ -4067,8 +4076,9 @@ function rebuildBirki(g){
   g.birki=[];
   let num=1; // порядковый номер бирки в группе
 
-  // 1. Бирка в шкафу — у ближайшего щита
-  const sch=S.schits.find(s=>s.name===g.schit)||S.schits[0];
+  // 1. Бирка в шкафу — у щита, реально закреплённого за этой группой по имени
+  //    (без отката на первый попавшийся щит — см. пояснение в snapAll)
+  const sch=S.schits.find(s=>s.name===g.schit);
   if(sch) g.birki.push({x:sch.x,y:sch.y,label:`${g.name}
 щит`,num:num++,type:'schit'});
 
@@ -5362,6 +5372,10 @@ function _build3DScene(rect, wrap){
   const ceilY = hpot; // потолок
   const SCHIT_MOUNT_Y = 1.2; // высота установки щита (низ корпуса), м
   const SCHIT_H = 0.6;       // высота корпуса щита, м — верх корпуса = SCHIT_MOUNT_Y+SCHIT_H
+  // Та же логика разведения линий разных групп, что и в 2D-чертеже (render()) —
+  // без неё в 3D кабели разных групп, идущие по одной оси, визуально сливались
+  // в одну линию и было не разобрать, где чья трасса.
+  const _segOffsets3D = _collectLineOffsets();
   const cx = (rect.x1+rect.x2)/2, cy=(rect.y1+rect.y2)/2;
   const inRect = (x,y,pad)=> x>=rect.x1-(pad||0) && x<=rect.x2+(pad||0) && y>=rect.y1-(pad||0) && y<=rect.y2+(pad||0);
   const segInRect = (s)=> inRect(s.x1,s.y1,300) || inRect(s.x2,s.y2,300) ||
@@ -5430,9 +5444,10 @@ function _build3DScene(rect, wrap){
     for(const seg of (g.segs||[])){
       if(!segInRect(seg)) continue;
       any=true;
+      const D = _segDraw(seg, _segOffsets3D); // визуальное смещение, если совпадает с линией другой группы
       const pts=[
-        new THREE.Vector3(lx(seg.x1), ceilY-0.02, lz(seg.y1)),
-        new THREE.Vector3(lx(seg.x2), ceilY-0.02, lz(seg.y2)),
+        new THREE.Vector3(lx(D.x1), ceilY-0.02, lz(D.y1)),
+        new THREE.Vector3(lx(D.x2), ceilY-0.02, lz(D.y2)),
       ];
       const geo = new THREE.BufferGeometry().setFromPoints(pts);
       scene.add(new THREE.Line(geo, lineMat));
@@ -5441,7 +5456,7 @@ function _build3DScene(rect, wrap){
       const segLenM = Math.hypot(seg.x2-seg.x1, seg.y2-seg.y1)/1000;
       if(segLenM>0.15){
         const dimSpr = _makeTextSprite(segLenM.toFixed(2)+'м', '#fde68a');
-        dimSpr.position.set((lx(seg.x1)+lx(seg.x2))/2, ceilY+0.05, (lz(seg.y1)+lz(seg.y2))/2);
+        dimSpr.position.set((lx(D.x1)+lx(D.x2))/2, ceilY+0.05, (lz(D.y1)+lz(D.y2))/2);
         dimSpr.visible = _m3dDimsOn;
         scene.add(dimSpr);
         _m3dDimObjects.push(dimSpr);
@@ -5550,14 +5565,29 @@ function _build3DScene(rect, wrap){
         scene.add(bm);
       }
     }
-    // Светильники — маркер на потолке (или на фальш-потолке, если задан)
+    // Светильники — маркер на потолке (или на фальш-потолке, если задан) +
+    // сам опуск (вертикаль от основного потолка до места светильника) с
+    // размерной подписью, как у обычных опусков — раньше рисовался только
+    // маркер, без линии и без высоты.
     const lampY = hfal ? Math.max(0.1, ceilY-hfal) : ceilY-0.04;
     for(const la of (g.lamps||[])){
       if(!inRect(la.x,la.y,200)) continue;
       any=true;
+      if(hfal){
+        const pts=[new THREE.Vector3(lx(la.x),ceilY,lz(la.y)), new THREE.Vector3(lx(la.x),lampY,lz(la.y))];
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat));
+      }
       const m = new THREE.Mesh(new THREE.SphereGeometry(0.07,10,10), boxMat);
       m.position.set(lx(la.x), lampY, lz(la.y));
       scene.add(m);
+      const lampDropM = (la.ol||0)/1000;
+      if(lampDropM>0.1){
+        const dimSpr = _makeTextSprite(lampDropM.toFixed(2)+'м', '#93c5fd');
+        dimSpr.position.set(lx(la.x)+0.08, (ceilY+lampY)/2, lz(la.y));
+        dimSpr.visible = _m3dDimsOn;
+        scene.add(dimSpr);
+        _m3dDimObjects.push(dimSpr);
+      }
     }
     if(any) legendItems.push({name:g.name, color:g.color});
   }
@@ -6163,7 +6193,51 @@ function openNewGroupModal(){
   const nEl=document.getElementById('mg-n'); if(nEl) nEl.value=`Гр.${S.groups.length+1}`;
   const prEl=document.getElementById('mg-plan-rozet'); if(prEl) prEl.value='';
   const plEl=document.getElementById('mg-plan-lamp'); if(plEl) plEl.value='';
+  _fillMgSchitSelect(g ? g.schit : null);
   openM('mg');
+}
+
+// Заполняет выпадающий список щитов реально существующими S.schits (по факту
+// расставленными на плане) вместо ручного ввода текста — раньше поле было
+// обычным текстовым инпутом с захардкоженным дефолтом «ЩС1», из-за чего новая
+// группа могла ссылаться на щит, которого либо не существует, либо это старый
+// щит от совсем другой группы, и трасса потом привязывалась (снапалась) не к
+// тому щиту. Теперь можно выбрать только реально стоящий на плане щит,
+// либо явно создать новый.
+function _fillMgSchitSelect(preferName){
+  const sel = document.getElementById('mg-s-sel');
+  if(!sel) return;
+  const opts = ['<option value="__new__">✏️ Новый щит…</option>'];
+  (S.schits||[]).forEach(sh=>{
+    opts.push(`<option value="${sh.name}">${sh.name}${sh.type?' ('+sh.type+')':''}</option>`);
+  });
+  sel.innerHTML = opts.join('');
+  const hasMatch = preferName && (S.schits||[]).some(sh=>sh.name===preferName);
+  if(hasMatch){
+    sel.value = preferName;
+  }else if((S.schits||[]).length){
+    // По умолчанию — последний размещённый щит (обычно самый актуальный для
+    // текущей работы), а не первый попавшийся
+    sel.value = S.schits[S.schits.length-1].name;
+  }else{
+    sel.value = '__new__';
+  }
+  _mgSchitSelChange();
+}
+function _mgSchitSelChange(){
+  const sel = document.getElementById('mg-s-sel');
+  const txt = document.getElementById('mg-s');
+  const hint = document.getElementById('mg-s-hint');
+  if(!sel || !txt) return;
+  if(sel.value === '__new__'){
+    txt.style.display = '';
+    if(!txt.value || (S.schits||[]).some(sh=>sh.name===txt.value)) txt.value = '';
+    if(hint) hint.textContent = 'Впиши название нового щита — не забудь поставить его инструментом «⊠ Щит» на плане.';
+  }else{
+    txt.style.display = 'none';
+    txt.value = sel.value;
+    if(hint) hint.textContent = '';
+  }
 }
 function doGrp(){
   const kab = document.getElementById('mg-k').value;
@@ -6172,9 +6246,14 @@ function doGrp(){
   const color = colorInput==='#3b82f6' ? kabColor(kab) : colorInput;
   const planRozet = +document.getElementById('mg-plan-rozet').value || 0;
   const planLamp = +document.getElementById('mg-plan-lamp').value || 0;
+  const schitName = document.getElementById('mg-s').value.trim();
+  if(!schitName){
+    tip('⚠️ Укажи щит группы — выбери существующий или впиши название нового');
+    return;
+  }
   addG(
     document.getElementById('mg-n').value.trim()||`Гр.${S.groups.length+1}`,
-    document.getElementById('mg-s').value.trim()||'ЩС1',
+    schitName,
     document.getElementById('mg-p').value.trim()||'—',
     document.getElementById('mg-m').value,
     kab, color,
