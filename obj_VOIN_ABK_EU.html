@@ -1346,7 +1346,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn" onclick="undo()" title="Отменить последнее действие (Ctrl+Z)" style="background:#7c2d12;color:#fed7aa;font-size:14px;font-weight:900;padding:7px 14px;border:1px solid #f97316">↩️ Отменить</button>
   <button class="btn b-blue" onclick="save()">💾</button>
   <button id="hand-btn" class="btn" onclick="toggleHandMode()" title="Включить/выключить режим «Рука» — таскать чертёж пальцем/мышью вместо рисования">✋ Рука</button>
-  <button id="lbl-btn" class="btn b-gray" onclick="toggleLabels()" title="Скрыть/показать размерные выноски (длины опусков, сегментов, светильников) — если чертёж перегружен подписями">🏷 Выноски</button>
+  <button id="lbl-btn" class="btn b-gray" onclick="toggleLabels()" title="Скрыть/показать выноски опусков и светильников (пояснительные боксы) — длины кабеля на самих линиях остаются видны в любом случае">🏷 Выноски</button>
 
   <span class="more-tools sec-kl" style="">
   <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения">📐</button>
@@ -4657,7 +4657,7 @@ function render(){
 
       const Lm=+(Math.hypot(seg.x2-seg.x1,seg.y2-seg.y1)/1000).toFixed(2);
       const mx=(D.x1+D.x2)/2, my=(D.y1+D.y2)/2;
-      if(S.showLabels && Lm>0.1&&s>0.03){
+      if(Lm>0.1&&s>0.03){
         // Длина сегмента — с разведением коллизий (частая ситуация: несколько
         // параллельных кабелей рядом, подписи иначе ложатся друг на друга)
         CX.font=`bold ${13/s}px Arial`;
@@ -5164,7 +5164,7 @@ function toggleLabels(){
     btnM.style.color=S.showLabels?'#93c5fd':'#fff';
   }
   render();
-  tip(S.showLabels ? '🏷 Выноски показаны' : '🏷 Выноски скрыты — чертёж чище');
+  tip(S.showLabels ? '🏷 Выноски показаны' : '🏷 Выноски опусков/светильников скрыты — длины кабеля на линиях остались');
 }
 
 CV.addEventListener('touchstart',onTS,{passive:false});
@@ -5483,6 +5483,16 @@ function _build3DScene(rect, wrap){
       const sph = new THREE.Mesh(new THREE.SphereGeometry(0.045,10,10), boxMat);
       sph.position.set(lx(op.x), yBot, lz(op.y));
       scene.add(sph);
+      // Размерная подпись длины опуска — та же кнопка «📐 Включить размеры»,
+      // что и для горизонтальных сегментов
+      const opDropM = yTop-yBot;
+      if(opDropM>0.1){
+        const dimSpr = _makeTextSprite(opDropM.toFixed(2)+'м', '#93c5fd');
+        dimSpr.position.set(lx(op.x)+0.08, (yTop+yBot)/2, lz(op.y));
+        dimSpr.visible = _m3dDimsOn;
+        scene.add(dimSpr);
+        _m3dDimObjects.push(dimSpr);
+      }
     }
     // Розетки (ручные, со своим опуском r.ol)
     for(const r of (g.rozets||[])){
@@ -5495,6 +5505,14 @@ function _build3DScene(rect, wrap){
       const sph = new THREE.Mesh(new THREE.SphereGeometry(0.05,10,10), boxMat);
       sph.position.set(lx(r.x), yBot, lz(r.y));
       scene.add(sph);
+      // Размерная подпись длины опуска розетки
+      if(dropLen>0.1){
+        const dimSpr = _makeTextSprite(dropLen.toFixed(2)+'м', '#93c5fd');
+        dimSpr.position.set(lx(r.x)+0.08, (yTop+yBot)/2, lz(r.y));
+        dimSpr.visible = _m3dDimsOn;
+        scene.add(dimSpr);
+        _m3dDimObjects.push(dimSpr);
+      }
     }
     // Гильзы — короткий цилиндр сквозь стену, ориентирован по направлению
     // кабеля, плюс бирки с ОБЕИХ сторон вдоль этого направления
