@@ -1116,15 +1116,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <input id="mobj-name" placeholder="Спальный корпус, этаж 2" style="width:100%;background:#0d1117;color:#e2e8f0;
     border:1px solid #334155;border-radius:6px;padding:9px 10px;font-size:13px;margin-bottom:16px;outline:none">
 
-  <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:8px">Раздел работ и марка</div>
-  <div id="mobj-sys-body" style="max-height:320px;overflow:auto;margin-bottom:16px;padding-right:2px"><div style="display:flex;gap:6px;margin-bottom:10px">
-    <button type="button" class="btn" onclick="_mobjPickRazdel('eom')" style="flex:1;padding:10px;font-size:13px;font-weight:700;
-      background:#1a4a8a;color:#fff;
-      border:1px solid #3b82f6">⚡ ЭОМ</button>
-    <button type="button" class="btn" onclick="_mobjPickRazdel('ss')" style="flex:1;padding:10px;font-size:13px;font-weight:700;
-      background:#0d1117;color:#94a3b8;
-      border:1px solid #334155">📡 СС</button>
-  </div><div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px">ВНУТРЕННИЕ СЕТИ</div><button type="button" class="btn" id="mobj-sys-btn-ros" onclick="_mobjPickSys('ros')" style="padding:9px;font-size:12px;background:#0d1117;color:#e2e8f0;border:1px solid #3b82f6;
+  <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:8px">Марка ЭОМ (система)</div>
+  <div id="mobj-sys-body" style="max-height:260px;overflow:auto;margin-bottom:16px;padding-right:2px"><div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px">ВНУТРЕННИЕ СЕТИ</div><button type="button" class="btn" id="mobj-sys-btn-ros" onclick="_mobjPickSys('ros')" style="padding:9px;font-size:12px;background:#0d1117;color:#e2e8f0;border:1px solid #3b82f6;
     text-align:left;width:100%;margin-bottom:5px;opacity:1">
     <b style="color:#3b82f6">ЭУ</b> — Электроустановки — розетки, выключатели, лючки
   </button><button type="button" class="btn" id="mobj-sys-btn-osv" onclick="_mobjPickSys('osv')" style="padding:9px;font-size:12px;background:#0d1117;color:#e2e8f0;border:1px solid #f59e0b;
@@ -1568,7 +1561,6 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb sec-kl" id="mb-3d" onclick="start3DSelect()" style="color:#c7d2fe">📦<span>3D</span></button>
   <button class="mb red" id="mb-er" onclick="sT('er')">✕<span>Ластик</span></button>
   <button class="mb" id="hand-btn-m" onclick="toggleHandMode()" style="color:#4ade80">✋<span>Рука</span></button>
-  <button class="mb" id="lbl-btn-m" onclick="toggleLabels()" style="color:#93c5fd">🏷<span>Выноски</span></button>
   <button class="mb more-tools sec-kl" style="color: rgb(245, 158, 11);" onclick="startKDDist('cable')">📏<span>КЛ</span></button>
   <button class="mb more-tools sec-kl" style="color: rgb(251, 146, 60);" onclick="startKDDist('opusk')">📏<span>Оп-ст.</span></button>
   <button class="mb" onclick="undo()" style="color:#f97316">↩<span>Отмена</span></button>
@@ -3646,18 +3638,6 @@ const ID_PROJECTS = {
   'СОШ17': [], // без корпусов
 };
 
-// ── СС (слаботочные системы) — раздел работ отдельный от ЭОМ.
-//    Пока для этих систем нет своего шаблона черчения/материалов (будем
-//    делать по одной вместе) — марка в шифре ИД проставляется правильно,
-//    а черчение временно идёт по общему шаблону КЛ, как и для ID_SYSTEMS_GENERIC_ONLY.
-const ID_SYSTEMS_SS = {
-  apssoue: {marka:'АПС.СОУЭ', markaFull:'Автоматическая пожарная сигнализация и система оповещения и управления эвакуацией при пожаре', color:'#ef4444'},
-  sot:     {marka:'СОТ',      markaFull:'Система охранного телевидения (видеонаблюдение)', color:'#0ea5e9'},
-  sks:     {marka:'СКС',      markaFull:'Структурированная кабельная система', color:'#8b5cf6'},
-  skud:    {marka:'СКУД',     markaFull:'Система контроля и управления доступом', color:'#f59e0b'},
-  os:      {marka:'ОС',       markaFull:'Охранная сигнализация', color:'#22c55e'},
-};
-
 // Текущая система ИД (по умолчанию — розетки)
 let CUR_SYS = 'ros';
 
@@ -4290,11 +4270,11 @@ function curMarkaCode(){
 
 // Выбор марки по ключу из полного справочника регламента (используется стартовой
 // модалкой «Объект + Система» и модалкой msys). Для марок без собственного шаблона
-// черчения (щитовое, заземление, наружные сети, СС и т.п.) чертим по общему шаблону
+// черчения (щитовое, заземление, наружные сети и т.п.) чертим по общему шаблону
 // «ЭМ — кабели», но марка в шифре проставляется правильная.
 function setMarkaByKey(key){
   if(ID_SYSTEMS[key]){ setSys(key); return; }
-  const g = ID_SYSTEMS_GENERIC_ONLY[key] || ID_SYSTEMS_SS[key];
+  const g = ID_SYSTEMS_GENERIC_ONLY[key];
   if(!g) return;
   setSys('em');
   CUR_MARKA_OVERRIDE = {key, marka:g.marka, markaFull:g.markaFull};
@@ -4304,11 +4284,7 @@ function setMarkaByKey(key){
     const bkey = b.id.replace('sys-btn-','');
     b.style.opacity = bkey===key ? '1' : '0.55';
   });
-  if(ID_SYSTEMS_SS[key]){
-    tip('🚧 Раздел «'+g.marka+'» (СС) — шаблон черчения/материалов для него ещё в разработке, пока считает по общему шаблону КЛ. Марка в шифре проставлена верно.');
-  }else{
-    tip('📋 Марка '+g.marka+' — черчение и материалы считаются по общему шаблону КЛ (ЭМ). Сверь ведомость с ПТО перед сдачей.');
-  }
+  tip('📋 Марка '+g.marka+' — черчение и материалы считаются по общему шаблону КЛ (ЭМ). Сверь ведомость с ПТО перед сдачей.');
 }
 
 // Рендер модалки выбора системы/марки — весь справочник регламента, сгруппированный
@@ -5157,11 +5133,6 @@ function toggleLabels(){
   if(btn){
     btn.style.background=S.showLabels?'':'#475569';
     btn.style.color=S.showLabels?'':'#fff';
-  }
-  const btnM=document.getElementById('lbl-btn-m');
-  if(btnM){
-    btnM.style.background=S.showLabels?'':'#475569';
-    btnM.style.color=S.showLabels?'#93c5fd':'#fff';
   }
   render();
   tip(S.showLabels ? '🏷 Выноски показаны' : '🏷 Выноски скрыты — чертёж чище');
@@ -11088,7 +11059,6 @@ function _mobjKorpusValue(){
 }
 
 let _mobjSelectedKey = 'ros';
-let _mobjRazdel = 'eom'; // 'eom' | 'ss' — раздел работ, выбирается первым делом
 
 function _mobjSysBtnHtml(key, marka, markaFull, color, drawable){
   const op = key===_mobjSelectedKey ? '1' : '0.55';
@@ -11100,41 +11070,10 @@ function _mobjSysBtnHtml(key, marka, markaFull, color, drawable){
   </button>`;
 }
 
-// Переключение раздела работ ЭОМ / СС — первый шаг перед выбором конкретной марки
-function _mobjPickRazdel(razdel){
-  _mobjRazdel = razdel;
-  // При смене раздела сбрасываем выбор марки на первую доступную в разделе
-  _mobjSelectedKey = razdel==='ss' ? 'apssoue' : 'ros';
-  renderMobjSysBody();
-}
-
-function _mobjRazdelHtml(){
-  const eomOn = _mobjRazdel==='eom';
-  return `<div style="display:flex;gap:6px;margin-bottom:10px">
-    <button type="button" class="btn" onclick="_mobjPickRazdel('eom')"
-      style="flex:1;padding:10px;font-size:13px;font-weight:700;
-      background:${eomOn?'#1a4a8a':'#0d1117'};color:${eomOn?'#fff':'#94a3b8'};
-      border:1px solid ${eomOn?'#3b82f6':'#334155'}">⚡ ЭОМ</button>
-    <button type="button" class="btn" onclick="_mobjPickRazdel('ss')"
-      style="flex:1;padding:10px;font-size:13px;font-weight:700;
-      background:${!eomOn?'#1a4a8a':'#0d1117'};color:${!eomOn?'#fff':'#94a3b8'};
-      border:1px solid ${!eomOn?'#3b82f6':'#334155'}">📡 СС</button>
-  </div>`;
-}
-
 function renderMobjSysBody(){
   const box = document.getElementById('mobj-sys-body');
   if(!box) return;
-  const rows = [_mobjRazdelHtml()];
-  if(_mobjRazdel==='ss'){
-    rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px">СЛАБОТОЧНЫЕ СИСТЕМЫ (СС)</div>');
-    Object.entries(ID_SYSTEMS_SS).forEach(([key,g])=>{
-      rows.push(_mobjSysBtnHtml(key, g.marka, g.markaFull, g.color, false));
-    });
-    rows.push('<div style="font-size:9.5px;color:#f59e0b;margin-top:4px;line-height:1.5">🚧 Шаблоны черчения и материалов для СС ещё разрабатываются — раздел за разделом. Марка в шифре ИД уже проставляется верно.</div>');
-    box.innerHTML = rows.join('');
-    return;
-  }
+  const rows = [];
   rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px">ВНУТРЕННИЕ СЕТИ</div>');
   Object.entries(ID_SYSTEMS).forEach(([key,sys])=>{
     if(sys.group!=='in') return;
@@ -11194,11 +11133,7 @@ function openStartModal(){
     }
   }
   if(last.name) document.getElementById('mobj-name').value = last.name;
-  if(last.sysKey){
-    _mobjSelectedKey = last.sysKey;
-    _mobjRazdel = ID_SYSTEMS_SS[last.sysKey] ? 'ss' : 'eom';
-    renderMobjSysBody();
-  }
+  if(last.sysKey){ _mobjSelectedKey = last.sysKey; renderMobjSysBody(); }
 }
 
 function skipStartModal(){
@@ -11490,6 +11425,19 @@ window.addEventListener('load', function(){
     var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
     if(typeof updateShifrPreview==='function') updateShifrPreview();
     if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+  }catch(e){}
+});
+</script>
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="СП1";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/СП1 — ЭУ");
   }catch(e){}
 });
 </script>
