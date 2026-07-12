@@ -1107,7 +1107,9 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">Объект / корпус</label>
     <select id="mobj-korpus" onchange="_mobjToggleKorpusCustom()" style="width:100%;background:#0d1117;color:#e2e8f0;border:1px solid #334155;
       border-radius:6px;padding:9px 10px;font-size:13px;margin-bottom:6px;outline:none"><option value="СП1">СП1</option><option value="СП2">СП2</option><option value="АБК">АБК</option><option value="КПП1">КПП1</option><option value="КПП2">КПП2</option><option value="__custom__">✏️ Другой (ввести вручную)</option></select>
-    <input id="mobj-korpus-custom" placeholder="Название корпуса/объекта" style="display: none; width: 100%; background: rgb(13, 17, 23); color: rgb(226, 232, 240); border: 1px solid rgb(59, 130, 246); border-radius: 6px; padding: 9px 10px; font-size: 13px; margin-bottom: 10px; outline: none;">
+    <input id="mobj-korpus-custom" placeholder="Название корпуса/объекта" style="display:none;width:100%;
+      background:#0d1117;color:#e2e8f0;border:1px solid #3b82f6;border-radius:6px;padding:9px 10px;
+      font-size:13px;margin-bottom:10px;outline:none">
   </div>
 
   <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">Название / адрес (для ведомости, необязательно)</label>
@@ -1337,6 +1339,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn" onclick="undo()" title="Отменить последнее действие (Ctrl+Z)" style="background:#7c2d12;color:#fed7aa;font-size:14px;font-weight:900;padding:7px 14px;border:1px solid #f97316">↩️ Отменить</button>
   <button class="btn b-blue" onclick="save()">💾</button>
   <button id="hand-btn" class="btn" onclick="toggleHandMode()" title="Включить/выключить режим «Рука» — таскать чертёж пальцем/мышью вместо рисования">✋ Рука</button>
+  <button id="lbl-btn" class="btn b-gray" onclick="toggleLabels()" title="Скрыть/показать размерные выноски (длины опусков, сегментов, светильников) — если чертёж перегружен подписями">🏷 Выноски</button>
 
   <span class="more-tools sec-kl" style="">
   <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения">📐</button>
@@ -1537,13 +1540,13 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="1760" height="819"></canvas></div>
+  <div id="cw"><canvas id="cv" width="1760" height="850"></canvas></div>
 </div>
 
 <div id="st">
   <span>Режим: <b id="stm">Кабель</b></span>
   <span>Группа: <b id="stg">Гр.1с</b></span>
-  <span>X:<b id="stx">2726</b> Y:<b id="sty">2573</b>мм</span>
+  <span>X:<b id="stx">0</b> Y:<b id="sty">0</b>мм</span>
   <span>Отрезок: <b id="sts">0</b>м</span>
 </div>
 
@@ -3533,6 +3536,7 @@ const ID_SYSTEMS = {
       {name:'Коробка распр. IP55 100×100×50мм', art:'IMT35091 Systeme Electric', unit:'шт', calc:'boxes_ip55'},
       {name:'Коробка огнестойкая FR Е15-Е120 100×100×50мм', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes_fr'},
       {name:'Подрозетник для полых стен 68×45мм IP30 синий С3Е3', art:'GUSI ELECTRIC', unit:'шт', calc:'rozets'},
+      {name:'BRITE Розетка 1 пост с заземлением с защитными шторками 16А в сборе РСР14-1-0-БрЧ черный', art:'IEK BR-R14-16-K02-F', unit:'шт', calc:'rozets'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
@@ -3554,6 +3558,8 @@ const ID_SYSTEMS = {
       {name:'Труба гофрированная ПВХ лёгкая чёрная с/з д20 — штроба/опуски (50м/уп)', art:'PR01.0056 Промрукав', unit:'м', calc:'gofra_sthr'},
       {name:'Клемма 3-проводная 221-613', art:'WAGO', unit:'шт', calc:'wago3'},
       {name:'Клемма 5-проводная 0,5-6мм² 221-615', art:'WAGO', unit:'шт', calc:'wago5'},
+      {name:'Светильник LED ОФИС УНИВЕРСАЛ (СВО) 28Вт 3400Лм 4,0К КСС Д IP40 опал', art:'ЛЕД-Эффект LE-СВО-03-028-8416-40Д', unit:'шт', calc:'lamps'},
+      {name:'BRITE Выключатель одноклавишный с индикацией 10А ВС10-1-1-БрЧ черный', art:'IEK BR-V10-1-10-K02', unit:'шт', calc:'switches'},
       {name:'Коробка распр. IP55 100×100×50мм', art:'IMT35091 Systeme Electric', unit:'шт', calc:'boxes_ip55'},
       {name:'Коробка огнестойкая FR Е15-Е120 100×100×50мм', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes_fr'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
@@ -3661,7 +3667,7 @@ function calcMat(sys, groups){
   let totCable=0, totGofCeil=0, totGofSthr=0, totSthrCount=0;
   let totClipsCeil=0, totClipsSthr=0;
   let totBoxes=0, totGC=0, totGP=0;
-  let totRozets=0, totLamps=0, totOpuski=0;
+  let totRozets=0, totLamps=0, totOpuski=0, totSwitches=0;
   const _boxCounts={}, _lotokCounts={};
 
   for(const g of groups){
@@ -3698,6 +3704,8 @@ function calcMat(sys, groups){
     totRozets += gRozetCount(g); // включая авто от опусков
     totLamps  += g.lamps.length;
     totOpuski += g.opuski.length;
+    // Выключатели — устройства, установленные на подрозетник опуска (_device==='switch')
+    totSwitches += g.opuski.filter(o=>o._device==='switch').length;
     g.gilzy.forEach(gl=> gl.wt==='cap'? totGC++ : totGP++);
   }
 
@@ -3724,6 +3732,7 @@ function calcMat(sys, groups){
     boxes:       totBoxes,
     rozets:      totRozets,
     lamps:       totLamps,
+    switches:    totSwitches,
     wago3, wago5,
     gilzy_cap:   totGC,
     gilzy_perg:  totGP,
@@ -3820,7 +3829,10 @@ const S={
   // Тип монтажа — маркер точки переключения
   _mountChangeAt: null,
   // Калибровка масштаба
-  calibMode:false, calibP1:null
+  calibMode:false, calibP1:null,
+  // Показ размерных выносок (длины/подписи опусков, светильников, сегментов) —
+  // можно скрыть кнопкой на панели, если чертёж перегружен подписями
+  showLabels:true
 };
 let _id=0, bgImg=null;
 let _curPlanDataURL = null; // dataURL текущего фонового плана — нужен для снапшотов по этажам (S.layers)
@@ -4396,9 +4408,64 @@ function _placeLabel(px, py, w, h, stepY){
   return {x:px, y:y, shifted: Math.abs(y-py)>1};
 }
 
+// Кабельные линии РАЗНЫХ групп никогда не должны визуально сливаться в одну
+// линию (даже если мастер провёл их по одной оси) — здесь для каждого
+// сегмента считаем чисто ВИЗУАЛЬНОЕ смещение (перпендикулярно линии),
+// если на этом же отрезке лежит сегмент другой группы. Сами координаты
+// сегментов (S.groups[].segs) не трогаем — смещение только для отрисовки,
+// длины кабеля и расчёты материалов остаются точными.
+function _collectLineOffsets(){
+  const all=[];
+  for(const g of S.groups) for(const seg of g.segs) all.push({seg,g});
+  const EPS_ANG=0.02, EPS_DIST=25; // допуски: параллельность и «на одной оси»
+  const clusters=[];
+  for(const item of all){
+    const {seg}=item;
+    const dx=seg.x2-seg.x1, dy=seg.y2-seg.y1, len=Math.hypot(dx,dy);
+    if(len<1) continue;
+    const ux=dx/len, uy=dy/len;
+    let found=null;
+    for(const cl of clusters){
+      const ref=cl[0].seg;
+      const rdx=ref.x2-ref.x1, rdy=ref.y2-ref.y1, rlen=Math.hypot(rdx,rdy);
+      if(rlen<1) continue;
+      const rux=rdx/rlen, ruy=rdy/rlen;
+      if(Math.abs(ux*ruy-uy*rux)>EPS_ANG) continue; // не параллельны
+      const nx=-ruy, ny=rux;
+      if(Math.abs((seg.x1-ref.x1)*nx+(seg.y1-ref.y1)*ny)>EPS_DIST) continue; // не на одной оси
+      const t1=(seg.x1-ref.x1)*rux+(seg.y1-ref.y1)*ruy;
+      const t2=(seg.x2-ref.x1)*rux+(seg.y2-ref.y1)*ruy;
+      if(Math.max(t1,t2)<=0 || Math.min(t1,t2)>=rlen) continue; // без пересечения по длине
+      found=cl; break;
+    }
+    if(found) found.push(item); else clusters.push([item]);
+  }
+  const offsetOf=new Map();
+  const STEP=50; // мм = минимум 5см между линиями разных групп
+  for(const cl of clusters){
+    const byGroup=[...new Set(cl.map(it=>it.g.id))].sort((a,b)=>a-b);
+    if(byGroup.length<2) continue; // только один и тот же кабель сам с собой — не трогаем
+    const n=byGroup.length;
+    byGroup.forEach((gid,idx)=>{
+      const off=(idx-(n-1)/2)*STEP;
+      for(const it of cl) if(it.g.id===gid) offsetOf.set(it.seg, off);
+    });
+  }
+  return offsetOf;
+}
+// Возвращает смещённые (только визуально!) координаты сегмента
+function _segDraw(seg, offMap){
+  const off = offMap.get(seg);
+  if(!off) return {x1:seg.x1,y1:seg.y1,x2:seg.x2,y2:seg.y2};
+  const ddx=seg.x2-seg.x1, ddy=seg.y2-seg.y1, ll=Math.hypot(ddx,ddy)||1;
+  const nx=-ddy/ll*off, ny=ddx/ll*off;
+  return {x1:seg.x1+nx,y1:seg.y1+ny,x2:seg.x2+nx,y2:seg.y2+ny};
+}
+
 function render(){
   _labelBoxes = []; // новый реестр занятых мест под подписи на каждый кадр
   const s=sc();
+  const _segOffsets=_collectLineOffsets();
   CX.clearRect(0,0,CV.width,CV.height);
   CX.fillStyle='#0a0f1e';CX.fillRect(0,0,CV.width,CV.height);
 
@@ -4540,23 +4607,24 @@ function render(){
       const sm=seg.mount||g.mount||'gof20';
       const st=_segStyle[sm]||{dash:[],lw:1.0,col:null,lbl:sm};
       const lineCol=st.col||g.color;
+      const D=_segDraw(seg,_segOffsets); // визуальное смещение, если совпадает с линией другой группы
 
       CX.strokeStyle=lineCol;
       CX.lineWidth=LW*st.lw;
       CX.setLineDash(st.dash.map(v=>v/s));
 
       if(seg._corr){ CX.shadowColor='#ff2d55'; CX.shadowBlur=9/s; }
-      CX.beginPath();CX.moveTo(seg.x1,seg.y1);CX.lineTo(seg.x2,seg.y2);CX.stroke();
+      CX.beginPath();CX.moveTo(D.x1,D.y1);CX.lineTo(D.x2,D.y2);CX.stroke();
       if(seg._corr){ CX.shadowColor='transparent'; CX.shadowBlur=0; }
 
       // Для лотка — две параллельные полочки
       if(st.shelf){
-        const dx=seg.x2-seg.x1,dy=seg.y2-seg.y1,ln=Math.hypot(dx,dy)||1;
+        const dx=D.x2-D.x1,dy=D.y2-D.y1,ln=Math.hypot(dx,dy)||1;
         const nx=-dy/ln*5/s,ny=dx/ln*5/s;
         CX.lineWidth=LW*0.5; CX.strokeStyle=lineCol+'88';
         CX.beginPath();
-        CX.moveTo(seg.x1+nx,seg.y1+ny);CX.lineTo(seg.x2+nx,seg.y2+ny);
-        CX.moveTo(seg.x1-nx,seg.y1-ny);CX.lineTo(seg.x2-nx,seg.y2-ny);
+        CX.moveTo(D.x1+nx,D.y1+ny);CX.lineTo(D.x2+nx,D.y2+ny);
+        CX.moveTo(D.x1-nx,D.y1-ny);CX.lineTo(D.x2-nx,D.y2-ny);
         CX.stroke();
       }
 
@@ -4564,8 +4632,8 @@ function render(){
       CX.setLineDash([]); CX.lineWidth=LW; CX.strokeStyle=g.color;
 
       const Lm=+(Math.hypot(seg.x2-seg.x1,seg.y2-seg.y1)/1000).toFixed(2);
-      const mx=(seg.x1+seg.x2)/2, my=(seg.y1+seg.y2)/2;
-      if(Lm>0.1&&s>0.03){
+      const mx=(D.x1+D.x2)/2, my=(D.y1+D.y2)/2;
+      if(S.showLabels && Lm>0.1&&s>0.03){
         // Длина сегмента — с разведением коллизий (частая ситуация: несколько
         // параллельных кабелей рядом, подписи иначе ложатся друг на друга)
         CX.font=`bold ${13/s}px Arial`;
@@ -4651,6 +4719,7 @@ function render(){
       CX.stroke();
 
       // ── Выноска вправо-вверх (как у опуска) — с тем же разведением коллизий ──
+      if(S.showLabels){
       const VX = l.x + LSZ + SZ*1.2;
       const VY0 = l.y - LSZ - SZ*1.2;
       const lineLen = SZ*12;
@@ -4686,6 +4755,7 @@ function render(){
       CX.fillText(line2, VX+SZ*.5, VY+SZ*1.3);
 
       CX.lineWidth = LW; // восстановить
+      }
     }
 
     // Опуски — вид сверху: точка на трассе + выноска с размером
@@ -4721,6 +4791,7 @@ function render(){
       // ── Выноска вправо-вверх (для всех опусков) — но если рядом уже есть
       //    чужая выноска, эта автоматически сдвигается пониже, чтобы не лечь
       //    поверх неё (частая ситуация с несколькими опусками рядом) ──
+      if(S.showLabels){
       const VX = op.x + SZ*2.5;
       const VY0 = op.y - SZ*2.5;
       const lineLen = SZ*10;
@@ -4767,6 +4838,7 @@ function render(){
       } else {
         CX.fillStyle = g.color + 'bb';
         CX.fillText(line2, VX + SZ*0.5, VY + SZ*1.3);
+      }
       }
 
       // Пунктирная вертикаль вниз — штроба (только для опуска со стеной)
@@ -5052,6 +5124,20 @@ function toggleHandMode(){
   tip(_handMode ? '✋ Режим «Рука» включён — таскай пальцем/мышью, чтобы двигать чертёж' : '✋ Режим «Рука» выключен — обычное рисование');
 }
 
+// Скрыть/показать размерные выноски (длины опусков/сегментов/светильников) —
+// сами кабели, коробки и символы остаются, убираются только текстовые подписи,
+// которые перегружают чертёж, когда рядом много опусков/розеток
+function toggleLabels(){
+  S.showLabels=!S.showLabels;
+  const btn=document.getElementById('lbl-btn');
+  if(btn){
+    btn.style.background=S.showLabels?'':'#475569';
+    btn.style.color=S.showLabels?'':'#fff';
+  }
+  render();
+  tip(S.showLabels ? '🏷 Выноски показаны' : '🏷 Выноски скрыты — чертёж чище');
+}
+
 CV.addEventListener('touchstart',onTS,{passive:false});
 CV.addEventListener('touchmove', onTM,{passive:false});
 CV.addEventListener('touchend',  onTE,{passive:false});
@@ -5245,6 +5331,8 @@ function _build3DScene(rect, wrap){
   const hpot = M(S.hpot||3100);
   const hfal = S.hfal ? M(S.hfal) : 0;
   const ceilY = hpot; // потолок
+  const SCHIT_MOUNT_Y = 1.2; // высота установки щита (низ корпуса), м
+  const SCHIT_H = 0.6;       // высота корпуса щита, м — верх корпуса = SCHIT_MOUNT_Y+SCHIT_H
   const cx = (rect.x1+rect.x2)/2, cy=(rect.y1+rect.y2)/2;
   const inRect = (x,y,pad)=> x>=rect.x1-(pad||0) && x<=rect.x2+(pad||0) && y>=rect.y1-(pad||0) && y<=rect.y2+(pad||0);
   const segInRect = (s)=> inRect(s.x1,s.y1,300) || inRect(s.x2,s.y2,300) ||
@@ -5339,12 +5427,27 @@ function _build3DScene(rect, wrap){
       m.position.set(lx(b.x), ceilY-0.06, lz(b.y));
       scene.add(m);
     }
-    // Опуски — вертикальная линия от потолка вниз на длину опуска + точка на конце
+    // Опуски — вертикальная линия от потолка вниз на длину опуска + точка на конце.
+    // Опуски-«подъёмы от щита» (_riser) — особый случай: это не опуск к розетке
+    // на полу/стене, а участок кабеля от щита ВВЕРХ до потолка. Такой опуск
+    // должен визуально доходить до корпуса щита (SCHIT_MOUNT_Y), а не до пола.
     for(const op of (g.opuski||[])){
       if(!inRect(op.x,op.y,200)) continue;
       any=true;
-      const dropLen = M(op.lm||1500);
-      const yTop=ceilY, yBot=Math.max(0.05, ceilY-dropLen);
+      const yTop=ceilY;
+      let yBot;
+      if(op._riser){
+        // Ищем ближайший щит рядом с точкой подъёма — линия должна заканчиваться
+        // на высоте установки щита, а не «улетать» к полу.
+        const nearSchit = (S.schits||[]).reduce((best,sh)=>{
+          const d=Math.hypot(sh.x-op.x, sh.y-op.y);
+          return (!best||d<best.d) ? {sh,d} : best;
+        }, null);
+        yBot = nearSchit && nearSchit.d<1500 ? SCHIT_MOUNT_Y + SCHIT_H : Math.max(0.05, ceilY-M(op.lm||1500));
+      }else{
+        const dropLen = M(op.lm||1500);
+        yBot = Math.max(0.05, ceilY-dropLen);
+      }
       const pts=[new THREE.Vector3(lx(op.x),yTop,lz(op.y)), new THREE.Vector3(lx(op.x),yBot,lz(op.y))];
       const geo=new THREE.BufferGeometry().setFromPoints(pts);
       scene.add(new THREE.Line(geo, lineMat));
@@ -5412,12 +5515,40 @@ function _build3DScene(rect, wrap){
     if(any) legendItems.push({name:g.name, color:g.color});
   }
 
-  // Щиты — простой блок на стене
+  // Щиты — простой блок, прижатый ДЛИННОЙ задней стенкой к ближайшей стене
+  // (щиты всегда монтируются вплотную к стене, а не «парят» в пространстве
+  // на исходных plan-координатах).
   const schitMat = new THREE.MeshStandardMaterial({color:0x0891b2});
+  const SCHIT_W=0.5, SCHIT_D=0.15; // ширина(длинная сторона)×глубина; SCHIT_H объявлена выше
   for(const sh of (S.schits||[])){
     if(!inRect(sh.x,sh.y,300)) continue;
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.6,0.15), schitMat);
-    m.position.set(lx(sh.x), 1.2, lz(sh.y));
+    // Ищем ближайшую стену — щит разворачиваем длинной стороной вдоль неё и
+    // прижимаем заднюю стенку корпуса вплотную к её поверхности.
+    let bestWall=null, bestD=1e9, bestT=0;
+    for(const w of (S.walls||[])){
+      const wdx=w.x2-w.x1, wdy=w.y2-w.y1, wl2=wdx*wdx+wdy*wdy;
+      if(wl2<1) continue;
+      const t=Math.max(0,Math.min(1, ((sh.x-w.x1)*wdx+(sh.y-w.y1)*wdy)/wl2));
+      const px=w.x1+t*wdx, py=w.y1+t*wdy;
+      const d=Math.hypot(sh.x-px, sh.y-py);
+      if(d<bestD){ bestD=d; bestWall=w; bestT=t; }
+    }
+    const m = new THREE.Mesh(new THREE.BoxGeometry(SCHIT_W,SCHIT_H,SCHIT_D), schitMat);
+    if(bestWall && bestD<2000){
+      const wdx=bestWall.x2-bestWall.x1, wdy=bestWall.y2-bestWall.y1, wl=Math.hypot(wdx,wdy);
+      const ux=wdx/wl, uy=wdy/wl;           // вдоль стены (её направление — длинная сторона щита)
+      const nx=-uy, ny=ux;                  // нормаль к стене
+      // Точка на оси стены, ближайшая к щиту, и знак нормали в сторону щита
+      const wallX=bestWall.x1+bestT*wdx, wallY=bestWall.y1+bestT*wdy;
+      const side = Math.sign((sh.x-wallX)*nx+(sh.y-wallY)*ny) || 1;
+      const wallHalfThick = wallThick(bestWall)/2;
+      const setbackMM = wallHalfThick + (SCHIT_D*1000)/2; // от оси стены до центра щита
+      const cx2 = wallX + nx*side*setbackMM, cy2 = wallY + ny*side*setbackMM;
+      m.position.set(lx(cx2), SCHIT_MOUNT_Y+SCHIT_H/2, lz(cy2));
+      m.rotation.y = -Math.atan2(uy,ux);
+    }else{
+      m.position.set(lx(sh.x), SCHIT_MOUNT_Y+SCHIT_H/2, lz(sh.y));
+    }
     scene.add(m);
   }
 
@@ -5710,8 +5841,9 @@ function click(mm){
       if(g){
         const nearSchit = S.schits.find(sh=>Math.hypot(sh.x-x,sh.y-y)<250);
         if(nearSchit && !g.opuski.some(o=>o._riser && Math.hypot(o.x-x,o.y-y)<50)){
-          g.opuski.push({x, y, dir:'up', lm:S.hpot, cnt:1, mount:'sthr', _riser:true, _corr:S.correctionActiveTag||undefined});
-          tip(`⟿ «${g.name}» — подъём от щита в штробе учтён (${(S.hpot/1000).toFixed(2)}м), веди трассу по потолку`);
+          const _dia=g.mount?.replace(/[^0-9]/g,'')||'20';
+          g.opuski.push({x, y, dir:'up', lm:S.hpot, cnt:1, mount:'sthr'+_dia, _riser:true, _corr:S.correctionActiveTag||undefined});
+          tip(`⟿ «${g.name}» — подъём от щита в штробе (гофра d${_dia}) учтён (${(S.hpot/1000).toFixed(2)}м), веди трассу по потолку`);
         }
       }
     }
@@ -5827,9 +5959,14 @@ function placeSymbol(x,y){
       g.boxes.push({x, y, t:bt, auto:true, fl:true, _corr:S.correctionActiveTag||undefined});
 
     // ── Автоматически проводим кабель (гофра, основной потолок) от этой
-    //    коробки до ближайшей точки уже существующей трассы группы — мастеру
+    //    коробки до ближайшей точки уже существующей трассы ГРУППЫ — мастеру
     //    не нужно вручную дорисовывать соединение к щиту/предыдущему светильнику.
-    if(g.segs.length){
+    //    Раньше при пустой трассе (g.segs.length===0, т.е. самый первый
+    //    светильник группы) кандидатов не было вообще, и коробка оставалась
+    //    без кабеля до следующего светильника — теперь ищем ближайшую ТОЧКУ
+    //    ЛЮБОГО типа в группе (конец сегмента ИЛИ уже стоящая коробка/светильник),
+    //    так что каждая новая коробка светильника всегда получает кабель.
+    {
       let bestX=null,bestY=null,bestD=1e9;
       for(const s2 of g.segs){
         for(const ep of [[s2.x1,s2.y1],[s2.x2,s2.y2]]){
@@ -5837,7 +5974,12 @@ function placeSymbol(x,y){
           if(d<bestD){bestD=d; bestX=ep[0]; bestY=ep[1];}
         }
       }
-      if(bestD>100 && bestD<15000){
+      for(const b2 of g.boxes){
+        if(b2.x===x && b2.y===y) continue; // сама только что добавленная коробка
+        const d=Math.hypot(b2.x-x, b2.y-y);
+        if(d<bestD){bestD=d; bestX=b2.x; bestY=b2.y;}
+      }
+      if(bestX!==null && bestD>100){
         g.segs.push({x1:x,y1:y,x2:bestX,y2:bestY,mount:'gof'+(g.mount?.replace(/[^0-9]/g,'')||'20'),kab:g.kab,_corr:S.correctionActiveTag||undefined});
       }
     }
@@ -6890,7 +7032,7 @@ function expV(){
   const activeGroups = S.groups.filter(g=>g.segs.length>0);
 
   // ── Чертёж с выносками групп (тот же приём, что и в отдельном экспорте) ──
-  let drawingDataURL = '', groupCallouts = '';
+  let drawingDataURL = '', groupCallouts = '', groupCalloutCards = [], groupCalloutsOverflow = '';
   try{
   if(activeGroups.length && BLD[0]>0 && BLD[1]>0){
     const PAD=40, pw=1400, ph=Math.round(pw*BLD[1]/BLD[0]);
@@ -6953,8 +7095,8 @@ function expV(){
       const b = calcGroupBreakdown(g);
       const kab = KN[g.kab]||g.kab;
       const formula = b.segParts.length ? b.segParts.join('+')+'='+b.segParts.reduce((a,c)=>a+c,0).toFixed(2)+'м' : '—';
-      groupCallouts += `
-      <div style="border:2px solid ${g.color};border-radius:4px;padding:8px 10px;margin-bottom:10px;background:#fafbfc">
+      groupCalloutCards.push(`
+      <div style="border:2px solid ${g.color};border-radius:4px;padding:8px 10px;margin-bottom:10px;background:#fafbfc;break-inside:avoid;page-break-inside:avoid">
         <div style="font-weight:700;color:${g.color};font-size:13px;margin-bottom:3px">Гр.${g.name.replace(/^Гр\.?/i,'')}</div>
         <div style="font-size:11px;color:#111;margin-bottom:2px">Кабель ${kab}</div>
         <div style="font-size:10.5px;color:#333;line-height:1.6">
@@ -6967,8 +7109,14 @@ function expV(){
           ${(b.gilzyCap+b.gilzyPerg)>0?`в закладной мет. трубе: L=0,25*${b.gilzyCap+b.gilzyPerg}=${(b.pipeCap+b.pipePerg).toFixed(2)}м<br>`:''}
         </div>
         <div style="font-size:11px;font-weight:700;color:${g.color};margin-top:3px">Итого: ${b.cableTotal.toFixed(2)}м</div>
-      </div>`;
+      </div>`);
     });
+    // Рядом с чертежом помещаем только те карточки, что реально влезают по
+    // высоте (не обрезая ни одну частично) — остальные уходят на отдельный
+    // лист «Выноски групп (продолжение)», чтобы ничего не терялось.
+    const SIDE_CARD_LIMIT = 5;
+    groupCallouts = groupCalloutCards.slice(0, SIDE_CARD_LIMIT).join('');
+    groupCalloutsOverflow = groupCalloutCards.slice(SIDE_CARD_LIMIT).join('');
   }
   }catch(e){
     console.error('Ведомость: не удалось построить чертёж с выносками —', e);
@@ -7191,7 +7339,7 @@ ${drawingDataURL ? `
 <h3>Чертёж кабельных трасс</h3>
 <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:nowrap;margin-bottom:10px">
   <div style="flex:0 0 62%;max-width:62%"><img src="${drawingDataURL}" style="width:100%;max-height:150mm;object-fit:contain;border:1px solid #ccc"></div>
-  <div style="flex:1;min-width:220px;max-height:150mm;overflow:hidden">${groupCallouts}</div>
+  <div style="flex:1;min-width:220px;max-height:150mm">${groupCallouts}</div>
 </div>
 
 <h3>УГО (условные графические обозначения)</h3>
@@ -7206,6 +7354,15 @@ ${(()=>{
 })()}
 ${_gostStamp('Чертёж кабельных трасс, выноски, УГО', 1, 3, sys, _stampShifr, window._stampObjAddr, window._stampDocName)}
 </div>
+
+${groupCalloutsOverflow ? `
+<div class="sheet-page sheet-break"><div class="sheet-content">
+<h3>Выноски групп (продолжение)</h3>
+<div style="columns:2;column-gap:14px">${groupCalloutsOverflow}</div>
+</div>
+${_gostStamp('Выноски групп, продолжение', 1, 3, sys, _stampShifr, window._stampObjAddr, window._stampDocName)}
+</div>
+` : ''}
 
 <div class="sheet-page sheet-break"><div class="sheet-content">
 <h3>1. Кабельный журнал</h3>
@@ -10042,7 +10199,7 @@ function _buildVedHTML(sys,mat,projectName){
   const vals={
     cable:mat.cable,boxes_ip55:mat.boxCounts?.ip55||0,boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
-    clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,lamps:mat.lamps,
+    clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,lamps:mat.lamps,switches:mat.switches,
     wago3:mat.wago3,wago5:mat.wago5,gilzy_cap:mat.gilzy_cap,
     gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki
   };
@@ -10702,7 +10859,7 @@ async function _buildSharePageWithDraft(name, author){
 
   let matRows='';
   const vals={cable:mat.cable,boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
-    clips:mat.clips,rozets:mat.rozets,lamps:mat.lamps,wago3:mat.wago3,wago5:mat.wago5,
+    clips:mat.clips,rozets:mat.rozets,lamps:mat.lamps,switches:mat.switches,wago3:mat.wago3,wago5:mat.wago5,
     gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki};
   sys.materials.forEach((item,i)=>{
     const qty=vals[item.calc]||0;
@@ -11258,32 +11415,6 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
-
-<script>
-// Автозаполнение шифра при первом открытии этого именного шаблона объекта
-window.addEventListener('load', function(){
-  try{
-    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
-    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
-    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
-    if(typeof updateShifrPreview==='function') updateShifrPreview();
-    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
-  }catch(e){}
-});
-</script>
-
-<script>
-// Автозаполнение шифра при первом открытии этого именного шаблона объекта
-window.addEventListener('load', function(){
-  try{
-    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
-    var sk=document.getElementById('share-korpus');  if(sk) sk.value="КПП3";
-    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
-    if(typeof updateShifrPreview==='function') updateShifrPreview();
-    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/КПП3 — ЭУ");
-  }catch(e){}
-});
-</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
