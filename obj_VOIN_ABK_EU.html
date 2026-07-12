@@ -1032,6 +1032,21 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   </div>
 </div></div>
 
+<div class="mbg" id="mved-stage"><div class="mbox">
+  <h3>📋 Этапы ведомости и чертежа</h3>
+  <div style="font-size:10.5px;color:#94a3b8;margin-bottom:10px;line-height:1.5">
+    Выбери, что включить в ведомость и на чертёж — можно один этап, несколько или все сразу.
+  </div>
+  <div id="mved-stage-body"></div>
+  <div style="display:flex;gap:8px;margin-top:6px">
+    <button class="btn b-gray" style="flex:1;padding:8px;font-size:11px" onclick="_mvedAll()">☑️ Все этапы</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+    <button class="btn b-grn" style="padding:10px" onclick="_mvedConfirm()">📋 Сформировать</button>
+    <button class="btn b-gray" style="padding:10px" onclick="closeM('mved-stage')">✕ Отмена</button>
+  </div>
+</div></div>
+
 
 <!-- БАННЕР: КАК ОТКРЫТЬ -->
 <div id="splash" style="display:none;position:fixed;inset:0;z-index:9999;
@@ -3530,6 +3545,23 @@ const PLAN='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABwUFRkVEhwZF
 
 
 // ── СИСТЕМЫ ИД И ПЕРЕЧНИ МАТЕРИАЛОВ ──────────────────────────
+// ── Этапы ведомости/чертежа ──────────────────────────────────────────
+// Общестрой — гильзы, сверление под них, запенивание, штробы (это работа
+//   общестроителей, не электриков — прокладка кабеля идёт уже потом).
+// Кабельные линии — сам кабель, гофра по потолку, крепёж, клеммы, бирки, лоток.
+// Оборудование — коробки, розетки, выключатели, светильники, щиты.
+const VED_STAGES = {
+  os: {label:'Общестрой', short:'ОС', color:'#a16207'},
+  kl: {label:'Кабельные линии', short:'КЛ', color:'#2563eb'},
+  ob: {label:'Оборудование', short:'ОБ', color:'#16a34a'},
+};
+const CALC_STAGE = {
+  gilzy_cap:'os', gilzy_perg:'os', gilzy:'os', pena:'os', drilling:'os', gofra_sthr:'os',
+  cable:'kl', gofra:'kl', clips:'kl', clips_fr:'kl', wago3:'kl', wago5:'kl', birki:'kl', lotok:'kl',
+  boxes:'ob', boxes_ip55:'ob', boxes_fr:'ob', rozets:'ob', lamps:'ob', switches:'ob', schits:'ob',
+};
+let _vedStages = {os:true, kl:true, ob:true}; // выбор этапов по умолчанию — все
+
 const ID_SYSTEMS = {
   ros: {
     name: 'ЭОМ КЛ Розеточная сеть',
@@ -3552,6 +3584,7 @@ const ID_SYSTEMS = {
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
+      {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
     ]
   },
   osv: {
@@ -3577,6 +3610,7 @@ const ID_SYSTEMS = {
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
+      {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
     ]
   },
   av: {
@@ -3599,6 +3633,7 @@ const ID_SYSTEMS = {
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
+      {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
     ]
   },
   em: {
@@ -3621,6 +3656,7 @@ const ID_SYSTEMS = {
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
+      {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
     ]
   }
 };
@@ -3760,6 +3796,7 @@ function calcMat(sys, groups){
     gilzy_cap:   totGC,
     gilzy_perg:  totGP,
     gilzy:       totGilzy,
+    drilling:    totGilzy,
     pena,
     birki
   };
@@ -4159,10 +4196,24 @@ function gCeilLenGof(g){
 function gRozetCount(g){
   // Ручные розетки на плане
   const manualR = g.rozets.filter(r=>!r.auto).length;
-  // Авто: из опусков — для розеточного кабеля
+  // Авто: из опусков — для розеточного кабеля. НО опуск, который заходит
+  // в щит (авто-«подъём от щита» ИЛИ обычный опуск, поставленный вплотную
+  // к щиту), — это НЕ подрозетник, кабель просто заходит в щит напрямую,
+  // подрозетника там физически нет и в ведомость он попадать не должен.
   const isRoz = g.kab==='ros25'||g.kab==='r25';
-  const autoR = isRoz ? g.opuski.reduce((s,o)=>s+(o.cnt||1), 0) : 0;
+  const autoR = isRoz ? g.opuski.reduce((s,o)=>{
+    if(_opuskIsToSchit(o)) return s;
+    return s+(o.cnt||1);
+  }, 0) : 0;
   return manualR + autoR;
+}
+// Опуск считается «заходом в щит» (без подрозетника), если это авто-подъём
+// от щита, либо просто оказался ВПЛОТНУЮ к щиту на плане (радиус совпадает
+// с радиусом, при котором сам авто-подъём создаётся — иначе обычные опуски
+// по всей комнате рядом со щитом ошибочно считались «без подрозетника»)
+function _opuskIsToSchit(o){
+  if(o._riser) return true;
+  return (S.schits||[]).some(sh=>Math.hypot(sh.x-o.x, sh.y-o.y)<300);
 }
 // Длина кабеля на потолке (трасса)
 function gCeilLen(g){ return gL(g); }
@@ -4821,6 +4872,7 @@ function render(){
       }
 
       const isRozKab = g.kab==='ros25'||g.kab==='r25';
+      const toSchit = _opuskIsToSchit(op);
 
       // ── Выноска вправо-вверх (для всех опусков) — но если рядом уже есть
       //    чужая выноска, эта автоматически сдвигается пониже, чтобы не лечь
@@ -4835,8 +4887,8 @@ function render(){
         ? `h=${(op.lm/1000).toFixed(2)}м, n=${cnt} шт`
         : `h=${(op.lm/1000).toFixed(2)}м`;
       const deviceLbl = op._device==='rozet' ? 'розетка установлена' : op._device==='switch' ? 'выключатель установлен' : null;
-      const line2 = deviceLbl || (op._riser ? 'подъём от щита' : (isRozKab && cnt>=1) ? `подрозетник С3Е3 — ${cnt} шт` : 'опуск/штроба');
-      const line3 = (!deviceLbl && !op._riser && isRozKab && cnt>=1) ? 'опуск/штроба' : null;
+      const line2 = deviceLbl || (toSchit ? 'заход в щит (без подрозетника)' : (isRozKab && cnt>=1) ? `подрозетник С3Е3 — ${cnt} шт` : 'опуск/штроба');
+      const line3 = (!deviceLbl && !toSchit && isRozKab && cnt>=1) ? 'опуск/штроба' : null;
       CX.font = `bold ${13/s}px Arial`;
       const w1 = CX.measureText(line1).width;
       CX.font = `${10/s}px Arial`;
@@ -5441,21 +5493,39 @@ function _build3DScene(rect, wrap){
     const col = new THREE.Color(g.color||'#3b82f6');
     let any=false;
     const lineMat = new THREE.LineBasicMaterial({color:col, linewidth:2});
+    const trayMat = new THREE.MeshStandardMaterial({color:col, metalness:0.3, roughness:0.6, transparent:true, opacity:0.85});
     for(const seg of (g.segs||[])){
       if(!segInRect(seg)) continue;
       any=true;
       const D = _segDraw(seg, _segOffsets3D); // визуальное смещение, если совпадает с линией другой группы
-      const pts=[
-        new THREE.Vector3(lx(D.x1), ceilY-0.02, lz(D.y1)),
-        new THREE.Vector3(lx(D.x2), ceilY-0.02, lz(D.y2)),
-      ];
-      const geo = new THREE.BufferGeometry().setFromPoints(pts);
-      scene.add(new THREE.Line(geo, lineMat));
+      const mountType = seg.mount||g.mount||'gof20';
+      const isLotok = mountType.startsWith('lotok');
+      if(isLotok){
+        // Лоток — рисуем как настоящий короб (не тонкую линию), чтобы в 3D
+        // было видно реальную кабеленесущую конструкцию, а не просто провод
+        const trayW = mountType==='lotok200' ? 0.2 : 0.1; // ширина лотка, м (100/200мм)
+        const trayH = 0.05; // высота борта, м
+        const dx=lx(D.x2)-lx(D.x1), dz=lz(D.y2)-lz(D.y1);
+        const len=Math.hypot(dx,dz);
+        if(len>0.01){
+          const trayMesh = new THREE.Mesh(new THREE.BoxGeometry(len, trayH, trayW), trayMat);
+          trayMesh.position.set((lx(D.x1)+lx(D.x2))/2, ceilY-0.08, (lz(D.y1)+lz(D.y2))/2);
+          trayMesh.rotation.y = -Math.atan2(dz,dx);
+          scene.add(trayMesh);
+        }
+      }else{
+        const pts=[
+          new THREE.Vector3(lx(D.x1), ceilY-0.02, lz(D.y1)),
+          new THREE.Vector3(lx(D.x2), ceilY-0.02, lz(D.y2)),
+        ];
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        scene.add(new THREE.Line(geo, lineMat));
+      }
       // Размерная подпись длины сегмента — по умолчанию скрыта, показывается
       // кнопкой «📐 Включить размеры»
       const segLenM = Math.hypot(seg.x2-seg.x1, seg.y2-seg.y1)/1000;
       if(segLenM>0.15){
-        const dimSpr = _makeTextSprite(segLenM.toFixed(2)+'м', '#fde68a');
+        const dimSpr = _makeTextSprite(segLenM.toFixed(2)+(isLotok?'м (лоток)':'м'), '#fde68a');
         dimSpr.position.set((lx(D.x1)+lx(D.x2))/2, ceilY+0.05, (lz(D.y1)+lz(D.y2))/2);
         dimSpr.visible = _m3dDimsOn;
         scene.add(dimSpr);
@@ -5989,7 +6059,7 @@ function placeSymbol(x,y){
     // подрозетник — одна розетка.
     let nearestOp=null, nearestD=300;
     for(const gg of S.groups) for(const op of gg.opuski){
-      if(op._device) continue; // уже занят
+      if(op._device || _opuskIsToSchit(op)) continue; // занят или это заход в щит (без подрозетника)
       const d=Math.hypot(op.x-x,op.y-y);
       if(d<nearestD){ nearestD=d; nearestOp=op; }
     }
@@ -6003,7 +6073,7 @@ function placeSymbol(x,y){
     // Выключатель — та же логика: садится на ближайший свободный подрозетник
     let nearestOp=null, nearestD=300;
     for(const gg of S.groups) for(const op of gg.opuski){
-      if(op._device) continue;
+      if(op._device || _opuskIsToSchit(op)) continue;
       const d=Math.hypot(op.x-x,op.y-y);
       if(d<nearestD){ nearestD=d; nearestOp=op; }
     }
@@ -6825,7 +6895,7 @@ function exportDrawingWithLegend(){
   const vals = { cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
     rozets:mat.rozets, lamps:mat.lamps, wago3:mat.wago3, wago5:mat.wago5,
-    gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki };
+    gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki, drilling:mat.drilling };
 
   const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
   const cableBase = +cableParts.reduce((a,b)=>a+b,0).toFixed(2);
@@ -7149,7 +7219,41 @@ function _gostStamp(sheetLabel, sheetNum, totalSheets, sys, shifrText, objAddr, 
   </table>`;
 }
 
+// Точка входа с кнопки «📋» — сперва спрашиваем, какие этапы включить в
+// ведомость/чертёж, потом строим саму ведомость через _doExpV()
 function expV(){
+  finDraw();
+  const box = document.getElementById('mved-stage-body');
+  if(box){
+    box.innerHTML = Object.entries(VED_STAGES).map(([key,st])=>`
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;
+        background:#0d1117;border:1px solid ${st.color};border-radius:6px;cursor:pointer">
+        <input type="checkbox" id="mved-st-${key}" ${_vedStages[key]?'checked':''} style="width:16px;height:16px">
+        <span style="font-weight:700;color:${st.color}">${st.label}</span>
+      </label>`).join('');
+  }
+  openM('mved-stage');
+}
+function _mvedConfirm(){
+  Object.keys(VED_STAGES).forEach(key=>{
+    const cb=document.getElementById('mved-st-'+key);
+    _vedStages[key] = cb ? cb.checked : true;
+  });
+  if(!Object.values(_vedStages).some(Boolean)){
+    tip('⚠️ Выбери хотя бы один этап');
+    return;
+  }
+  closeM('mved-stage');
+  _doExpV();
+}
+function _mvedAll(){
+  Object.keys(VED_STAGES).forEach(key=>{
+    const cb=document.getElementById('mved-st-'+key);
+    if(cb) cb.checked=true;
+  });
+}
+
+function _doExpV(){
  try{
   finDraw();
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
@@ -7178,37 +7282,78 @@ function expV(){
       OX2.beginPath();OX2.moveTo(w.x1,w.y1);OX2.lineTo(w.x2,w.y2);OX2.stroke();OX2.setLineDash([]);
     }
     for(const g of activeGroups){
-      OX2.strokeStyle=g.color; OX2.lineWidth=LW2;
-      for(const seg of g.segs){ OX2.beginPath();OX2.moveTo(seg.x1,seg.y1);OX2.lineTo(seg.x2,seg.y2);OX2.stroke(); }
-      for(const b of g.boxes) OX2.strokeRect(b.x-SZ2,b.y-SZ2,SZ2*2,SZ2*2);
-      for(const r of g.rozets){ if(r.auto) continue;
-        OX2.beginPath();OX2.arc(r.x,r.y,SZ2,0,Math.PI*2);OX2.stroke();
-        OX2.beginPath();OX2.moveTo(r.x-SZ2,r.y);OX2.lineTo(r.x+SZ2,r.y);OX2.stroke();
+      if(_vedStages.kl){
+        OX2.strokeStyle=g.color; OX2.lineWidth=LW2;
+        for(const seg of g.segs){
+          OX2.beginPath();OX2.moveTo(seg.x1,seg.y1);OX2.lineTo(seg.x2,seg.y2);OX2.stroke();
+        }
       }
-      // Опуски — с настоящей выноской (линия + полка), как в образце ИД
-      for(const op of (g.opuski||[])){
-        OX2.fillStyle=g.color; OX2.beginPath();OX2.arc(op.x,op.y,SZ2,0,Math.PI*2);OX2.fill();
-        OX2.strokeStyle=g.color; OX2.lineWidth=LW2*.7;
-        const VX=op.x+SZ2*2.5, VY=op.y-SZ2*2.5, shelfLen=SZ2*6;
-        OX2.beginPath();OX2.moveTo(op.x,op.y);OX2.lineTo(VX,VY);OX2.lineTo(VX+shelfLen,VY);OX2.stroke();
-        const cnt=op.cnt||1;
-        OX2.font=`bold ${FSM2}px Arial`;
-        OX2.fillText(`опуск, L=${((op.lm||0)/1000).toFixed(2)}м${cnt>1?', n='+cnt+'шт':''}`, VX+4/s2, VY-3/s2);
+      // Штробы — общестроительная работа: выделяем толстой пунктирной линией
+      // поверх тех же сегментов кабеля, если выбран этап «Общестрой»
+      if(_vedStages.os){
+        OX2.strokeStyle='#a16207'; OX2.lineWidth=LW2*1.6; OX2.setLineDash([6/s2,4/s2]);
+        for(const seg of g.segs){
+          if(!(seg.mount||g.mount||'').startsWith('sthr')) continue;
+          OX2.beginPath();OX2.moveTo(seg.x1,seg.y1);OX2.lineTo(seg.x2,seg.y2);OX2.stroke();
+        }
+        OX2.setLineDash([]);
       }
-      for(const l of g.lamps){
-        OX2.strokeStyle=g.color; OX2.beginPath();OX2.arc(l.x,l.y,SZ2*1.1,0,Math.PI*2);OX2.stroke();
+      if(_vedStages.ob){
+        OX2.strokeStyle=g.color; OX2.lineWidth=LW2;
+        for(const b of g.boxes) OX2.strokeRect(b.x-SZ2,b.y-SZ2,SZ2*2,SZ2*2);
+        for(const r of g.rozets){ if(r.auto) continue;
+          OX2.beginPath();OX2.arc(r.x,r.y,SZ2,0,Math.PI*2);OX2.stroke();
+          OX2.beginPath();OX2.moveTo(r.x-SZ2,r.y);OX2.lineTo(r.x+SZ2,r.y);OX2.stroke();
+        }
       }
-      for(const gl of g.gilzy){
-        OX2.strokeStyle='#ea580c'; OX2.lineWidth=LW2*.8;
-        OX2.beginPath();OX2.arc(gl.x,gl.y,SZ2,0,Math.PI*2);OX2.stroke();
+      // Опуски — сама линия «кабельные линии», устройство на ней — «оборудование»,
+      // заход в щит без подрозетника (штроба) — «общестрой»
+      if(_vedStages.kl || _vedStages.ob){
+        for(const op of (g.opuski||[])){
+          const toSchit = _opuskIsToSchit(op);
+          if(toSchit && !_vedStages.os && !_vedStages.kl) continue;
+          OX2.fillStyle=g.color; OX2.beginPath();OX2.arc(op.x,op.y,SZ2,0,Math.PI*2);OX2.fill();
+          if(_vedStages.ob){
+            if(op._device==='rozet'){
+              OX2.strokeStyle='#fff'; OX2.lineWidth=LW2*0.7;
+              OX2.beginPath(); OX2.arc(op.x,op.y,SZ2*1.6,0,Math.PI*2); OX2.stroke();
+            }else if(op._device==='switch'){
+              OX2.strokeStyle='#67e8f9'; OX2.lineWidth=LW2*0.8;
+              OX2.strokeRect(op.x-SZ2*1.4,op.y-SZ2*1.4,SZ2*2.8,SZ2*2.8);
+            }
+          }
+          OX2.strokeStyle=g.color; OX2.lineWidth=LW2*.7;
+          const VX=op.x+SZ2*2.5, VY=op.y-SZ2*2.5, shelfLen=SZ2*6;
+          OX2.beginPath();OX2.moveTo(op.x,op.y);OX2.lineTo(VX,VY);OX2.lineTo(VX+shelfLen,VY);OX2.stroke();
+          const cnt=op.cnt||1;
+          OX2.font=`bold ${FSM2}px Arial`;
+          const opLbl = op._device==='rozet' ? 'розетка' : op._device==='switch' ? 'выключатель' :
+            toSchit ? 'заход в щит' : `опуск, L=${((op.lm||0)/1000).toFixed(2)}м${cnt>1?', n='+cnt+'шт':''}`;
+          OX2.fillText(opLbl, VX+4/s2, VY-3/s2);
+        }
       }
-      if(g.segs[0]){
+      if(_vedStages.ob){
+        for(const l of g.lamps){
+          OX2.strokeStyle=g.color; OX2.fillStyle=g.color;
+          OX2.beginPath();OX2.arc(l.x,l.y,SZ2*1.1,0,Math.PI*2);OX2.stroke();
+          OX2.lineWidth=LW2*0.6;
+          OX2.beginPath();OX2.moveTo(l.x-SZ2*0.7,l.y-SZ2*0.7);OX2.lineTo(l.x+SZ2*0.7,l.y+SZ2*0.7);
+          OX2.moveTo(l.x+SZ2*0.7,l.y-SZ2*0.7);OX2.lineTo(l.x-SZ2*0.7,l.y+SZ2*0.7);OX2.stroke();
+        }
+      }
+      if(_vedStages.os){
+        for(const gl of g.gilzy){
+          OX2.strokeStyle='#ea580c'; OX2.lineWidth=LW2*.8;
+          OX2.beginPath();OX2.arc(gl.x,gl.y,SZ2,0,Math.PI*2);OX2.stroke();
+        }
+      }
+      if(g.segs[0] && _vedStages.kl){
         OX2.font=`bold ${F2}px Arial`; OX2.fillStyle=g.color;
         OX2.fillText(g.name, g.segs[0].x1+7/s2, g.segs[0].y1-8/s2);
       }
     }
     const SW2=17/s2, SHw2=12/s2;
-    for(const sh of S.schits){
+    if(_vedStages.ob) for(const sh of S.schits){
       OX2.strokeStyle='#0891b2'; OX2.fillStyle='rgba(8,145,178,.12)'; OX2.lineWidth=LW2;
       OX2.fillRect(sh.x-SW2/2,sh.y-SHw2/2,SW2,SHw2); OX2.strokeRect(sh.x-SW2/2,sh.y-SHw2/2,SW2,SHw2);
       OX2.font=`bold ${F2}px Arial`; OX2.fillStyle='#0891b2'; OX2.textAlign='center';
@@ -7334,15 +7479,16 @@ function expV(){
     gofra_sthr: mat.gofra_sthr,
     clips:      mat.clips,
     clips_fr:   mat.clips_fr,
-    boxes:      mat.boxes,
     rozets:     mat.rozets,
     lamps:      mat.lamps,
+    switches:   mat.switches,
     wago3:      mat.wago3,
     wago5:      mat.wago5,
     gilzy_cap:  mat.gilzy_cap,
     gilzy_perg: mat.gilzy_perg,
     pena:       mat.pena,
-    birki:      mat.birki
+    birki:      mat.birki,
+    drilling:   mat.drilling
   };
 
   const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
@@ -7350,17 +7496,29 @@ function expV(){
   const gofParts = activeGroups.map(g=>calcGroupBreakdown(g).gofCeil).filter(v=>v>0.005);
   const gofBase = +gofParts.reduce((a,b)=>a+b,0).toFixed(2);
 
-  sys.materials.forEach((item, i)=>{
+  const _stageOrder=['os','kl','ob'];
+  const _sortedMaterials = sys.materials.map((item,i)=>({item,i}))
+    .sort((a,b)=>_stageOrder.indexOf(CALC_STAGE[a.item.calc]||'kl') - _stageOrder.indexOf(CALC_STAGE[b.item.calc]||'kl'));
+  let _lastStage=null, _rowNum=0;
+  _sortedMaterials.forEach(({item,i})=>{
     const qty = vals[item.calc] || 0;
     if(qty<=0 && !['cable','gofra','boxes'].includes(item.calc)) return;
-    const bg = i%2===0?'':'background:#f7f9ff';
+    const stKey = CALC_STAGE[item.calc]||'kl';
+    if(!(_vedStages[stKey])) return; // фильтр по выбранным этапам
+    if(stKey!==_lastStage){
+      _lastStage=stKey;
+      const st=VED_STAGES[stKey];
+      matRows+=`<tr><td colspan="6" style="background:${st.color}22;color:${st.color};font-weight:700;padding:5px 6px;border:1px solid ${st.color}">Этап: ${st.label}</td></tr>`;
+    }
+    _rowNum++;
+    const bg = _rowNum%2===0?'':'background:#f7f9ff';
     let note='';
     if(item.calc==='cable' && cableParts.length)
       note=`${cableParts.map(v=>v.toFixed(2)).join('+')}=${cableBase.toFixed(2)}<br>с учётом прим.4: ${cableBase.toFixed(2)}×1.06=${qty}`;
     else if(item.calc==='gofra' && gofParts.length)
       note=`${gofParts.map(v=>v.toFixed(2)).join('+')}=${gofBase.toFixed(2)}<br>с учётом прим.4: ${gofBase.toFixed(2)}×1.06=${qty}`;
     matRows+=`<tr style="${bg}">
-      <td>${i+1}</td>
+      <td>${_rowNum}</td>
       <td>${item.name}</td>
       <td style="font-size:9px;color:#64748b">${item.art}</td>
       <td style="text-align:center">${item.unit}</td>
@@ -10310,7 +10468,8 @@ function _cloudGetFiles(name){
 }
 
 // ── Генерация HTML ведомости (inline, без popup) ─────────────
-function _buildVedHTML(sys,mat,projectName){
+function _buildVedHTML(sys,mat,projectName,stages){
+  stages = stages || _vedStages;
   const birki=mat.birki;
   const nCap=S.walls.filter(w=>w.t==='cap').length;
   const nP  =S.walls.filter(w=>w.t!=='cap').length;
@@ -10321,23 +10480,33 @@ function _buildVedHTML(sys,mat,projectName){
   const journalHtml=buildCableJournal(S.groups);
   const heightsHtml=heightsTableHTML();
 
-  let matRows='';
   const vals={
     cable:mat.cable,boxes_ip55:mat.boxCounts?.ip55||0,boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
     clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,lamps:mat.lamps,switches:mat.switches,
     wago3:mat.wago3,wago5:mat.wago5,gilzy_cap:mat.gilzy_cap,
-    gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki
+    gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling
   };
-  sys.materials.forEach((item,i)=>{
-    const qty=vals[item.calc]||0;
-    if(qty<=0&&!['cable','gofra','boxes'].includes(item.calc)) return;
-    const bg=i%2===0?'':'background:#f7f9ff';
-    matRows+=`<tr style="${bg}"><td>${i+1}</td><td>${item.name}</td>
-      <td style="font-size:9px;color:#64748b">${item.art}</td>
-      <td style="text-align:center">${item.unit}</td>
-      <td style="text-align:center;font-weight:700">${qty}</td>
-      <td style="text-align:center;font-weight:700;color:#1a4a8a">${qty}</td></tr>`;
+  // Материалы группируем по этапам (Общестрой / Кабельные линии / Оборудование)
+  // и печатаем только выбранные пользователем этапы, каждый — своим разделом
+  let matRows='';
+  let rowIdx=0;
+  Object.entries(VED_STAGES).forEach(([stKey,st])=>{
+    if(!stages[stKey]) return;
+    const items = sys.materials.filter(item=>(CALC_STAGE[item.calc]||'kl')===stKey);
+    if(!items.length) return;
+    matRows += `<tr><td colspan="6" style="background:${st.color}22;color:${st.color};font-weight:700;padding:5px 6px;border:1px solid ${st.color}">Этап: ${st.label}</td></tr>`;
+    items.forEach(item=>{
+      const qty=vals[item.calc]||0;
+      if(qty<=0&&!['cable','gofra','boxes'].includes(item.calc)) return;
+      rowIdx++;
+      const bg=rowIdx%2===0?'':'background:#f7f9ff';
+      matRows+=`<tr style="${bg}"><td>${rowIdx}</td><td>${item.name}</td>
+        <td style="font-size:9px;color:#64748b">${item.art}</td>
+        <td style="text-align:center">${item.unit}</td>
+        <td style="text-align:center;font-weight:700">${qty}</td>
+        <td style="text-align:center;font-weight:700;color:#1a4a8a">${qty}</td></tr>`;
+    });
   });
   const birkaNote=`1 в шкафу + 1 запотолочное + ${gC+gP} гильз×2 = ${birki} шт`;
 
@@ -10361,15 +10530,15 @@ td{border:1px solid #ddd;padding:3px 5px;vertical-align:top}
 <div class="noprint"><button class="btn" onclick="window.print()">🖨 Печать/PDF</button></div>
 <div class="sys-badge">${sys.name}</div>
 <h2>${projectName||'Кабельный журнал'} | 1 этаж</h2>
-<div class="meta">Потолок: ${S.hpot}мм${S.hfal?' | Фальш: '+S.hfal+'мм':''} | ${new Date().toLocaleDateString('ru')} | Групп: ${S.groups.length}</div>
-<h3>1. Кабельный журнал</h3>${journalHtml}
+<div class="meta">Потолок: ${S.hpot}мм${S.hfal?' | Фальш: '+S.hfal+'мм':''} | ${new Date().toLocaleDateString('ru')} | Групп: ${S.groups.length} | Этапы: ${Object.entries(VED_STAGES).filter(([k])=>stages[k]).map(([,v])=>v.label).join(', ')||'—'}</div>
+${stages.kl ? `<h3>1. Кабельный журнал</h3>${journalHtml}` : ''}
 <h3 style="margin-top:16px">2. Перечень материалов — ${sys.name}</h3>
 <table><tr><th>#</th><th>Наименование</th><th>Артикул</th><th>Ед.</th><th>База</th><th>К закупке</th></tr>
 ${matRows}
-<tr class="birki-row"><td>—</td><td><b>Кабельные бирки ТМАРК-3-У136</b><br><span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
-<td>1000шт+риббон 75м</td><td>компл.</td><td>${birki}</td><td><b>${birki}</b></td></tr>
+${stages.kl ? `<tr class="birki-row"><td>—</td><td><b>Кабельные бирки ТМАРК-3-У136</b><br><span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
+<td>1000шт+риббон 75м</td><td>компл.</td><td>${birki}</td><td><b>${birki}</b></td></tr>` : ''}
 </table>
-${heightsHtml}
+${stages.kl ? heightsHtml : ''}
 <\/body><\/html>`;
 }
 
@@ -10986,7 +11155,7 @@ async function _buildSharePageWithDraft(name, author){
   let matRows='';
   const vals={cable:mat.cable,boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
     clips:mat.clips,rozets:mat.rozets,lamps:mat.lamps,switches:mat.switches,wago3:mat.wago3,wago5:mat.wago5,
-    gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki};
+    gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling};
   sys.materials.forEach((item,i)=>{
     const qty=vals[item.calc]||0;
     if(qty<=0&&!['cable','gofra','boxes'].includes(item.calc)) return;
