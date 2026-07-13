@@ -1006,6 +1006,40 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   </div>
 </div></div>
 
+<div class="mbg" id="mrig"><div class="mbox">
+  <h3>📏 Добавить ригель</h3>
+  <p style="font-size:11px;color:#9ca3af;margin-bottom:10px">
+    Проведи линию ригеля/балки под потолком — два клика.<br>
+    Кабель, который пересекает ригель, автоматически обходит его снизу —
+    длина обхода (вниз-вдоль-вверх) добавляется к трассе сама.
+  </p>
+  <label>Ширина ригеля (по ходу кабеля), мм</label>
+  <input id="mrig-w" type="number" value="600" min="50" step="10">
+  <label style="margin-top:8px">Высота ригеля (насколько свисает от потолка), мм</label>
+  <input id="mrig-h" type="number" value="400" min="50" step="10">
+  <div class="mbtns">
+    <button class="btn b-grn" onclick="doRigel()">✏️ Рисовать</button>
+    <button class="btn b-gray" onclick="closeM('mrig')">✕ Отмена</button>
+  </div>
+</div></div>
+
+<div class="mbg" id="mlay"><div class="mbox">
+  <h3>🗂 Слои систем</h3>
+  <div style="font-size:10.5px;color:#94a3b8;margin-bottom:10px;line-height:1.5">
+    В одном чертеже можно вести несколько систем (розетки, освещение, СС...) —
+    каждая группа автоматически помечается системой, в которой она создана.
+    Здесь можно показать/скрыть слой каждой системы для просмотра.
+  </div>
+  <div id="mlay-body"></div>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button class="btn b-gray" style="flex:1;padding:8px;font-size:11px" onclick="_layAll(true)">👁 Показать все</button>
+    <button class="btn b-gray" style="flex:1;padding:8px;font-size:11px" onclick="_layAll(false)">🚫 Скрыть все</button>
+  </div>
+  <div class="mbtns">
+    <button class="btn b-gray" onclick="closeM('mlay')">✕ Закрыть</button>
+  </div>
+</div></div>
+
 <!-- МОДАЛ: ЭКСПОРТ / ГОТОВО -->
 <div class="mbg" id="mexp"><div class="mbox">
   <h3>✅ Схема готова</h3>
@@ -1042,7 +1076,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <button class="btn b-gray" style="flex:1;padding:8px;font-size:11px" onclick="_mvedAll()">☑️ Все этапы</button>
   </div>
   <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
-    <button class="btn b-grn" style="padding:10px" onclick="_mvedConfirm()">📋 Сформировать</button>
+    <button class="btn b-grn" style="padding:10px" onclick="_mvedConfirm()">📋 Сформировать (текущая система)</button>
+    <button class="btn b-blue" style="padding:10px" onclick="_mvedAutoSplit()" title="Автоматически разложит по всем системам, встречающимся в чертеже, и по выбранным этапам — отдельный раздел на каждую пару, с шифром по регламенту">📚 Разложить по системам и этапам</button>
     <button class="btn b-gray" style="padding:10px" onclick="closeM('mved-stage')">✕ Отмена</button>
   </div>
 </div></div>
@@ -1296,7 +1331,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="11" selected="">Гр.1с</option><option value="12">Гр.2с</option><option value="13">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1314,6 +1349,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <span class="sec-kl">
   <button id="t-schit" class="btn b-blue" onclick="openM('ms');sT('schit')">⊠ Щит</button>
   <button id="t-wall" class="btn b-teal" onclick="openM('mw');sT('wall')">🧱 Стена</button>
+  <button id="t-rigel" class="btn b-teal" onclick="openM('mrig');sT('rigel')" title="Ригель/балка под потолком — кабель автоматически обходит его снизу, длина обхода считается сама">📏 Ригель</button>
   <button id="t-3d" class="btn" style="background:#312e81;color:#c7d2fe" onclick="start3DSelect()" title="Выдели прямоугольный участок на плане, потом кликни внутри — покажу его в 3D">📦 Участок в 3D</button>
   </span>
   <button id="t-er" class="btn b-red" onclick="sT('er')">✕ Ластик</button>
@@ -1365,6 +1401,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn b-blue" onclick="save()">💾</button>
   <button id="hand-btn" class="btn" onclick="toggleHandMode()" title="Включить/выключить режим «Рука» — таскать чертёж пальцем/мышью вместо рисования">✋ Рука</button>
   <button id="lbl-btn" class="btn b-gray" onclick="toggleLabels()" title="Скрыть/показать выноски опусков и светильников (пояснительные боксы) — длины кабеля на самих линиях остаются видны в любом случае">🏷 Выноски</button>
+  <button id="lay-btn" class="btn b-gray" onclick="openLayersPanel()" title="Слои систем — если в одном чертеже несколько систем (розетки, освещение, СС...), можно показывать по одной">🗂 Слои</button>
 
   <span class="more-tools sec-kl" style="">
   <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения">📐</button>
@@ -1546,17 +1583,17 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(11)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(12)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(13)">
       <div class="md" style="background:#f59e0b"></div>
       <div><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
@@ -2738,12 +2775,12 @@ function aosrFillFromDrawing(){
 
   // 2. Материалы — реальный каталог текущей системы + реальные объёмы с чертежа
   //    (та же формула vals{}, что использует ведомость и сверка с 1С — см. calcMat())
-  const mat = calcMat(CUR_SYS, allGroups);
+  const mat = calcMat(curSysKey(), allGroups);
   const vals = {
     cable: mat.cable, boxes_ip55: mat.boxCounts?.ip55||0, boxes_fr: mat.boxCounts?.fr||0,
     boxes: mat.boxes, gofra: mat.gofra, gofra_sthr: mat.gofra_sthr, clips: mat.clips,
-    clips_fr: mat.clips_fr, rozets: mat.rozets, lamps: mat.lamps, wago3: mat.wago3, wago5: mat.wago5,
-    gilzy_cap: mat.gilzy_cap, gilzy_perg: mat.gilzy_perg, pena: mat.pena, birki: mat.birki
+    clips_fr: mat.clips_fr, rozets: mat.rozets, rozet_device: mat.rozet_device, lamps: mat.lamps, switches: mat.switches, wago3: mat.wago3, wago5: mat.wago5,
+    gilzy_cap: mat.gilzy_cap, gilzy_perg: mat.gilzy_perg, pena: mat.pena, birki: mat.birki, drilling: mat.drilling, shtroba: mat.shtroba
   };
   document.getElementById('aosr-materials').innerHTML = '';
   let addedAny = false;
@@ -3545,20 +3582,27 @@ const PLAN='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABwUFRkVEhwZF
 
 
 // ── СИСТЕМЫ ИД И ПЕРЕЧНИ МАТЕРИАЛОВ ──────────────────────────
-// ── Этапы ведомости/чертежа ──────────────────────────────────────────
-// Общестрой — гильзы, сверление под них, запенивание, штробы (это работа
-//   общестроителей, не электриков — прокладка кабеля идёт уже потом).
-// Кабельные линии — сам кабель, гофра по потолку, крепёж, клеммы, бирки, лоток.
-// Оборудование — коробки, розетки, выключатели, светильники, щиты.
+// ── Этапы ведомости/чертежа (по регламенту ИД: ОСР / КЛ / ОБ) ────────
+// ОСР (Общестроительные работы) — штробление, проходки (гильзы, отверстия
+//   под них), закладные, запенивание. Это работа общестроителей, ДО того,
+//   как электрики тянут кабель. Труба гофрированная (даже та, что лежит
+//   в штробе) — это уже кабеленесущая конструкция, а не общестрой.
+// КЛ (Кабельные линии) — сам кабель, гофра (и потолок, и в штробе),
+//   кабеленесущие конструкции (лоток), крепёж, клеммы, бирки, коробки
+//   и подрозетники (это тоже часть кабельной трассы, не «приборы»).
+// ОБ (Оборудование) — монтаж приборов/устройств: розетки, выключатели,
+//   светильники, щиты (сами розетки/выключатели — устройства на
+//   подрозетнике, а не сам подрозетник).
 const VED_STAGES = {
-  os: {label:'Общестрой', short:'ОС', color:'#a16207'},
+  os: {label:'Общестроительные работы', short:'ОСР', color:'#a16207'},
   kl: {label:'Кабельные линии', short:'КЛ', color:'#2563eb'},
   ob: {label:'Оборудование', short:'ОБ', color:'#16a34a'},
 };
 const CALC_STAGE = {
-  gilzy_cap:'os', gilzy_perg:'os', gilzy:'os', pena:'os', drilling:'os', gofra_sthr:'os',
-  cable:'kl', gofra:'kl', clips:'kl', clips_fr:'kl', wago3:'kl', wago5:'kl', birki:'kl', lotok:'kl',
-  boxes:'ob', boxes_ip55:'ob', boxes_fr:'ob', rozets:'ob', lamps:'ob', switches:'ob', schits:'ob',
+  gilzy_cap:'os', gilzy_perg:'os', gilzy:'os', pena:'os', drilling:'os', shtroba:'os',
+  cable:'kl', gofra:'kl', gofra_sthr:'kl', clips:'kl', clips_fr:'kl', wago3:'kl', wago5:'kl',
+  birki:'kl', lotok:'kl', boxes:'kl', boxes_ip55:'kl', boxes_fr:'kl', rozets:'kl',
+  rozet_device:'ob', lamps:'ob', switches:'ob', schits:'ob',
 };
 let _vedStages = {os:true, kl:true, ob:true}; // выбор этапов по умолчанию — все
 
@@ -3579,12 +3623,13 @@ const ID_SYSTEMS = {
       {name:'Коробка распр. IP55 100×100×50мм', art:'IMT35091 Systeme Electric', unit:'шт', calc:'boxes_ip55'},
       {name:'Коробка огнестойкая FR Е15-Е120 100×100×50мм', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes_fr'},
       {name:'Подрозетник для полых стен 68×45мм IP30 синий С3Е3', art:'GUSI ELECTRIC', unit:'шт', calc:'rozets'},
-      {name:'BRITE Розетка 1 пост с заземлением с защитными шторками 16А в сборе РСР14-1-0-БрЧ черный', art:'IEK BR-R14-16-K02-F', unit:'шт', calc:'rozets'},
+      {name:'BRITE Розетка 1 пост с заземлением с защитными шторками 16А в сборе РСР14-1-0-БрЧ черный', art:'IEK BR-R14-16-K02-F', unit:'шт', calc:'rozet_device'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
       {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
+      {name:'Штробление стен под кабель (сечение до 20×20мм, вкл. заделку)', art:'работа', unit:'м', calc:'shtroba'},
     ]
   },
   osv: {
@@ -3611,6 +3656,7 @@ const ID_SYSTEMS = {
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
+      {name:'Штробление стен под кабель (сечение до 20×20мм, вкл. заделку)', art:'работа', unit:'м', calc:'shtroba'},
     ]
   },
   av: {
@@ -3634,6 +3680,7 @@ const ID_SYSTEMS = {
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
+      {name:'Штробление стен под кабель (сечение до 20×20мм, вкл. заделку)', art:'работа', unit:'м', calc:'shtroba'},
     ]
   },
   em: {
@@ -3657,6 +3704,7 @@ const ID_SYSTEMS = {
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
+      {name:'Штробление стен под кабель (сечение до 20×20мм, вкл. заделку)', art:'работа', unit:'м', calc:'shtroba'},
     ]
   }
 };
@@ -3699,6 +3747,7 @@ const ID_SYSTEMS_SS = {
 
 // Текущая система ИД (по умолчанию — розетки)
 let CUR_SYS = 'ros';
+let CUR_MARKA_OVERRIDE = null; // {key,marka,markaFull} — когда выбрана марка без своего шаблона черчения (см. ID_SYSTEMS_GENERIC_ONLY/ID_SYSTEMS_SS)
 
 
 // ── РАСЧЁТ КОЛИЧЕСТВА БИРОК ──────────────────────────────────
@@ -3721,8 +3770,18 @@ function calcBirki(groups){
   return total;
 }
 
+// Ключ активной системы с учётом переопределения марки (щитовое/СС/наружка) —
+// именно по этому ключу группы помечаются полем g.sys при создании
+function curSysKey(){ return CUR_MARKA_OVERRIDE ? CUR_MARKA_OVERRIDE.key : CUR_SYS; }
+
 // ── РАСЧЁТ МАТЕРИАЛОВ ДЛЯ ГРУППЫ ────────────────────────────
 function calcMat(sys, groups){
+  // Считаем материалы ТОЛЬКО по группам этой системы — если в одном проекте
+  // несколько систем (розетки + освещение + СС и т.п.), группы других систем
+  // не должны попадать в ведомость текущей. Группы без метки sys (старые
+  // сохранённые проекты, до появления этого поля) не фильтруются —
+  // обратная совместимость.
+  groups = groups.filter(g => !g.sys || g.sys===sys);
   let totCable=0, totGofCeil=0, totGofSthr=0, totSthrCount=0;
   let totClipsCeil=0, totClipsSthr=0;
   let totBoxes=0, totGC=0, totGP=0;
@@ -3752,6 +3811,13 @@ function calcMat(sys, groups){
     totGofSthr += gSthrLen(g) - g.segs.filter(s=>(s.mount||g.mount||'').startsWith('sthr'))
       .reduce((s,seg)=>s+Math.hypot(seg.x2-seg.x1,seg.y2-seg.y1)/1000,0);
     totSthrCount += g.opuski.length;
+
+    // Обход ригелей — доп. гофра/клипсы на потолке для участка обхода
+    const _rigExtra = gRigelExtra(g);
+    if(_rigExtra.m>0){
+      totGofCeil += _rigExtra.m;
+      totClipsCeil += Math.ceil(_rigExtra.m/0.5);
+    }
 
     totBoxes += g.boxes.length;
     // Считаем коробки по типам для ведомости
@@ -3790,8 +3856,10 @@ function calcMat(sys, groups){
     clips_fr,
     boxes:       totBoxes,
     rozets:      totRozets,
+    rozet_device: totRozets,
     lamps:       totLamps,
     switches:    totSwitches,
+    shtroba:     +totGofSthr.toFixed(2), // длина штробы под кабель (общестрой), м
     wago3, wago5,
     gilzy_cap:   totGC,
     gilzy_perg:  totGP,
@@ -3882,7 +3950,7 @@ const S={
   wallDraw:false, wallP1:null, wallType:'cap',
   curX:0, curY:0,
   schPend:null, opPend:null,
-  groups:[], schits:[], walls:[],
+  groups:[], schits:[], walls:[], rigels:[],
   cur:null, undo:[],
   // Слои (защиты ИД)
   layers:[], curLayer:0,
@@ -3892,7 +3960,11 @@ const S={
   calibMode:false, calibP1:null,
   // Показ размерных выносок (длины/подписи опусков, светильников, сегментов) —
   // можно скрыть кнопкой на панели, если чертёж перегружен подписями
-  showLabels:true
+  showLabels:true,
+  // Слои систем — какие системы (g.sys) СКРЫТЫ на текущем чертеже (Set ключей).
+  // Пусто = показаны все. Позволяет мастеру рисовать несколько систем в одном
+  // файле, а зрителю (проектировщику) включать/выключать по одной.
+  hiddenSystems: new Set()
 };
 let _id=0, bgImg=null;
 let _curPlanDataURL = null; // dataURL текущего фонового плана — нужен для снапшотов по этажам (S.layers)
@@ -4173,6 +4245,11 @@ function mkG(n,s,p,m,k,c,boxType,plan){
   return{id:++_id,name:n,schit:s,pom:p,mount:m,kab:k,
     color: c||kabColor(k),
     boxType: boxType||boxTypeForSys(CUR_SYS),
+    // Система/марка, к которой относится группа — фиксируется в момент
+    // создания. Нужна, чтобы при нескольких системах в одном чертеже можно
+    // было автоматически разложить материалы/слои по своим системам, а не
+    // считать всё как одну текущую (CUR_SYS может измениться позже).
+    sys: CUR_MARKA_OVERRIDE ? CUR_MARKA_OVERRIDE.key : CUR_SYS,
     plan: plan||{rozet:0, lamp:0}, // план по количеству — для индикатора прогресса «факт/план»
     segs:[],boxes:[],rozets:[],lamps:[],gilzy:[],opuski:[],birki:[],ok:true};
 }
@@ -4236,6 +4313,31 @@ function cg(){
 
 // Длина кабеля группы в метрах (мм→м)
 function gL(g){return g.segs.reduce((s,sg)=>s+Math.hypot(sg.x2-sg.x1,sg.y2-sg.y1)/1000,0);}
+// Пересечение двух отрезков (для проверки «кабель пересекает ригель»)
+function _segXsegX(ax1,ay1,ax2,ay2,bx1,by1,bx2,by2){
+  const d1x=ax2-ax1, d1y=ay2-ay1, d2x=bx2-bx1, d2y=by2-by1;
+  const den=d1x*d2y-d1y*d2x;
+  if(Math.abs(den)<1e-9) return false;
+  const t=((bx1-ax1)*d2y-(by1-ay1)*d2x)/den;
+  const u=((bx1-ax1)*d1y-(by1-ay1)*d1x)/den;
+  return t>0.001 && t<0.999 && u>0.001 && u<0.999;
+}
+// Ригель — балка под потолком: если трасса группы пересекает его, кабель
+// физически должен обойти его снизу (вниз на высоту ригеля, вдоль его
+// ширины, обратно вверх) — считаем эту добавку автоматически, мастеру не
+// нужно вручную удлинять трассу или чертить обход.
+function gRigelExtra(g){
+  let extraMm=0, crossings=0;
+  for(const seg of g.segs){
+    for(const rg of (S.rigels||[])){
+      if(_segXsegX(seg.x1,seg.y1,seg.x2,seg.y2, rg.x1,rg.y1,rg.x2,rg.y2)){
+        extraMm += rg.h*2 + rg.w; // вниз + вдоль ширины + обратно вверх
+        crossings++;
+      }
+    }
+  }
+  return {m: extraMm/1000, crossings};
+}
 function gLF(g){
   let L=gL(g);
   // Опуски: cnt ветвей одинаковой длины
@@ -4243,6 +4345,8 @@ function gLF(g){
   // Только ручные розетки (авто уже в опусках)
   L+=g.rozets.filter(r=>!r.auto).reduce((s,r)=>s+r.ol/1000,0);
   L+=g.lamps.reduce((s,l)=>s+l.ol/1000,0);
+  // Обход ригелей — автоматическая добавка длины
+  L+=gRigelExtra(g).m;
   return L;
 }
 function chkConn(g){
@@ -4307,7 +4411,6 @@ function editGroupPlan(id){
 function swG(id){finDraw();S.cur=id;rSel();rList();updCnt();updMountBtns();}
 
 const SYS_ICONS = {ros:'🔌', osv:'💡', av:'🚨', em:'🧵'};
-let CUR_MARKA_OVERRIDE = null; // {key,marka,markaFull} — когда выбрана марка без своего шаблона черчения (см. ID_SYSTEMS_GENERIC_ONLY)
 
 function setSys(sysId){
   CUR_SYS = sysId;
@@ -4656,10 +4759,47 @@ function render(){
     CX.setLineDash([]);
     CX.fillStyle='#14b8a6';CX.beginPath();CX.arc(S.wallP1.x,S.wallP1.y,6/s,0,Math.PI*2);CX.fill();
   }
+  if(S.rigelDraw&&S.rigelP1){
+    const pr = snapO(S.rigelP1.x, S.rigelP1.y, S.curX, S.curY);
+    CX.strokeStyle='rgba(217,119,6,.5)';CX.lineWidth=10/s;CX.setLineDash([14/s,6/s]);
+    CX.beginPath();CX.moveTo(S.rigelP1.x,S.rigelP1.y);CX.lineTo(pr.x,pr.y);CX.stroke();
+    CX.setLineDash([]);
+    CX.fillStyle='#d97706';CX.beginPath();CX.arc(S.rigelP1.x,S.rigelP1.y,6/s,0,Math.PI*2);CX.fill();
+  }
+  // ── Ригели — уже размещённые (балка под потолком, заштрихованная полоса) ──
+  for(const rg of (S.rigels||[])){
+    const dx=rg.x2-rg.x1, dy=rg.y2-rg.y1, len=Math.hypot(dx,dy)||1;
+    const nx=-dy/len, ny=dx/len; // нормаль
+    const halfW = rg.w/2;
+    CX.strokeStyle='#d97706'; CX.lineWidth=1.2/s;
+    CX.fillStyle='rgba(217,119,6,.18)';
+    CX.beginPath();
+    CX.moveTo(rg.x1+nx*halfW, rg.y1+ny*halfW);
+    CX.lineTo(rg.x2+nx*halfW, rg.y2+ny*halfW);
+    CX.lineTo(rg.x2-nx*halfW, rg.y2-ny*halfW);
+    CX.lineTo(rg.x1-nx*halfW, rg.y1-ny*halfW);
+    CX.closePath(); CX.fill(); CX.stroke();
+    // Штриховка
+    const hatchStep=60;
+    for(let t=0;t<=len;t+=hatchStep){
+      const cx=rg.x1+dx/len*t, cy=rg.y1+dy/len*t;
+      CX.beginPath();
+      CX.moveTo(cx+nx*halfW, cy+ny*halfW);
+      CX.lineTo(cx-nx*halfW, cy-ny*halfW);
+      CX.stroke();
+    }
+    if(S.showLabels){
+      CX.font=`bold ${11/s}px Arial`; CX.fillStyle='#d97706';
+      CX.save(); CX.translate((rg.x1+rg.x2)/2,(rg.y1+rg.y2)/2);
+      CX.fillText(`ригель ${rg.w}×${rg.h}мм`, 8/s, -halfW-6/s);
+      CX.restore();
+    }
+  }
 
   // ── Кабельные группы ──
   const LW=2/s, SZ=12/s; // линия 2px, символ 12px в мировых мм
   for(const g of S.groups){
+    if(S.hiddenSystems && g.sys && S.hiddenSystems.has(g.sys)) continue; // скрытый слой системы
     const err=!g.ok&&g.segs.length>1;
     CX.strokeStyle=err?'#ef4444':g.color;
     CX.lineWidth=LW;CX.setLineDash(err?[15/s,6/s]:[]);
@@ -5213,6 +5353,49 @@ function toggleHandMode(){
 // Скрыть/показать размерные выноски (длины опусков/сегментов/светильников) —
 // сами кабели, коробки и символы остаются, убираются только текстовые подписи,
 // которые перегружают чертёж, когда рядом много опусков/розеток
+// Отображаемое имя системы по ключу — ищет во всех трёх справочниках
+function sysDisplayName(key){
+  if(ID_SYSTEMS[key]) return ID_SYSTEMS[key].marka+' — '+ID_SYSTEMS[key].name;
+  if(ID_SYSTEMS_GENERIC_ONLY[key]) return ID_SYSTEMS_GENERIC_ONLY[key].marka+' — '+ID_SYSTEMS_GENERIC_ONLY[key].markaFull;
+  if(ID_SYSTEMS_SS[key]) return ID_SYSTEMS_SS[key].marka+' — '+ID_SYSTEMS_SS[key].markaFull;
+  return key;
+}
+function sysDisplayColor(key){
+  return ID_SYSTEMS[key]?.color || (ID_SYSTEMS_SS[key]?.color) || '#64748b';
+}
+function openLayersPanel(){
+  const keys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
+  const box = document.getElementById('mlay-body');
+  if(!box) return;
+  if(!keys.length){
+    box.innerHTML = '<div style="font-size:11px;color:#64748b;padding:10px">Пока только одна система в этом чертеже — переключать нечего.</div>';
+  }else{
+    box.innerHTML = keys.map(key=>{
+      const hidden = S.hiddenSystems.has(key);
+      const cnt = S.groups.filter(g=>g.sys===key).length;
+      const col = sysDisplayColor(key);
+      return `<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;
+        background:#0d1117;border:1px solid ${col};border-radius:6px;cursor:pointer">
+        <input type="checkbox" ${hidden?'':'checked'} onchange="_layToggle('${key}')" style="width:16px;height:16px">
+        <span style="font-weight:700;color:${col};flex:1">${sysDisplayName(key)}</span>
+        <span style="font-size:9.5px;color:#64748b">${cnt} гр.</span>
+      </label>`;
+    }).join('');
+  }
+  openM('mlay');
+}
+function _layToggle(key){
+  if(S.hiddenSystems.has(key)) S.hiddenSystems.delete(key);
+  else S.hiddenSystems.add(key);
+  render();
+}
+function _layAll(show){
+  const keys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
+  if(show) S.hiddenSystems.clear();
+  else keys.forEach(k=>S.hiddenSystems.add(k));
+  openLayersPanel(); render();
+}
+
 function toggleLabels(){
   S.showLabels=!S.showLabels;
   const btn=document.getElementById('lbl-btn');
@@ -5662,6 +5845,20 @@ function _build3DScene(rect, wrap){
     if(any) legendItems.push({name:g.name, color:g.color});
   }
 
+  // Ригели — балки, свисающие от потолка; кабель на этом участке идёт ниже них
+  const rigelMat = new THREE.MeshStandardMaterial({color:0xd97706, transparent:true, opacity:0.55});
+  for(const rg of (S.rigels||[])){
+    if(!inRect(rg.x1,rg.y1,500) && !inRect(rg.x2,rg.y2,500)) continue;
+    const dx=lx(rg.x2)-lx(rg.x1), dz=lz(rg.y2)-lz(rg.y1);
+    const len=Math.hypot(dx,dz);
+    if(len<0.01) continue;
+    const rh=M(rg.h), rw=M(rg.w);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(len, rh, rw), rigelMat);
+    m.position.set((lx(rg.x1)+lx(rg.x2))/2, ceilY-rh/2, (lz(rg.y1)+lz(rg.y2))/2);
+    m.rotation.y = -Math.atan2(dz,dx);
+    scene.add(m);
+  }
+
   // Щиты — простой блок, прижатый ДЛИННОЙ задней стенкой к ближайшей стене
   // (щиты всегда монтируются вплотную к стене, а не «парят» в пространстве
   // на исходных plan-координатах).
@@ -5972,6 +6169,21 @@ function click(mm){
     }
     render();return;
   }
+  // Ригель — балка под потолком, кабель огибает её снизу автоматически
+  if(S.rigelDraw){
+    if(!S.rigelP1){
+      S.rigelP1={x,y};tip('📏 Кликни вторую точку ригеля');
+    }else{
+      const p2 = snapO(S.rigelP1.x, S.rigelP1.y, x, y);
+      push();S.rigels.push({
+        x1:S.rigelP1.x,y1:S.rigelP1.y,x2:p2.x,y2:p2.y,
+        w:S.rigelW, h:S.rigelH
+      });
+      S.rigelP1=null;updCnt();
+      tip(`✅ Ригель ${S.rigelW}×${S.rigelH}мм добавлен — кабели через него автоматически посчитаны с обходом. Ещё один или Esc`);
+    }
+    render();return;
+  }
   // Ластик
   if(S.t==='er'){eraseAt(x,y);return;}
   // Кабель
@@ -6228,6 +6440,7 @@ function updCnt(){
 function sT(t){
   if(t!=='cable')finDraw();
   if(t!=='wall'){S.wallDraw=false;S.wallP1=null;}
+  if(t!=='rigel'){S.rigelDraw=false;S.rigelP1=null;}
   S.t=t;
   document.querySelectorAll('.btn[id^="t-"]').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('t-'+t);if(el)el.classList.add('on');
@@ -6354,6 +6567,13 @@ function doWall(){
   S.wallP1=null;closeM('mw');sT('wall');
   const names={cap:'капитальная стена',perg200:'перегородка 200мм',perg:'перегородка тонкая'};
   tip('🧱 Кликни первую точку: '+(names[S.wallType]||S.wallType));
+}
+function doRigel(){
+  S.rigelDraw=true;
+  S.rigelW=+document.getElementById('mrig-w').value||600;
+  S.rigelH=+document.getElementById('mrig-h').value||400;
+  S.rigelP1=null;closeM('mrig');sT('rigel');
+  tip(`📏 Кликни первую точку ригеля (${S.rigelW}×${S.rigelH}мм)`);
 }
 
 // Превью в модале стены при смене типа
@@ -6794,7 +7014,7 @@ function exportDrawingWithLegend(){
  try{
   finDraw();
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
-  const mat = calcMat(CUR_SYS, S.groups);
+  const mat = calcMat(curSysKey(), S.groups);
   const activeGroups = S.groups.filter(g=>g.segs.length>0);
   if(!activeGroups.length){ tip('⚠️ Нечего экспортировать — сначала начерти хотя бы одну группу'); return; }
 
@@ -6894,8 +7114,8 @@ function exportDrawingWithLegend(){
   // ── Ведомость материалов (автозаполняемая, с формулами в примечании) ──
   const vals = { cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
-    rozets:mat.rozets, lamps:mat.lamps, wago3:mat.wago3, wago5:mat.wago5,
-    gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki, drilling:mat.drilling };
+    rozets:mat.rozets, rozet_device:mat.rozet_device, lamps:mat.lamps, switches:mat.switches, wago3:mat.wago3, wago5:mat.wago5,
+    gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba };
 
   const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
   const cableBase = +cableParts.reduce((a,b)=>a+b,0).toFixed(2);
@@ -7179,6 +7399,11 @@ function _gostStamp(sheetLabel, sheetNum, totalSheets, sys, shifrText, objAddr, 
   const addrShort = (objAddr||'').trim() || '—';
   const docName = (docFullName||sheetLabel||'').trim();
   return `
+  <div style="align-self:flex-end;display:flex;flex-direction:column;align-items:flex-end;margin-top:6mm;margin-bottom:2mm">
+  <table class="gost-stamp-rev">
+    <tr><th>Изм.</th><th>Кол.уч.</th><th>Лист</th><th>№ докум.</th><th>Дата</th></tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </table>
   <table class="gost-stamp">
     <colgroup>
       <col style="width:7mm"><col style="width:23mm"><col style="width:15mm"><col style="width:10mm">
@@ -7216,7 +7441,50 @@ function _gostStamp(sheetLabel, sheetNum, totalSheets, sys, shifrText, objAddr, 
     <tr style="height:5mm">
       <td class="gs-role"></td><td class="gs-fio"></td><td class="gs-sign"></td><td class="gs-date"></td>
     </tr>
-  </table>`;
+  </table>
+  <div style="font-size:7px;margin-top:1mm">Формат А3</div>
+  </div>`;
+}
+
+// Узел ригеля — сечение с обходом кабеля снизу (как в типовом альбоме):
+// круг, в верхней части — заштрихованный ригель шириной w и высотой h (мм),
+// кабель огибает его понизу штрихпунктиром.
+function _rigelNodeSVG(w,h){
+  const R=95, cx=110, cy=110;
+  const rw = Math.min(150, 40+w/12), rh = Math.min(70, 20+h/8); // масштаб для читаемости
+  const rx = cx-rw/2, ry = cy-R*0.62;
+  return `<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" style="background:#fff">
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1a4a8a" stroke-width="1.6"/>
+    <defs><pattern id="hatch${w}x${h}" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#1a4a8a" stroke-width="1"/>
+    </pattern></defs>
+    <rect x="${rx}" y="${ry-6}" width="${rw}" height="6" fill="url(#hatch${w}x${h})" stroke="#1a4a8a" stroke-width="1"/>
+    <rect x="${rx+rw*0.28}" y="${ry}" width="${rw*0.44}" height="${rh}" fill="url(#hatch${w}x${h})" stroke="#1a4a8a" stroke-width="1.3"/>
+    <path d="M ${cx-R*0.82} ${ry-2} L ${rx} ${ry-2}" stroke="#2563eb" stroke-width="1.6" fill="none"/>
+    <path d="M ${rx+rw} ${ry-2} L ${cx+R*0.82} ${ry-2}" stroke="#2563eb" stroke-width="1.6" fill="none"/>
+    <path d="M ${rx} ${ry-2} L ${rx} ${ry+rh} L ${rx+rw*0.28} ${ry+rh}" stroke="#2563eb" stroke-width="1.6" fill="none" stroke-dasharray="3,2"/>
+    <path d="M ${rx+rw*0.72} ${ry+rh} L ${rx+rw} ${ry+rh} L ${rx+rw} ${ry-2}" stroke="#2563eb" stroke-width="1.6" fill="none" stroke-dasharray="3,2"/>
+    <line x1="${rx+rw*0.28}" y1="${ry+rh}" x2="${rx+rw*0.72}" y2="${ry+rh}" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="3,2"/>
+    <line x1="${rx+rw*0.28}" y1="${ry+rh+6}" x2="${rx+rw*0.72}" y2="${ry+rh+6}" stroke="#333" stroke-width="0.8"/>
+    <line x1="${rx+rw*0.28}" y1="${ry+rh+2}" x2="${rx+rw*0.28}" y2="${ry+rh+10}" stroke="#333" stroke-width="0.8"/>
+    <line x1="${rx+rw*0.72}" y1="${ry+rh+2}" x2="${rx+rw*0.72}" y2="${ry+rh+10}" stroke="#333" stroke-width="0.8"/>
+    <text x="${cx}" y="${ry+rh+20}" text-anchor="middle" font-size="11" font-family="Arial">${(w/1000).toFixed(1)}м</text>
+    <line x1="${rx+rw+8}" y1="${ry}" x2="${rx+rw+8}" y2="${ry+rh}" stroke="#333" stroke-width="0.8"/>
+    <line x1="${rx+rw+4}" y1="${ry}" x2="${rx+rw+12}" y2="${ry}" stroke="#333" stroke-width="0.8"/>
+    <line x1="${rx+rw+4}" y1="${ry+rh}" x2="${rx+rw+12}" y2="${ry+rh}" stroke="#333" stroke-width="0.8"/>
+    <text x="${rx+rw+16}" y="${ry+rh/2+4}" font-size="11" font-family="Arial">${(h/1000).toFixed(1)}м</text>
+  </svg>`;
+}
+function _rigelNodesHtml(){
+  if(!S.rigels || !S.rigels.length) return '';
+  const uniq = [...new Map(S.rigels.map(r=>[r.w+'x'+r.h, r])).values()];
+  return `<h3>Узел обхода ригеля кабелем</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+  ${uniq.map(r=>`<div style="text-align:center">${_rigelNodeSVG(r.w,r.h)}
+    <div style="font-size:10px;color:#1a4a8a;font-weight:700">Ригель ${r.w}×${r.h}мм</div>
+    <div style="font-size:9px;color:#666">Труба гофрированная — на обходе, сеч. по расчёту</div>
+  </div>`).join('')}
+  </div>`;
 }
 
 // Точка входа с кнопки «📋» — сперва спрашиваем, какие этапы включить в
@@ -7253,11 +7521,120 @@ function _mvedAll(){
   });
 }
 
+// ── Автоматическое разложение ведомости по системам и этапам ──────────
+// Собирает ОДИН печатный документ, но с отдельным разделом (шифр + таблица
+// материалов) на каждую пару «система × этап», которая реально встречается
+// в чертеже — как того требует регламент ИД компании (файл на каждую пару
+// марка/система + вид работ: КЛ / ОБ / ОСР).
+function _mvedAutoSplit(){
+ try{
+  finDraw();
+  Object.keys(VED_STAGES).forEach(key=>{
+    const cb=document.getElementById('mved-st-'+key);
+    _vedStages[key] = cb ? cb.checked : true;
+  });
+  const selStages = Object.keys(VED_STAGES).filter(k=>_vedStages[k]);
+  if(!selStages.length){ tip('⚠️ Выбери хотя бы один этап'); return; }
+
+  const sysKeys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
+  if(!sysKeys.length) sysKeys.push(curSysKey());
+
+  const proj=(document.getElementById('share-project')?.value||document.getElementById('aosr-project')?.value||'').trim().toUpperCase();
+  const korpus=(document.getElementById('share-korpus')?.value||document.getElementById('aosr-korpus')?.value||'').trim().toUpperCase();
+  const objAddr=(document.getElementById('aosr-object')?.value||'').trim();
+
+  let sections='';
+  let sectionCount=0;
+  for(const sysKey of sysKeys){
+    // Марка/система для заголовка и шифра
+    const dict = ID_SYSTEMS[sysKey] ? ID_SYSTEMS[sysKey]
+      : ID_SYSTEMS_GENERIC_ONLY[sysKey] ? ID_SYSTEMS_GENERIC_ONLY[sysKey]
+      : ID_SYSTEMS_SS[sysKey];
+    if(!dict) continue;
+    const markaCode = (dict.marka||sysKey).toUpperCase();
+    const markaName = dict.markaFull || dict.name || dict.marka;
+    // Черчение/материалы считаем по шаблону КЛ (ЭМ), если у системы нет своего
+    const matTemplate = ID_SYSTEMS[sysKey] ? ID_SYSTEMS[sysKey] : ID_SYSTEMS.em;
+    const mat = calcMat(sysKey, S.groups);
+    const groupsOfSys = S.groups.filter(g=>g.sys===sysKey || !g.sys);
+    if(!groupsOfSys.length) continue;
+
+    const vals = {
+      cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
+      boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
+      rozets:mat.rozets, rozet_device:mat.rozet_device, lamps:mat.lamps, switches:mat.switches,
+      wago3:mat.wago3, wago5:mat.wago5, gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg,
+      pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba
+    };
+
+    for(const stKey of selStages){
+      const items = matTemplate.materials.filter(item=>(CALC_STAGE[item.calc]||'kl')===stKey);
+      const rows = items.map(item=>({item, qty: vals[item.calc]||0}))
+        .filter(r=>r.qty>0 || ['cable','gofra','boxes'].includes(r.item.calc));
+      if(!rows.length) continue; // для этой системы этот этап пуст — файл не создаём
+
+      sectionCount++;
+      const shifr = 'ИД_'+proj+(korpus?'_'+korpus:'')+'_'+markaCode+'_'+VED_STAGES[stKey].short;
+      let matRows='';
+      rows.forEach((r,i)=>{
+        matRows+=`<tr style="${i%2?'background:#f7f9ff':''}">
+          <td>${i+1}</td><td>${r.item.name}</td>
+          <td style="font-size:9px;color:#64748b">${r.item.art}</td>
+          <td style="text-align:center">${r.item.unit}</td>
+          <td style="text-align:center;font-weight:700">${r.qty}</td>
+          <td style="text-align:center;font-weight:700;color:#1a4a8a">${r.qty}</td>
+        </tr>`;
+      });
+      sections += `
+<div class="sheet-page ${sectionCount>1?'sheet-break':''}"><div class="sheet-content">
+<div class="sys-badge" style="background:${VED_STAGES[stKey].color}22;color:${VED_STAGES[stKey].color};border-color:${VED_STAGES[stKey].color}">${VED_STAGES[stKey].label}</div>
+<h2>${markaCode} — ${markaName}</h2>
+<div class="meta">Шифр: <b>${shifr}</b>${objAddr?' | '+objAddr:''} | Групп в системе: ${groupsOfSys.length} | ${new Date().toLocaleDateString('ru')}</div>
+<table><tr><th>#</th><th>Наименование</th><th>Артикул</th><th>Ед.</th><th>База</th><th>К закупке</th></tr>${matRows}</table>
+</div>
+${_gostStamp(VED_STAGES[stKey].label, sectionCount, sectionCount, matTemplate, shifr, objAddr, `Ведомость материалов — ${markaName}`)}
+</div>`;
+    }
+  }
+
+  if(!sectionCount){ tip('⚠️ Не найдено ни одной пары «система × этап» с материалами'); return; }
+
+  const h=`<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<title>Ведомости по системам и этапам</title>
+<style>
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;padding:10px;color:#111;background:#fff}
+h2{color:#1a4a8a;font-size:15px;margin-bottom:3px}
+.sys-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;margin-bottom:6px;border:1px solid}
+.meta{font-size:10px;color:#555;margin-bottom:8px}
+table{border-collapse:collapse;width:100%;font-size:10px;margin-bottom:6px}
+th{background:#1a4a8a;color:#fff;padding:4px 6px;text-align:left;font-size:9.5px}
+td{border:1px solid #ddd;padding:3px 5px;vertical-align:top}
+.btn{margin:4px 4px 4px 0;padding:7px 16px;background:#1a4a8a;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px}
+@media print{.noprint{display:none}.sheet-break{page-break-before:always}@page{size:A3 landscape;margin:10mm}}
+</style></head><body>
+<div class="noprint"><button class="btn" onclick="window.print()">🖨 Печать/PDF</button></div>
+${sections}
+<\/body><\/html>`;
+
+  closeM('mved-stage');
+  const fname = `Ведомости_по_системам_${new Date().toLocaleDateString('ru').replace(/\./g,'-')}.html`;
+  _vedPreviewHtml = h;
+  _vedPreviewFname = fname;
+  const frame = document.getElementById('ved-preview-frame');
+  if(frame) frame.srcdoc = h;
+  openM('m-ved-preview');
+  tip(`📚 Готово: ${sectionCount} раздел(ов) по системам/этапам — проверь и скачай`);
+ }catch(e){
+  tip('❌ Не удалось разложить по системам: '+e.message);
+  console.error('_mvedAutoSplit error:', e);
+ }
+}
+
 function _doExpV(){
  try{
   finDraw();
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
-  const mat = calcMat(CUR_SYS, S.groups);
+  const mat = calcMat(curSysKey(), S.groups);
   const birki = mat.birki;
   const activeGroups = S.groups.filter(g=>g.segs.length>0);
 
@@ -7480,6 +7857,7 @@ function _doExpV(){
     clips:      mat.clips,
     clips_fr:   mat.clips_fr,
     rozets:     mat.rozets,
+    rozet_device: mat.rozet_device,
     lamps:      mat.lamps,
     switches:   mat.switches,
     wago3:      mat.wago3,
@@ -7488,7 +7866,8 @@ function _doExpV(){
     gilzy_perg: mat.gilzy_perg,
     pena:       mat.pena,
     birki:      mat.birki,
-    drilling:   mat.drilling
+    drilling:   mat.drilling,
+    shtroba:    mat.shtroba
   };
 
   const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
@@ -7585,9 +7964,11 @@ td{border:1px solid #ddd;padding:3px 5px;vertical-align:top}
 .gost-stamp{
   align-self:flex-end;
   border-collapse:collapse;
-  margin-top:6mm; margin-bottom:2mm;
   font-size:8px; font-family:Arial,sans-serif; color:#000;
 }
+.gost-stamp-rev{border-collapse:collapse;font-size:6.5px;font-family:Arial,sans-serif;color:#000;margin-bottom:0}
+.gost-stamp-rev th,.gost-stamp-rev td{border:0.35mm solid #000;padding:1px 3px;text-align:center;min-width:9mm}
+.gost-stamp-rev th{font-weight:400}
 .gost-stamp td{border:0.35mm solid #000; padding:1px 3px; vertical-align:middle}
 .gs-role{font-size:7px; text-align:left}
 .gs-fio,.gs-sign,.gs-date{min-width:14mm}
@@ -7628,6 +8009,7 @@ ${drawingDataURL ? `
 
 <h3>УГО (условные графические обозначения)</h3>
 <table><tr><th style="width:70px">УГО</th><th>Наименование</th></tr>${ugoHtml}</table>
+${_rigelNodesHtml()}
 ` : `<div class="note">⚠️ Не удалось встроить чертёж с выносками и УГО в этот раз — сама ведомость ниже посчитана верно. Попробуй нажать «📋» ещё раз; если повторится — сообщи об этом.</div>`}
 </div>
 ${(()=>{
@@ -7741,7 +8123,7 @@ function showReady(){
   const gTotal=S.groups.reduce((s,g)=>s+g.gilzy.length,0);
   const kTotal=S.groups.reduce((s,g)=>s+klipsyG(g),0);
   const _sys = ID_SYSTEMS[CUR_SYS]||ID_SYSTEMS.ros;
-  const _mat = calcMat(CUR_SYS, S.groups);
+  const _mat = calcMat(curSysKey(), S.groups);
   document.getElementById('mexp-info').innerHTML=
     `<span style="font-size:11px;color:${_sys.color};font-weight:700">${_sys.name}</span><br>`+
     `<b style="color:#4ade80">Кабель нетто:</b> ${S.groups.reduce((s,g)=>s+gLF(g),0).toFixed(2)}м → ×1.06 = ${(S.groups.reduce((s,g)=>s+gLF(g),0)*1.06).toFixed(2)}м<br>`+
@@ -8543,7 +8925,7 @@ function showMergeVed(){
   allGroups.push(...JSON.parse(JSON.stringify(S.groups)));
 
   // Используем calcMat по всем группам
-  const mat=calcMat(CUR_SYS, allGroups);
+  const mat=calcMat(curSysKey(), allGroups);
   const birki=calcBirki(allGroups);
   let gC=0,gP=0,totK=0;
   allGroups.forEach(g=>{totK+=gLF(g);g.gilzy?.forEach(gl=>gl.wt==='cap'?gC++:gP++);});
@@ -9241,7 +9623,7 @@ function getIDQty(){
   for(const layer of S.layers) if(layer.snap?.groups) allGroups.push(...layer.snap.groups);
   allGroups.push(...S.groups);
 
-  const mat = calcMat(CUR_SYS, allGroups);
+  const mat = calcMat(curSysKey(), allGroups);
   const birki = calcBirki(allGroups);
   let gC=0,gP=0;
   allGroups.forEach(g=>g.gilzy?.forEach(gl=>gl.wt==='cap'?gC++:gP++));
@@ -10458,7 +10840,7 @@ function _cloudGetFiles(name){
   // Ведомость HTML
   if(document.getElementById('cl-ved')?.checked){
     const sys=ID_SYSTEMS[CUR_SYS]||ID_SYSTEMS.ros;
-    const mat=calcMat(CUR_SYS,S.groups);
+    const mat=calcMat(curSysKey(),S.groups);
     // Строим HTML ведомости
     const vedHtml=_buildVedHTML(sys,mat,name);
     files.push({name:`${prefix}_ведомость.html`, content:vedHtml, mime:'text/html'});
@@ -10483,9 +10865,9 @@ function _buildVedHTML(sys,mat,projectName,stages){
   const vals={
     cable:mat.cable,boxes_ip55:mat.boxCounts?.ip55||0,boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
-    clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,lamps:mat.lamps,switches:mat.switches,
+    clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,rozet_device:mat.rozet_device,lamps:mat.lamps,switches:mat.switches,
     wago3:mat.wago3,wago5:mat.wago5,gilzy_cap:mat.gilzy_cap,
-    gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling
+    gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba
   };
   // Материалы группируем по этапам (Общестрой / Кабельные линии / Оборудование)
   // и печатаем только выбранные пользователем этапы, каждый — своим разделом
@@ -11135,7 +11517,7 @@ async function _buildSharePageWithDraft(name, author){
 
   // Строим страницу с чертежом
   const sys=ID_SYSTEMS[CUR_SYS]||ID_SYSTEMS.ros;
-  const mat=calcMat(CUR_SYS,S.groups);
+  const mat=calcMat(curSysKey(),S.groups);
   const journalHtml=buildCableJournal(S.groups);
   const heightsHtml=heightsTableHTML();
 
@@ -11154,8 +11536,8 @@ async function _buildSharePageWithDraft(name, author){
 
   let matRows='';
   const vals={cable:mat.cable,boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
-    clips:mat.clips,rozets:mat.rozets,lamps:mat.lamps,switches:mat.switches,wago3:mat.wago3,wago5:mat.wago5,
-    gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling};
+    clips:mat.clips,rozets:mat.rozets,rozet_device:mat.rozet_device,lamps:mat.lamps,switches:mat.switches,wago3:mat.wago3,wago5:mat.wago5,
+    gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba};
   sys.materials.forEach((item,i)=>{
     const qty=vals[item.calc]||0;
     if(qty<=0&&!['cable','gofra','boxes'].includes(item.calc)) return;
@@ -11662,7 +12044,7 @@ function tip(m){const el=document.getElementById('tip');el.textContent=m;el.clas
 // ══════════════════════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key==='z'){e.preventDefault();undo();return;}
-  if(e.key==='Escape'){finDraw();S.wallDraw=false;S.wallP1=null;S.opPend=null;S.schPend=null;if(S.calibMode)cancelCalib();render();return;}
+  if(e.key==='Escape'){finDraw();S.wallDraw=false;S.wallP1=null;S.rigelDraw=false;S.rigelP1=null;S.opPend=null;S.schPend=null;if(S.calibMode)cancelCalib();render();return;}
   if(e.key==='Enter'&&S.draw){finDraw();return;}
   if(!e.ctrlKey&&!e.altKey&&!e.shiftKey){
     const k={c:'cable',b:'box',r:'rozet',l:'lamp',o:'opusk',w:'wall',x:'er'};
