@@ -1331,7 +1331,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="6" selected="">Гр.1с</option><option value="7">Гр.2с</option><option value="8">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="6" selected="">Гр.1с</option><option value="7">Гр.2с</option><option value="8">Гр.1о</option><option value="7">Гр.4</option><option value="8">Гр.5</option><option value="9">Гр.6</option><option value="10">Гр.1о</option><option value="12">Гр.8</option><option value="13">Гр.9</option><option value="18">Гр.10</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1368,7 +1368,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">1%</span>
   </label>
   </span>
 
@@ -1565,20 +1565,20 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <!-- Счётчики -->
     <div id="cnt">
       <div style="font-size:8.5px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📊 Итого</div>
-      Кабель: <b id="ck">0.0м</b><br>
-      ×1.06: <b id="ckz">0.0м</b><br>
-      Коробок: <b id="cb2">0</b><br>
+      Кабель: <b id="ck">353.2м</b><br>
+      ×1.06: <b id="ckz">374.4м</b><br>
+      Коробок: <b id="cb2">48</b><br>
       Розеток: <b id="cr">0</b><br>
-      <span style="color:#10b981">Подрозетники:</span> <b id="cpr">0</b><br>
-      Светильн.: <b id="cl">0</b><br>
-      Гильзы: <b id="cg" class="warn">0</b><br>
-      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">0.0м</b><br>
-      <span style="color:#c084fc">Гофра штроба:</span> <b id="csthr">0.0м</b><br>
+      <span style="color:#10b981">Подрозетники:</span> <b id="cpr">16</b><br>
+      Светильн.: <b id="cl">22 (фальш 0.50м, оп.2.60м)</b><br>
+      Гильзы: <b id="cg" class="warn">12</b><br>
+      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">230.6м</b><br>
+      <span style="color:#c084fc">Гофра штроба:</span> <b id="csthr">46.8м</b><br>
       <span style="color:#818cf8">Лоток:</span> <b id="clot">0.0м</b><br>
-      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">0</b><br>
-      Несвязан: <b id="ce" class="warn">0</b><br>
-      <span style="color:#a78bfa">Опусков:</span> <b id="co">0</b><br>
-      <span style="color:#facc15">Бирки:</span> <b id="cbk">0</b>
+      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">272</b><br>
+      Несвязан: <b id="ce" class="warn">4</b><br>
+      <span style="color:#a78bfa">Опусков:</span> <b id="co">26</b><br>
+      <span style="color:#facc15">Бирки:</span> <b id="cbk">37</b>
     </div>
 
     <div style="margin-top:5px">
@@ -1586,7 +1586,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.1с</div>
-      <div class="ms">0.0м</div>
+      <div class="ms">53.8м</div>
       </div>
     </div><div class="gi" style="border-color:#3b82f6" onclick="swG(7)">
       <div class="md" style="background:#3b82f6"></div>
@@ -1598,11 +1598,46 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       <div><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
       </div>
+    </div><div class="gi" style="border-color:#3bf7f4" onclick="swG(7)">
+      <div class="md" style="background:#3bf7f4"></div>
+      <div><div class="mn">Гр.4</div>
+      <div class="ms">0.0м</div>
+      </div>
+    </div><div class="gi" style="border-color:#3bf7f4" onclick="swG(8)">
+      <div class="md" style="background:#3bf7f4"></div>
+      <div><div class="mn">Гр.5</div>
+      <div class="ms">0.0м</div>
+      </div>
+    </div><div class="gi" style="border-color:#3bf7f4" onclick="swG(9)">
+      <div class="md" style="background:#3bf7f4"></div>
+      <div><div class="mn">Гр.6 ⚠</div>
+      <div class="ms">41.0м</div>
+      </div>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(10)">
+      <div class="md" style="background:#f59e0b"></div>
+      <div><div class="mn">Гр.1о</div>
+      <div class="ms">0.0м</div>
+      </div>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(12)">
+      <div class="md" style="background:#f59e0b"></div>
+      <div><div class="mn">Гр.8 ⚠</div>
+      <div class="ms">43.3м</div>
+      </div>
+    </div><div class="gi" style="border-color:#31f50a" onclick="swG(13)">
+      <div class="md" style="background:#31f50a"></div>
+      <div><div class="mn">Гр.9 ⚠</div>
+      <div class="ms">56.0м</div>
+      </div>
+    </div><div class="gi" style="border-color:#ef4444" onclick="swG(18)">
+      <div class="md" style="background:#ef4444"></div>
+      <div><div class="mn">Гр.10 ⚠</div>
+      <div class="ms">36.5м</div>
+      </div>
     </div></div>
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="1760" height="850"></canvas></div>
+  <div id="cw"><canvas id="cv" width="390" height="600"></canvas></div>
 </div>
 
 <div id="st">
@@ -12457,6 +12492,19 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+  }catch(e){}
+});
+</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
