@@ -3813,6 +3813,15 @@ function calcMat(sys, groups){
     const Lcable  = gLF(g);
     totCable += Lcable;
 
+    // Опуск светильника (основной потолок → фальш-потолок) идёт в
+    // запотолочном пространстве — это гофра по потолку (КЛ), а не штроба
+    // (штроба считается отдельно в gSthrLen, светильники туда больше не входят)
+    const lampDropLen = g.lamps.reduce((s,l)=>s+(l.ol||0)/1000,0);
+    if(lampDropLen>0){
+      totGofCeil += lampDropLen;
+      totClipsCeil += Math.ceil(lampDropLen/0.5);
+    }
+
     // По сегментам — каждый сегмент знает свой тип монтажа
     for(const seg of g.segs){
       const sm = seg.mount||g.mount||'gof20';
@@ -3828,7 +3837,7 @@ function calcMat(sys, groups){
         _lotokCounts[sm]+=segLen;
         // Консоли ставятся с обеих сторон ригеля, если лоток его пересекает
         for(const rg of (S.rigels||[])){
-          if(_segXsegX(seg.x1,seg.y1,seg.x2,seg.y2, rg.x1,rg.y1,rg.x2,rg.y2)){
+          if(_segXRigel(seg.x1,seg.y1,seg.x2,seg.y2, rg)){
             if(!_lotokRigelCrossings[sm]) _lotokRigelCrossings[sm]=0;
             _lotokRigelCrossings[sm]+=2; // консоль с каждой стороны ригеля
           }
@@ -4266,7 +4275,10 @@ function rebuildBirki(g){
     const dx=seg.x2-seg.x1, dy=seg.y2-seg.y1;
     const len=Math.hypot(dx,dy)||1;
     const ux=dx/len, uy=dy/len;
-    const OFFSET=400; // мм
+    // Отступ должен гарантированно выносить бирку ЗА пределы стены (не внутрь
+    // неё) — берём половину толщины стены в этом месте + запас, а не
+    // фиксированные 400мм (для капитальной стены 500мм этого может не хватить)
+    const OFFSET=Math.max(400, (gl.thick||100)/2+250); // мм
     g.birki.push({x:gl.x-ux*OFFSET,y:gl.y-uy*OFFSET,
       label:`${g.name}
 пер.гильзу`,num:num++,type:'before_gilza'});
@@ -4303,13 +4315,15 @@ function mkG(n,s,p,m,k,c,boxType,plan){
 // Длина кабеля в штробе (опуски) в метрах
 // Опуск cnt=3 значит 3 параллельных штробы одной длины
 function gSthrLen(g){
-  // Опуски + штробные сегменты + ручные розетки/светильники
+  // Опуски + штробные сегменты + ручные розетки
+  // Светильники — НЕ сюда: опуск от основного потолка до фальш-потолка идёт
+  // в запотолочном пространстве, это просто гофра, а не штроба (штроба —
+  // это именно прорезка в стене/полу под опуск к розетке/выключателю/щиту)
   let L=0;
   L+=g.segs.filter(s=>(s.mount||g.mount||'').startsWith('sthr'))
      .reduce((s,seg)=>s+Math.hypot(seg.x2-seg.x1,seg.y2-seg.y1)/1000,0);
   L+=g.opuski.reduce((s,o)=>s+(o.cnt||1)*o.lm/1000,0);
   L+=g.rozets.filter(r=>!r.auto).reduce((s,r)=>s+r.ol/1000,0);
-  L+=g.lamps.reduce((s,l)=>s+l.ol/1000,0);
   return L;
 }
 function gCeilLenGof(g){
@@ -4388,6 +4402,27 @@ function _segXsegX(ax1,ay1,ax2,ay2,bx1,by1,bx2,by2){
   const u=((bx1-ax1)*d1y-(by1-ay1)*d1x)/den;
   return t>0.001 && t<0.999 && u>0.001 && u<0.999;
 }
+// Точка внутри прямоугольника ригеля (по длине И ширине балки) — общая
+// для расчёта материалов (gRigelExtra) и 3D-отрисовки
+function _pointInRigelG(px,py,rg){
+  const bdx=rg.x2-rg.x1, bdy=rg.y2-rg.y1, blen=Math.hypot(bdx,bdy)||1;
+  const ux=bdx/blen, uy=bdy/blen, nx=-uy, ny=ux;
+  const relX=px-rg.x1, relY=py-rg.y1;
+  const along=relX*ux+relY*uy, across=relX*nx+relY*ny;
+  return along>=-15 && along<=blen+15 && Math.abs(across)<=rg.w/2+15;
+}
+// Пересекает ли отрезок кабеля прямоугольник (полосу) ригеля — сэмплируем
+// точки вдоль отрезка, это надёжно работает при любом угле, включая почти
+// параллельный ригелю (старая проверка через пересечение ЛИНИЙ давала false
+// в таких случаях, и обход вообще не считался)
+function _segXRigel(x1,y1,x2,y2, rg){
+  const N=30;
+  for(let i=0;i<=N;i++){
+    const t=i/N;
+    if(_pointInRigelG(x1+(x2-x1)*t, y1+(y2-y1)*t, rg)) return true;
+  }
+  return false;
+}
 // Ригель — балка под потолком: если трасса группы пересекает его, кабель
 // физически должен обойти его снизу (вниз на высоту ригеля, вдоль его
 // ширины, обратно вверх) — считаем эту добавку автоматически, мастеру не
@@ -4396,7 +4431,7 @@ function gRigelExtra(g){
   let extraMm=0, crossings=0;
   for(const seg of g.segs){
     for(const rg of (S.rigels||[])){
-      if(_segXsegX(seg.x1,seg.y1,seg.x2,seg.y2, rg.x1,rg.y1,rg.x2,rg.y2)){
+      if(_segXRigel(seg.x1,seg.y1,seg.x2,seg.y2, rg)){
         extraMm += rg.h*2 + rg.w; // вниз + вдоль ширины + обратно вверх
         crossings++;
       }
@@ -5701,6 +5736,26 @@ function _build3DScene(rect, wrap){
   // без неё в 3D кабели разных групп, идущие по одной оси, визуально сливались
   // в одну линию и было не разобрать, где чья трасса.
   const _segOffsets3D = _collectLineOffsets();
+  // Разводим визуально подъёмы от щита (_riser), если несколько групп
+  // заходят в один и тот же щит — иначе их риsery совпадают почти
+  // координата-в-координату и в 3D выглядят как ОДИН опуск вместо
+  // «по одному на каждую кабельную линию»
+  const _riserOffsets = (()=>{
+    const all=[];
+    for(const gg of S.groups) for(const op of (gg.opuski||[])) if(op._riser) all.push(op);
+    const clusters=[];
+    for(const op of all){
+      let found=clusters.find(cl=>Math.hypot(cl[0].x-op.x, cl[0].y-op.y)<400);
+      if(found) found.push(op); else clusters.push([op]);
+    }
+    const map=new Map();
+    const STEP=120; // мм между соседними риserами у одного щита
+    for(const cl of clusters){
+      if(cl.length<2) continue;
+      cl.forEach((op,idx)=>{ map.set(op, (idx-(cl.length-1)/2)*STEP); });
+    }
+    return map;
+  })();
   const cx = (rect.x1+rect.x2)/2, cy=(rect.y1+rect.y2)/2;
   const inRect = (x,y,pad)=> x>=rect.x1-(pad||0) && x<=rect.x2+(pad||0) && y>=rect.y1-(pad||0) && y<=rect.y2+(pad||0);
   const segInRect = (s)=> inRect(s.x1,s.y1,300) || inRect(s.x2,s.y2,300) ||
@@ -5869,13 +5924,36 @@ function _build3DScene(rect, wrap){
         }
       }
     }
-    // Коробки — маленький кубик на потолке
+    // Коробки — маленький кубик на потолке. Если коробка стоит на участке
+    // трассы, где кабель идёт в лотке, — коробка монтируется РЯДОМ с лотком
+    // (сбоку), а не внутри его короба (иначе визуально накладывались друг
+    // на друга — коробка «вживлялась» в лоток).
     const boxMat = new THREE.MeshStandardMaterial({color:col});
+    const boxSize=0.09;
     for(const b of (g.boxes||[])){
       if(!inRect(b.x,b.y,200)) continue;
       any=true;
-      const m = new THREE.Mesh(new THREE.BoxGeometry(0.09,0.09,0.09), boxMat);
-      m.position.set(lx(b.x), ceilY-0.06, lz(b.y));
+      let bx=b.x, by=b.y;
+      // Ищем ближайший лотковый сегмент рядом с коробкой
+      let nearestLotok=null, nearestD=150;
+      for(const s2 of (g.segs||[])){
+        if(!(s2.mount||g.mount||'').startsWith('lotok')) continue;
+        const sdx=s2.x2-s2.x1, sdy=s2.y2-s2.y1, sl=Math.hypot(sdx,sdy);
+        if(sl<1) continue;
+        const t=Math.max(0,Math.min(1, ((b.x-s2.x1)*sdx+(b.y-s2.y1)*sdy)/(sl*sl)));
+        const px=s2.x1+t*sdx, py=s2.y1+t*sdy;
+        const dd=Math.hypot(px-b.x,py-b.y);
+        if(dd<nearestD){ nearestD=dd; nearestLotok={s2,sl,sdx,sdy}; }
+      }
+      if(nearestLotok){
+        const {s2,sl,sdx,sdy}=nearestLotok;
+        const trayWfill=(s2.mount==='lotok200')?0.2:0.1;
+        const nx=-sdy/sl, ny=sdx/sl; // нормаль к лотку
+        const offsetMm=(trayWfill*1000)/2 + boxSize*1000/2 + 30; // за пределы короба лотка + зазор
+        bx = b.x + nx*offsetMm; by = b.y + ny*offsetMm;
+      }
+      const m = new THREE.Mesh(new THREE.BoxGeometry(boxSize,boxSize,boxSize), boxMat);
+      m.position.set(lx(bx), ceilY-0.06, lz(by));
       scene.add(m);
     }
     // Опуски — вертикальная линия от потолка вниз на длину опуска + точка на конце.
@@ -5887,6 +5965,11 @@ function _build3DScene(rect, wrap){
       any=true;
       const yTop=ceilY;
       let yBot;
+      // Смещение для визуального разведения нескольких риserов у одного щита —
+      // только для отрисовки, поиск ближайшего щита и расчёт материалов
+      // используют настоящие op.x/op.y
+      const _rOff = _riserOffsets.get(op)||0;
+      const drawX = op.x + _rOff, drawY = op.y + _rOff*0.35;
       if(op._riser){
         // Ищем ближайший щит рядом с точкой подъёма — линия должна заканчиваться
         // на высоте установки щита, а не «улетать» к полу.
@@ -5899,7 +5982,7 @@ function _build3DScene(rect, wrap){
         const dropLen = M(op.lm||1500);
         yBot = Math.max(0.05, ceilY-dropLen);
       }
-      const pts=[new THREE.Vector3(lx(op.x),yTop,lz(op.y)), new THREE.Vector3(lx(op.x),yBot,lz(op.y))];
+      const pts=[new THREE.Vector3(lx(drawX),yTop,lz(drawY)), new THREE.Vector3(lx(drawX),yBot,lz(drawY))];
       const geo=new THREE.BufferGeometry().setFromPoints(pts);
       scene.add(new THREE.Line(geo, lineMat));
       // Подрозетник (без устройства) — вогнутая полусфера («вмятина» в стену,
@@ -5908,18 +5991,18 @@ function _build3DScene(rect, wrap){
       // визуально отличается от пустого подрозетника. Выключатель — кубик.
       if(op._device==='switch'){
         const sw=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,0.03), new THREE.MeshStandardMaterial({color:0x67e8f9}));
-        sw.position.set(lx(op.x), yBot, lz(op.y));
+        sw.position.set(lx(drawX), yBot, lz(drawY));
         scene.add(sw);
       }else if(op._device==='rozet'){
         const roz=new THREE.Mesh(new THREE.SphereGeometry(0.05,14,10,0,Math.PI*2,0,Math.PI/2),
           new THREE.MeshStandardMaterial({color:0xffffff}));
-        roz.position.set(lx(op.x), yBot, lz(op.y));
+        roz.position.set(lx(drawX), yBot, lz(drawY));
         roz.rotation.x = Math.PI; // выпуклостью «наружу» от места монтажа
         scene.add(roz);
       }else{
         const podroz=new THREE.Mesh(new THREE.SphereGeometry(0.05,14,10,0,Math.PI*2,0,Math.PI/2),
           new THREE.MeshStandardMaterial({color:boxMat.color, side:THREE.BackSide}));
-        podroz.position.set(lx(op.x), yBot, lz(op.y));
+        podroz.position.set(lx(drawX), yBot, lz(drawY));
         scene.add(podroz);
       }
       // Размерная подпись длины опуска — та же кнопка «📐 Включить размеры»,
@@ -5927,7 +6010,7 @@ function _build3DScene(rect, wrap){
       const opDropM = yTop-yBot;
       if(opDropM>0.1){
         const dimSpr = _makeTextSprite(opDropM.toFixed(2)+'м', '#93c5fd');
-        dimSpr.position.set(lx(op.x)+0.08, (yTop+yBot)/2, lz(op.y));
+        dimSpr.position.set(lx(drawX)+0.08, (yTop+yBot)/2, lz(drawY));
         dimSpr.visible = _m3dDimsOn;
         scene.add(dimSpr);
         _m3dDimObjects.push(dimSpr);
@@ -5981,15 +6064,18 @@ function _build3DScene(rect, wrap){
       scene.add(cyl);
     }
     // Бирки — плоские квадратные жетоны (как реальная кабельная бирка
-    // ТМАРК-1-У134, квадрат 55×55мм) в каждой точке из g.birki: у щита,
-    // над щитом, у каждой гильзы, на входе/выходе лотка
+    // ТМАРК-1-У134, квадрат 55×55мм), висят на кабеле ВЕРТИКАЛЬНО (плашмя
+    // лежащая бирка выглядела как «плитка» на потолке — теперь тонкая грань
+    // смотрит вбок, а не вверх/вниз) в каждой точке из g.birki: у щита, над
+    // щитом, у каждой гильзы (по 400мм+ в обе стороны от стены), на входе/
+    // выходе лотка
     const birkaMat = new THREE.MeshStandardMaterial({color:0xf5f0e6, side:THREE.DoubleSide});
     const birkaSize = M(55); // 55×55мм
     for(const b of (g.birki||[])){
       if(!inRect(b.x,b.y,200)) continue;
       any=true;
-      const bm = new THREE.Mesh(new THREE.BoxGeometry(birkaSize, M(6), birkaSize), birkaMat);
-      bm.position.set(lx(b.x), ceilY-0.02, lz(b.y));
+      const bm = new THREE.Mesh(new THREE.BoxGeometry(birkaSize, birkaSize, M(6)), birkaMat);
+      bm.position.set(lx(b.x), ceilY-0.04, lz(b.y));
       bm.rotation.y = Math.PI/4; // угол «ромбом», как в реальности бирку часто видно на кабеле
       scene.add(bm);
     }
@@ -6034,23 +6120,37 @@ function _build3DScene(rect, wrap){
     scene.add(m);
   }
 
-  // Пересечение отрезка кабеля с «полосой» ригеля (по нормали к линии ригеля,
-  // шириной rg.w) — возвращает [tMin,tMax] параметра вдоль КАБЕЛЯ (0..1),
-  // на котором кабель физически проходит ПОД ригелем, либо null
-  function _rigelCrossingRange(x1,y1,x2,y2, rg){
+  // Проверка «точка внутри прямоугольника ригеля» (по его длине И ширине —
+  // раньше проверялась только полоса по ширине БЕЗ учёта длины самого
+  // ригеля, а пересечение линий давало null, если кабель шёл почти
+  // параллельно ригелю — из-за этого нырок иногда вообще не появлялся)
+  function _pointInRigel(px,py,rg){
     const bdx=rg.x2-rg.x1, bdy=rg.y2-rg.y1, blen=Math.hypot(bdx,bdy)||1;
-    const bnx=-bdy/blen, bny=bdx/blen, halfW=rg.w/2;
-    const lineT=(ax1,ay1,ax2,ay2,bx1,by1,bx2,by2)=>{
-      const d1x=ax2-ax1,d1y=ay2-ay1,d2x=bx2-bx1,d2y=by2-by1;
-      const den=d1x*d2y-d1y*d2x;
-      if(Math.abs(den)<1e-9) return null;
-      return ((bx1-ax1)*d2y-(by1-ay1)*d2x)/den;
-    };
-    const t1=lineT(x1,y1,x2,y2, rg.x1+bnx*halfW,rg.y1+bny*halfW, rg.x2+bnx*halfW,rg.y2+bny*halfW);
-    const t2=lineT(x1,y1,x2,y2, rg.x1-bnx*halfW,rg.y1-bny*halfW, rg.x2-bnx*halfW,rg.y2-bny*halfW);
-    if(t1===null||t2===null) return null;
-    const tMin=Math.max(0,Math.min(t1,t2)), tMax=Math.min(1,Math.max(t1,t2));
-    if(tMax<=tMin) return null;
+    const ux=bdx/blen, uy=bdy/blen, nx=-uy, ny=ux;
+    const relX=px-rg.x1, relY=py-rg.y1;
+    const along=relX*ux+relY*uy, across=relX*nx+relY*ny;
+    return along>=-15 && along<=blen+15 && Math.abs(across)<=rg.w/2+15;
+  }
+  // Пересечение отрезка кабеля с прямоугольником ригеля — сэмплируем точки
+  // вдоль кабеля (надёжно работает при любом угле, включая почти параллельный
+  // ригелю) и находим непрерывный диапазон [tMin,tMax], где кабель физически
+  // проходит НАД/ЧЕРЕЗ ригель — там его нужно опустить ниже
+  function _rigelCrossingRange(x1,y1,x2,y2, rg){
+    const N=50;
+    let tMin=null, tMax=null;
+    for(let i=0;i<=N;i++){
+      const t=i/N;
+      const px=x1+(x2-x1)*t, py=y1+(y2-y1)*t;
+      if(_pointInRigel(px,py,rg)){
+        if(tMin===null) tMin=t;
+        tMax=t;
+      }
+    }
+    if(tMin===null) return null;
+    // Небольшой запас с каждой стороны, чтобы нырок начинался чуть раньше
+    // границы ригеля, а не впритык
+    tMin=Math.max(0, tMin-0.02);
+    tMax=Math.min(1, tMax+0.02);
     return [tMin,tMax];
   }
   // Строит точки трассы кабеля с «нырком» ПОД ригель на пересечениях —
