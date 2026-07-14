@@ -1331,7 +1331,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="8" selected="">Гр.1с</option><option value="9">Гр.2с</option><option value="10">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1583,17 +1583,17 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(8)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(9)">
       <div class="md" style="background:#3b82f6"></div>
       <div><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(10)">
       <div class="md" style="background:#f59e0b"></div>
       <div><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
@@ -3604,6 +3604,7 @@ const CALC_STAGE = {
   gilzy_cap:'os', gilzy_perg:'os', gilzy:'os', pena:'os', drilling:'os', shtroba:'os',
   cable:'kl', gofra:'kl', gofra_sthr:'kl', clips:'kl', clips_fr:'kl', wago3:'kl', wago5:'kl',
   birki:'kl', lotok:'kl', boxes:'kl', boxes_ip55:'kl', boxes_fr:'kl', rozets:'kl',
+  console100:'kl', console200:'kl', cryshka100:'kl', cryshka200:'kl', lotok100_sht:'kl', lotok200_sht:'kl',
   rozet_device:'ob', lamps:'ob', switches:'ob', schits:'ob',
 };
 let _vedStages = {os:true, kl:true, ob:true}; // выбор этапов по умолчанию — все
@@ -3627,7 +3628,7 @@ const ID_SYSTEMS = {
       {name:'Подрозетник для полых стен 68×45мм IP30 синий С3Е3', art:'GUSI ELECTRIC', unit:'шт', calc:'rozets'},
       {name:'BRITE Розетка 1 пост с заземлением с защитными шторками 16А в сборе РСР14-1-0-БрЧ черный', art:'IEK BR-R14-16-K02-F', unit:'шт', calc:'rozet_device'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
-      {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
+      {name:'Кабельная бирка ТМАРК-1-У134 компл. 2в1 универсальный квадрат 55×55мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
@@ -3649,12 +3650,18 @@ const ID_SYSTEMS = {
       {name:'Труба гофрированная ПВХ лёгкая чёрная с/з д20 — штроба/опуски (50м/уп)', art:'PR01.0056 Промрукав', unit:'м', calc:'gofra_sthr'},
       {name:'Клемма 3-проводная 221-613', art:'WAGO', unit:'шт', calc:'wago3'},
       {name:'Клемма 5-проводная 0,5-6мм² 221-615', art:'WAGO', unit:'шт', calc:'wago5'},
+      {name:'Лоток проволочный 100×50 L3000 сталь оцинк. DKC FC5010', art:'DKC', unit:'шт', calc:'lotok100_sht'},
+      {name:'Консоль потолоч. VR осн.100 IEK CLW10-VR-100', art:'IEK', unit:'шт', calc:'console100'},
+      {name:'Крышка лотка основание 100мм L3000', art:'DKC', unit:'шт', calc:'cryshka100'},
+      {name:'Лоток проволочный 200×50 L3000 сталь оцинк. DKC FC5020', art:'DKC', unit:'шт', calc:'lotok200_sht'},
+      {name:'Консоль потолоч. VR осн.200 IEK CLW10-VR-200', art:'IEK', unit:'шт', calc:'console200'},
+      {name:'Крышка лотка основание 200мм L3000', art:'DKC', unit:'шт', calc:'cryshka200'},
       {name:'Светильник LED ОФИС УНИВЕРСАЛ (СВО) 28Вт 3400Лм 4,0К КСС Д IP40 опал', art:'ЛЕД-Эффект LE-СВО-03-028-8416-40Д', unit:'шт', calc:'lamps'},
       {name:'BRITE Выключатель одноклавишный с индикацией 10А ВС10-1-1-БрЧ черный', art:'IEK BR-V10-1-10-K02', unit:'шт', calc:'switches'},
       {name:'Коробка распр. IP55 100×100×50мм', art:'IMT35091 Systeme Electric', unit:'шт', calc:'boxes_ip55'},
       {name:'Коробка огнестойкая FR Е15-Е120 100×100×50мм', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes_fr'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
-      {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
+      {name:'Кабельная бирка ТМАРК-1-У134 компл. 2в1 универсальный квадрат 55×55мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
@@ -3677,8 +3684,14 @@ const ID_SYSTEMS = {
       {name:'Коробка огнестойкая для о/п Е15-Е120 100×100×50', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes'},
       {name:'Клемма 3-проводная 221-613', art:'WAGO', unit:'шт', calc:'wago3'},
       {name:'Клемма 5-проводная 0,5-6мм² 221-615', art:'WAGO', unit:'шт', calc:'wago5'},
+      {name:'Лоток проволочный 100×50 L3000 сталь оцинк. DKC FC5010', art:'DKC', unit:'шт', calc:'lotok100_sht'},
+      {name:'Консоль потолоч. VR осн.100 IEK CLW10-VR-100', art:'IEK', unit:'шт', calc:'console100'},
+      {name:'Крышка лотка основание 100мм L3000', art:'DKC', unit:'шт', calc:'cryshka100'},
+      {name:'Лоток проволочный 200×50 L3000 сталь оцинк. DKC FC5020', art:'DKC', unit:'шт', calc:'lotok200_sht'},
+      {name:'Консоль потолоч. VR осн.200 IEK CLW10-VR-200', art:'IEK', unit:'шт', calc:'console200'},
+      {name:'Крышка лотка основание 200мм L3000', art:'DKC', unit:'шт', calc:'cryshka200'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
-      {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
+      {name:'Кабельная бирка ТМАРК-1-У134 компл. 2в1 универсальный квадрат 55×55мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
@@ -3701,8 +3714,14 @@ const ID_SYSTEMS = {
       {name:'Коробка распр. IP55 100×100×50мм', art:'IMT35091 Systeme Electric', unit:'шт', calc:'boxes_ip55'},
       {name:'Клемма 3-проводная 221-613', art:'WAGO', unit:'шт', calc:'wago3'},
       {name:'Клемма 5-проводная 0,5-6мм² 221-615', art:'WAGO', unit:'шт', calc:'wago5'},
+      {name:'Лоток проволочный 100×50 L3000 сталь оцинк. DKC FC5010', art:'DKC', unit:'шт', calc:'lotok100_sht'},
+      {name:'Консоль потолоч. VR осн.100 IEK CLW10-VR-100', art:'IEK', unit:'шт', calc:'console100'},
+      {name:'Крышка лотка основание 100мм L3000', art:'DKC', unit:'шт', calc:'cryshka100'},
+      {name:'Лоток проволочный 200×50 L3000 сталь оцинк. DKC FC5020', art:'DKC', unit:'шт', calc:'lotok200_sht'},
+      {name:'Консоль потолоч. VR осн.200 IEK CLW10-VR-200', art:'IEK', unit:'шт', calc:'console200'},
+      {name:'Крышка лотка основание 200мм L3000', art:'DKC', unit:'шт', calc:'cryshka200'},
       {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
-      {name:'Кабельная бирка ТМАРК-3-У136 компл. 2в1 треугольник 60×60мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
+      {name:'Кабельная бирка ТМАРК-1-У134 компл. 2в1 универсальный квадрат 55×55мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
       {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
       {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
@@ -3788,7 +3807,7 @@ function calcMat(sys, groups){
   let totClipsCeil=0, totClipsSthr=0;
   let totBoxes=0, totGC=0, totGP=0;
   let totRozets=0, totLamps=0, totOpuski=0, totSwitches=0;
-  const _boxCounts={}, _lotokCounts={};
+  const _boxCounts={}, _lotokCounts={}, _lotokRigelCrossings={};
 
   for(const g of groups){
     const Lcable  = gLF(g);
@@ -3807,6 +3826,13 @@ function calcMat(sys, groups){
       }else if(sm.startsWith('lotok')){
         if(!_lotokCounts[sm])_lotokCounts[sm]=0;
         _lotokCounts[sm]+=segLen;
+        // Консоли ставятся с обеих сторон ригеля, если лоток его пересекает
+        for(const rg of (S.rigels||[])){
+          if(_segXsegX(seg.x1,seg.y1,seg.x2,seg.y2, rg.x1,rg.y1,rg.x2,rg.y2)){
+            if(!_lotokRigelCrossings[sm]) _lotokRigelCrossings[sm]=0;
+            _lotokRigelCrossings[sm]+=2; // консоль с каждой стороны ригеля
+          }
+        }
       }
     }
     // Опуски — всегда в штробе (каждый опуск — своя отдельная штроба)
@@ -3843,9 +3869,20 @@ function calcMat(sys, groups){
   const wago5 = totBoxes * 1;
   const clips_fr = totClipsCeil; // для аварийного — те же клипсы
 
+  // Консоли и крышки лотка — по ширине (100/200мм), с учётом ригелей
+  const lotok100_len = _lotokCounts['lotok']||0;
+  const lotok200_len = _lotokCounts['lotok200']||0;
+  const console100 = calcLotokConsoles(lotok100_len) + (_lotokRigelCrossings['lotok']||0);
+  const console200 = calcLotokConsoles(lotok200_len) + (_lotokRigelCrossings['lotok200']||0);
+  const cryshka100 = Math.ceil(lotok100_len/3);
+  const cryshka200 = Math.ceil(lotok200_len/3);
+  const lotok100_sht = cryshka100; // 1 лоток 3м = 1 крышка 3м
+  const lotok200_sht = cryshka200;
+
   return {
     boxCounts:   _boxCounts,
     lotokCounts: _lotokCounts,
+    console100, console200, cryshka100, cryshka200, lotok100_sht, lotok200_sht,
     cable:       +(totCable*1.06).toFixed(2),
     cable_net:   +totCable.toFixed(2),
     // Гофра потолок и штроба раздельно
@@ -4076,7 +4113,15 @@ function rebuildGilzy(g){
   }
 
   // ── Авто-коробки и починка разрывов ──────────────────────
-  const EPS=200, bt=g.boxType||boxTypeForSys(CUR_SYS);
+  // EPS — допуск «конец сегмента лежит НА теле другого сегмента» (разрыв/Т).
+  // Раньше было 200мм — это слишком много: обычный поворот трассы, у которого
+  // рядом (в 100-200мм) проходит другой участок кабеля той же группы,
+  // ошибочно считался разрывом/разветвлением, сегмент резался, коробка
+  // ставилась не в том месте, а при округлении координат мог возникать
+  // сегмент нулевой длины, который затем удалялся фильтром (Шаг D) —
+  // отсюда «кабель отрисовался и пропал». 20мм — это уже точное совпадение
+  // (с учётом округления координат), а не «почти рядом».
+  const EPS=20, bt=g.boxType||boxTypeForSys(CUR_SYS);
 
   // ── Шаг A: находим все пересечения сегментов ──────────────
   // 1. Конец сегмента попадает на тело другого (T-соединение, разрыв)
@@ -4315,6 +4360,25 @@ function cg(){
 
 // Длина кабеля группы в метрах (мм→м)
 function gL(g){return g.segs.reduce((s,sg)=>s+Math.hypot(sg.x2-sg.x1,sg.y2-sg.y1)/1000,0);}
+// Консоли (крепления) лотка: в начале и конце каждого лотка длиной 3м,
+// плюс одна посередине. Стыки соседних лотков делят одну консоль (не
+// дублируем). Длина трассы округляется вверх кратно 3м; если остаток
+// (последний неполный лоток) короче 2м — на нём консоль только в начале
+// и в конце (без середины, чтобы не ставить их слишком близко друг к другу).
+function calcLotokConsoles(Lm){
+  if(Lm<=0.01) return 0;
+  const r=v=>Math.round(v*100)/100;
+  const full=Math.floor(Lm/3+1e-6);
+  const rem=Lm-full*3;
+  const positions=new Set();
+  for(let i=0;i<=full;i++) positions.add(r(i*3));           // границы полных 3м-участков
+  for(let i=0;i<full;i++) positions.add(r(i*3+1.5));        // середины полных участков
+  if(rem>0.01){
+    positions.add(r(Lm));                                   // конец последнего неполного участка
+    if(rem>=2) positions.add(r(full*3+rem/2));               // середина неполного, только если он длинный
+  }
+  return positions.size;
+}
 // Пересечение двух отрезков (для проверки «кабель пересекает ригель»)
 function _segXsegX(ax1,ay1,ax2,ay2,bx1,by1,bx2,by2){
   const d1x=ax2-ax1, d1y=ay2-ay1, d2x=bx2-bx1, d2y=by2-by1;
@@ -4415,6 +4479,7 @@ function swG(id){finDraw();S.cur=id;rSel();rList();updCnt();updMountBtns();}
 const SYS_ICONS = {ros:'🔌', osv:'💡', av:'🚨', em:'🧵'};
 
 function setSys(sysId){
+  const prevSys = CUR_SYS;
   CUR_SYS = sysId;
   CUR_MARKA_OVERRIDE = null;
   const sys = ID_SYSTEMS[sysId];
@@ -4442,6 +4507,29 @@ function setSys(sysId){
   // При смене системы обновляем цвет input в модале группы
   const colorInput=document.getElementById('mg-c');
   if(colorInput) colorInput.value=sys.color||'#3b82f6';
+
+  // Если переключились на ДРУГУЮ систему, а активная группа принадлежит
+  // старой — автоматически создаём новую группу для новой системы и
+  // переключаемся на неё. Раньше при смене системы группа НЕ менялась,
+  // и мастер мог, не заметив, продолжить чертить в старой группе (например,
+  // начать рисовать освещение поверх группы «розетки») — слой/система
+  // группы фиксируется один раз при создании и потом не пересчитывается.
+  const curG = cg();
+  if(prevSys!==sysId && curG && curG.sys && curG.sys!==sysId && !CUR_MARKA_OVERRIDE){
+    const sameSysExisting = S.groups.find(g=>g.sys===sysId);
+    if(sameSysExisting){
+      S.cur = sameSysExisting.id;
+    }else{
+      const prefix = {ros:'Гр.',osv:'Гр.',av:'Гр.',em:'Гр.'}[sysId]||'Гр.';
+      const suffixLetter = {ros:'с',osv:'о',av:'а',em:''}[sysId]||'';
+      const n = S.groups.filter(g=>g.sys===sysId).length+1;
+      const newG = addG(`${prefix}${n}${suffixLetter}`, curG.schit, curG.pom, sys.kab, sys.kab, sys.color, boxTypeForSys(sysId), {rozet:0,lamp:0});
+      S.cur = newG.id;
+    }
+    rSel(); rList(); updCnt();
+    tip(`🗂 Новая система — автоматически создана группа «${cg().name}» для «${sys.name}»`);
+  }
+
   closeM('msys');
   updCnt();
   tip('📋 '+sys.name);
@@ -5679,6 +5767,7 @@ function _build3DScene(rect, wrap){
     let any=false;
     const lineMat = new THREE.LineBasicMaterial({color:col, linewidth:2});
     const trayMat = new THREE.MeshStandardMaterial({color:col, metalness:0.3, roughness:0.6, transparent:true, opacity:0.85});
+    const consoleMat = new THREE.MeshStandardMaterial({color:0x94a3b8, metalness:0.5, roughness:0.4});
     for(const seg of (g.segs||[])){
       if(!segInRect(seg)) continue;
       any=true;
@@ -5687,19 +5776,60 @@ function _build3DScene(rect, wrap){
       const isLotok = mountType.startsWith('lotok');
       if(isLotok){
         // Лоток — рисуем как настоящий короб (не тонкую линию), чтобы в 3D
-        // было видно реальную кабеленесущую конструкцию, а не просто провод
+        // было видно реальную кабеленесущую конструкцию, а не просто провод.
+        // Если лоток пересекает ригель — разбиваем короб на участки и
+        // опускаем средний участок ниже ригеля (лоток тоже физически не
+        // может проходить сквозь балку).
         const trayW = mountType==='lotok200' ? 0.2 : 0.1; // ширина лотка, м (100/200мм)
         const trayH = 0.05; // высота борта, м
         const dx=lx(D.x2)-lx(D.x1), dz=lz(D.y2)-lz(D.y1);
-        const len=Math.hypot(dx,dz);
-        if(len>0.01){
-          const trayMesh = new THREE.Mesh(new THREE.BoxGeometry(len, trayH, trayW), trayMat);
-          trayMesh.position.set((lx(D.x1)+lx(D.x2))/2, ceilY-0.08, (lz(D.y1)+lz(D.y2))/2);
+        const fullLen=Math.hypot(dx,dz);
+        const detourPts = _buildDetourPts(D, ceilY);
+        if(fullLen>0.01 && detourPts){
+          for(let i=0;i<detourPts.length-1;i++){
+            const p1=detourPts[i], p2=detourPts[i+1];
+            const segLen=p1.distanceTo(p2);
+            if(segLen<0.005) continue;
+            const seg3d = new THREE.Mesh(new THREE.BoxGeometry(segLen, trayH, trayW), trayMat);
+            seg3d.position.set((p1.x+p2.x)/2, (p1.y+p2.y)/2-trayH/2, (p1.z+p2.z)/2);
+            seg3d.rotation.y = -Math.atan2(p2.z-p1.z, p2.x-p1.x);
+            // Вертикальные («нырок») отрезки короба не рисуем как горизонтальный
+            // лоток — заменяем тонкой линией-переходником
+            if(Math.abs(p1.x-p2.x)<0.01 && Math.abs(p1.z-p2.z)<0.01){
+              const vGeo=new THREE.BufferGeometry().setFromPoints([p1,p2]);
+              scene.add(new THREE.Line(vGeo, lineMat));
+            }else{
+              scene.add(seg3d);
+            }
+          }
+        }else if(fullLen>0.01){
+          const trayMesh = new THREE.Mesh(new THREE.BoxGeometry(fullLen, trayH, trayW), trayMat);
+          trayMesh.position.set((lx(D.x1)+lx(D.x2))/2, ceilY-0.02-trayH/2, (lz(D.y1)+lz(D.y2))/2);
           trayMesh.rotation.y = -Math.atan2(dz,dx);
           scene.add(trayMesh);
         }
+        // Консоли (крепление лотка) — в начале, в конце и через каждые 1,5м
+        if(fullLen>0.01){
+          const ux2=dx/fullLen, uz2=dz/fullLen;
+          const nSteps=Math.floor(fullLen/1.5+1e-6);
+          const consolePositions=new Set([0, fullLen]);
+          for(let i=0;i<=nSteps;i++) consolePositions.add(+(i*1.5).toFixed(2));
+          for(const t of consolePositions){
+            const cx=lx(D.x1)+ux2*t, cz=lz(D.y1)+uz2*t;
+            const cons=new THREE.Mesh(new THREE.BoxGeometry(trayW*1.1, 0.02, 0.03), consoleMat);
+            cons.position.set(cx, ceilY-0.005, cz);
+            cons.rotation.y = -Math.atan2(dz,dx);
+            scene.add(cons);
+            // Вертикальный подвес консоли к потолку
+            const hangGeo=new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(cx, ceilY, cz), new THREE.Vector3(cx, ceilY-0.02-trayH, cz)
+            ]);
+            scene.add(new THREE.Line(hangGeo, consoleMat));
+          }
+        }
       }else{
-        const pts=[
+        const detour = _buildDetourPts(D, ceilY);
+        const pts = detour || [
           new THREE.Vector3(lx(D.x1), ceilY-0.02, lz(D.y1)),
           new THREE.Vector3(lx(D.x2), ceilY-0.02, lz(D.y2)),
         ];
@@ -5715,6 +5845,28 @@ function _build3DScene(rect, wrap){
         dimSpr.visible = _m3dDimsOn;
         scene.add(dimSpr);
         _m3dDimObjects.push(dimSpr);
+      }
+    }
+    // Угловые вставки лотка — на стыке двух лотковых сегментов (поворот)
+    // прямоугольные короба сами по себе не стыкуются аккуратно, оставляя
+    // видимый зазор/нахлёст на повороте — заполняем угол кубиком той же
+    // ширины, чтобы поворот выглядел цельной конструкцией
+    {
+      const lotokSegs = (g.segs||[]).filter(s=>(s.mount||g.mount||'').startsWith('lotok'));
+      for(let i=0;i<lotokSegs.length;i++){
+        for(let j=i+1;j<lotokSegs.length;j++){
+          const a=lotokSegs[i], b=lotokSegs[j];
+          const pts=[[a.x1,a.y1],[a.x2,a.y2]];
+          const pts2=[[b.x1,b.y1],[b.x2,b.y2]];
+          for(const pa of pts) for(const pb of pts2){
+            if(Math.hypot(pa[0]-pb[0],pa[1]-pb[1])<5){
+              const trayWfill = (a.mount||g.mount)==='lotok200' ? 0.2 : 0.1;
+              const corner=new THREE.Mesh(new THREE.BoxGeometry(trayWfill,0.05,trayWfill), trayMat);
+              corner.position.set(lx(pa[0]), ceilY-0.02-0.025, lz(pa[1]));
+              scene.add(corner);
+            }
+          }
+        }
       }
     }
     // Коробки — маленький кубик на потолке
@@ -5750,9 +5902,26 @@ function _build3DScene(rect, wrap){
       const pts=[new THREE.Vector3(lx(op.x),yTop,lz(op.y)), new THREE.Vector3(lx(op.x),yBot,lz(op.y))];
       const geo=new THREE.BufferGeometry().setFromPoints(pts);
       scene.add(new THREE.Line(geo, lineMat));
-      const sph = new THREE.Mesh(new THREE.SphereGeometry(0.045,10,10), boxMat);
-      sph.position.set(lx(op.x), yBot, lz(op.y));
-      scene.add(sph);
+      // Подрозетник (без устройства) — вогнутая полусфера («вмятина» в стену,
+      // рисуем только внутреннюю поверхность — BackSide — отсюда вид впадины).
+      // Розетка (устройство установлено) — выпуклая полусфера наружу, белая,
+      // визуально отличается от пустого подрозетника. Выключатель — кубик.
+      if(op._device==='switch'){
+        const sw=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,0.03), new THREE.MeshStandardMaterial({color:0x67e8f9}));
+        sw.position.set(lx(op.x), yBot, lz(op.y));
+        scene.add(sw);
+      }else if(op._device==='rozet'){
+        const roz=new THREE.Mesh(new THREE.SphereGeometry(0.05,14,10,0,Math.PI*2,0,Math.PI/2),
+          new THREE.MeshStandardMaterial({color:0xffffff}));
+        roz.position.set(lx(op.x), yBot, lz(op.y));
+        roz.rotation.x = Math.PI; // выпуклостью «наружу» от места монтажа
+        scene.add(roz);
+      }else{
+        const podroz=new THREE.Mesh(new THREE.SphereGeometry(0.05,14,10,0,Math.PI*2,0,Math.PI/2),
+          new THREE.MeshStandardMaterial({color:boxMat.color, side:THREE.BackSide}));
+        podroz.position.set(lx(op.x), yBot, lz(op.y));
+        scene.add(podroz);
+      }
       // Размерная подпись длины опуска — та же кнопка «📐 Включить размеры»,
       // что и для горизонтальных сегментов
       const opDropM = yTop-yBot;
@@ -5785,9 +5954,9 @@ function _build3DScene(rect, wrap){
       }
     }
     // Гильзы — короткий цилиндр сквозь стену, ориентирован по направлению
-    // кабеля, плюс бирки с ОБЕИХ сторон вдоль этого направления
+    // кабеля (бирки рисуются ниже единым циклом по g.birki — так учитываются
+    // все бирки: у щита, над щитом, у гильз, на входе/выходе лотка)
     const gilzaMat = new THREE.MeshStandardMaterial({color:0x9ca3af});
-    const birkaMat = new THREE.MeshStandardMaterial({color:0xfbbf24});
     for(const gl of (g.gilzy||[])){
       if(!inRect(gl.x,gl.y,200)) continue;
       any=true;
@@ -5810,15 +5979,19 @@ function _build3DScene(rect, wrap){
       cyl.rotation.z = Math.PI/2;
       cyl.rotation.y = -Math.atan2(dirY,dirX);
       scene.add(cyl);
-      // Бирки — по маленькому кубику с каждой стороны гильзы, вдоль кабеля
-      const birkaOffset = gilzaLenM/2 + 0.08;
-      for(const sgn of [-1,1]){
-        const bx=gl.x+dirX*sgn*((gl.thick||100)/2+80);
-        const by=gl.y+dirY*sgn*((gl.thick||100)/2+80);
-        const bm=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.03,0.05), birkaMat);
-        bm.position.set(lx(bx), ceilY-0.02, lz(by));
-        scene.add(bm);
-      }
+    }
+    // Бирки — плоские квадратные жетоны (как реальная кабельная бирка
+    // ТМАРК-1-У134, квадрат 55×55мм) в каждой точке из g.birki: у щита,
+    // над щитом, у каждой гильзы, на входе/выходе лотка
+    const birkaMat = new THREE.MeshStandardMaterial({color:0xf5f0e6, side:THREE.DoubleSide});
+    const birkaSize = M(55); // 55×55мм
+    for(const b of (g.birki||[])){
+      if(!inRect(b.x,b.y,200)) continue;
+      any=true;
+      const bm = new THREE.Mesh(new THREE.BoxGeometry(birkaSize, M(6), birkaSize), birkaMat);
+      bm.position.set(lx(b.x), ceilY-0.02, lz(b.y));
+      bm.rotation.y = Math.PI/4; // угол «ромбом», как в реальности бирку часто видно на кабеле
+      scene.add(bm);
     }
     // Светильники — маркер на потолке (или на фальш-потолке, если задан) +
     // сам опуск (вертикаль от основного потолка до места светильника) с
@@ -5859,6 +6032,48 @@ function _build3DScene(rect, wrap){
     m.position.set((lx(rg.x1)+lx(rg.x2))/2, ceilY-rh/2, (lz(rg.y1)+lz(rg.y2))/2);
     m.rotation.y = -Math.atan2(dz,dx);
     scene.add(m);
+  }
+
+  // Пересечение отрезка кабеля с «полосой» ригеля (по нормали к линии ригеля,
+  // шириной rg.w) — возвращает [tMin,tMax] параметра вдоль КАБЕЛЯ (0..1),
+  // на котором кабель физически проходит ПОД ригелем, либо null
+  function _rigelCrossingRange(x1,y1,x2,y2, rg){
+    const bdx=rg.x2-rg.x1, bdy=rg.y2-rg.y1, blen=Math.hypot(bdx,bdy)||1;
+    const bnx=-bdy/blen, bny=bdx/blen, halfW=rg.w/2;
+    const lineT=(ax1,ay1,ax2,ay2,bx1,by1,bx2,by2)=>{
+      const d1x=ax2-ax1,d1y=ay2-ay1,d2x=bx2-bx1,d2y=by2-by1;
+      const den=d1x*d2y-d1y*d2x;
+      if(Math.abs(den)<1e-9) return null;
+      return ((bx1-ax1)*d2y-(by1-ay1)*d2x)/den;
+    };
+    const t1=lineT(x1,y1,x2,y2, rg.x1+bnx*halfW,rg.y1+bny*halfW, rg.x2+bnx*halfW,rg.y2+bny*halfW);
+    const t2=lineT(x1,y1,x2,y2, rg.x1-bnx*halfW,rg.y1-bny*halfW, rg.x2-bnx*halfW,rg.y2-bny*halfW);
+    if(t1===null||t2===null) return null;
+    const tMin=Math.max(0,Math.min(t1,t2)), tMax=Math.min(1,Math.max(t1,t2));
+    if(tMax<=tMin) return null;
+    return [tMin,tMax];
+  }
+  // Строит точки трассы кабеля с «нырком» ПОД ригель на пересечениях —
+  // раньше линия просто проходила сквозь балку насквозь, теперь физически
+  // огибает её понизу, как в реальности (и как показано в узле ригеля)
+  function _buildDetourPts(D, ceilY){
+    const ranges=[];
+    for(const rg of (S.rigels||[])){
+      const r=_rigelCrossingRange(D.x1,D.y1,D.x2,D.y2, rg);
+      if(r) ranges.push({t0:r[0], t1:r[1], h:rg.h});
+    }
+    if(!ranges.length) return null;
+    ranges.sort((a,b)=>a.t0-b.t0);
+    const dx=D.x2-D.x1, dy=D.y2-D.y1;
+    const at=(t,y)=>new THREE.Vector3(lx(D.x1+dx*t), y, lz(D.y1+dy*t));
+    const topY=ceilY-0.02;
+    const pts=[at(0,topY)];
+    for(const r of ranges){
+      const dipY=Math.max(0.15, ceilY-M(r.h)-0.06);
+      pts.push(at(r.t0,topY), at(r.t0,dipY), at(r.t1,dipY), at(r.t1,topY));
+    }
+    pts.push(at(1,topY));
+    return pts;
   }
 
   // Щиты — простой блок, прижатый ДЛИННОЙ задней стенкой к ближайшей стене
@@ -7117,7 +7332,7 @@ function exportDrawingWithLegend(){
   const vals = { cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
     rozets:mat.rozets, rozet_device:mat.rozet_device, lamps:mat.lamps, switches:mat.switches, wago3:mat.wago3, wago5:mat.wago5,
-    gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba };
+    gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba, console100:mat.console100, console200:mat.console200, cryshka100:mat.cryshka100, cryshka200:mat.cryshka200, lotok100_sht:mat.lotok100_sht, lotok200_sht:mat.lotok200_sht };
 
   const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
   const cableBase = +cableParts.reduce((a,b)=>a+b,0).toFixed(2);
@@ -7566,7 +7781,8 @@ function _mvedAutoSplit(){
       boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
       rozets:mat.rozets, rozet_device:mat.rozet_device, lamps:mat.lamps, switches:mat.switches,
       wago3:mat.wago3, wago5:mat.wago5, gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg,
-      pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba
+      pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba,
+      console100:mat.console100, console200:mat.console200, cryshka100:mat.cryshka100, cryshka200:mat.cryshka200, lotok100_sht:mat.lotok100_sht, lotok200_sht:mat.lotok200_sht
     };
 
     for(const stKey of selStages){
@@ -7869,7 +8085,10 @@ function _doExpV(){
     pena:       mat.pena,
     birki:      mat.birki,
     drilling:   mat.drilling,
-    shtroba:    mat.shtroba
+    shtroba:    mat.shtroba,
+    console100: mat.console100, console200: mat.console200,
+    cryshka100: mat.cryshka100, cryshka200: mat.cryshka200,
+    lotok100_sht: mat.lotok100_sht, lotok200_sht: mat.lotok200_sht
   };
 
   const cableParts = activeGroups.map(g=>gLF(g)).filter(v=>v>0.005);
@@ -7917,7 +8136,14 @@ function _doExpV(){
     const p=(document.getElementById('share-project')?.value||document.getElementById('aosr-project')?.value||'').trim().toUpperCase();
     const k=(document.getElementById('share-korpus')?.value||document.getElementById('aosr-korpus')?.value||'').trim().toUpperCase();
     const m=(document.getElementById('share-marka')?.value||document.getElementById('aosr-marka')?.value||curMarkaCode()||'').trim().toUpperCase();
-    const e=document.getElementById('share-etap')?.value||document.getElementById('aosr-etap')?.value||'КЛ';
+    // Код вида работ (этапа) в шифре должен соответствовать РЕАЛЬНО выбранным
+    // этапам ведомости (_vedStages), а не отдельному, никак с ними не
+    // связанному полю — иначе шифр может показывать «КЛ», хотя в самой
+    // ведомости выбран и посчитан этап «Оборудование».
+    const selStages = Object.keys(VED_STAGES).filter(k=>_vedStages[k]);
+    const e = selStages.length
+      ? selStages.map(k=>VED_STAGES[k].short).join('-')
+      : (document.getElementById('share-etap')?.value||document.getElementById('aosr-etap')?.value||'КЛ');
     if(!p) return '';
     return 'ИД_'+p+(k?'_'+k:'')+(m?'_'+m:'')+'_'+e;
   })();
@@ -8059,7 +8285,7 @@ ${_gostStamp('Кабельный журнал', 2, 3, sys, _stampShifr, window._
 ${matRows}
 <tr class="birki-row">
   <td>—</td>
-  <td><b>Кабельные бирки ТМАРК-3-У136</b><br>
+  <td><b>Кабельные бирки ТМАРК-1-У134</b><br>
   <span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
   <td class="wide">1000шт+риббон 75м</td>
   <td>компл.</td>
@@ -8976,7 +9202,7 @@ function showMergeVed(){
   if(gC+gP>0) matRows+=`<tr style="background:#fef3c7"><td>${mn++}</td><td>Отверстия под гильзы (сверление)</td><td>шт</td><td>${gC+gP}</td><td>${gC+gP}</td></tr>`;
   if(mat.gofra_sthr_count>0) matRows+=`<tr style="background:#f0f9ff"><td>${mn++}</td><td>Штробы в стенах — количество</td><td>шт</td><td>${mat.gofra_sthr_count}</td><td>${mat.gofra_sthr_count}</td></tr>`;
   if(mat.pena>0) matRows+=`<tr style="background:#fff7ed"><td>${mn++}</td><td>Пена огнеупорная EI60</td><td>бал.</td><td>${mat.pena}</td><td>${mat.pena}</td></tr>`;
-  matRows+=`<tr style="background:#fffbe6"><td>${mn++}</td><td>Бирка ТМАРК-3-У136</td><td>компл.</td><td>${birki}</td><td>${birki}</td></tr>`;
+  matRows+=`<tr style="background:#fffbe6"><td>${mn++}</td><td>Бирка ТМАРК-1-У134</td><td>компл.</td><td>${birki}</td><td>${birki}</td></tr>`;
 
   const h=`<!DOCTYPE html><html lang="ru"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9592,7 +9818,7 @@ function load1CDemo(){
     {name:'Гильза ВГП Ду20 L=550мм', art:'ВГП-550', unit:'шт', qty:10},
     {name:'Гильза ВГП Ду20 L=300мм', art:'ВГП-300', unit:'шт', qty:6},
     {name:'Пена огнеупорная EI60 890г', art:'EI60', unit:'бал.', qty:2},
-    {name:'Бирка ТМАРК-3-У136', art:'ТМАРК-3', unit:'компл.', qty:1},
+    {name:'Бирка ТМАРК-1-У134', art:'ТМАРК-3', unit:'компл.', qty:1},
   ];
   // Демо-остатки на складе — намеренно часть позиций занижена, чтобы показать "не хватит"
   _1cStock = [
@@ -9610,7 +9836,7 @@ function load1CDemo(){
     {name:'Гильза ВГП Ду20 L=550мм', art:'ВГП-550', unit:'шт', qty:20},
     {name:'Гильза ВГП Ду20 L=300мм', art:'ВГП-300', unit:'шт', qty:20},
     {name:'Пена огнеупорная EI60 890г', art:'EI60', unit:'бал.', qty:0},
-    {name:'Бирка ТМАРК-3-У136', art:'ТМАРК-3', unit:'компл.', qty:3},
+    {name:'Бирка ТМАРК-1-У134', art:'ТМАРК-3', unit:'компл.', qty:3},
   ];
   _1cLoaded = true; _1cStockLoaded = true;
   document.getElementById('s1c-status').innerHTML=
@@ -9653,7 +9879,7 @@ function getIDQty(){
   if(gC>0) items.push({name:'Гильза ВГП Ду20 L=550мм', unit:'шт', qty:gC});
   if(gP>0) items.push({name:'Гильза ВГП Ду20 L=300мм', unit:'шт', qty:gP});
   if(mat.pena>0) items.push({name:'Пена огнеупорная EI60', unit:'бал.', qty:+mat.pena});
-  if(birki>0) items.push({name:'Бирка ТМАРК-3-У136', unit:'компл.', qty:Math.ceil(birki/1000)||1});
+  if(birki>0) items.push({name:'Бирка ТМАРК-1-У134', unit:'компл.', qty:Math.ceil(birki/1000)||1});
   return items;
 }
 
@@ -10869,7 +11095,8 @@ function _buildVedHTML(sys,mat,projectName,stages){
     boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
     clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,rozet_device:mat.rozet_device,lamps:mat.lamps,switches:mat.switches,
     wago3:mat.wago3,wago5:mat.wago5,gilzy_cap:mat.gilzy_cap,
-    gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba
+    gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba,
+    console100:mat.console100,console200:mat.console200,cryshka100:mat.cryshka100,cryshka200:mat.cryshka200,lotok100_sht:mat.lotok100_sht,lotok200_sht:mat.lotok200_sht
   };
   // Материалы группируем по этапам (Общестрой / Кабельные линии / Оборудование)
   // и печатаем только выбранные пользователем этапы, каждый — своим разделом
@@ -10919,7 +11146,7 @@ ${stages.kl ? `<h3>1. Кабельный журнал</h3>${journalHtml}` : ''}
 <h3 style="margin-top:16px">2. Перечень материалов — ${sys.name}</h3>
 <table><tr><th>#</th><th>Наименование</th><th>Артикул</th><th>Ед.</th><th>База</th><th>К закупке</th></tr>
 ${matRows}
-${stages.kl ? `<tr class="birki-row"><td>—</td><td><b>Кабельные бирки ТМАРК-3-У136</b><br><span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
+${stages.kl ? `<tr class="birki-row"><td>—</td><td><b>Кабельные бирки ТМАРК-1-У134</b><br><span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
 <td>1000шт+риббон 75м</td><td>компл.</td><td>${birki}</td><td><b>${birki}</b></td></tr>` : ''}
 </table>
 ${stages.kl ? heightsHtml : ''}
@@ -11539,7 +11766,7 @@ async function _buildSharePageWithDraft(name, author){
   let matRows='';
   const vals={cable:mat.cable,boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
     clips:mat.clips,rozets:mat.rozets,rozet_device:mat.rozet_device,lamps:mat.lamps,switches:mat.switches,wago3:mat.wago3,wago5:mat.wago5,
-    gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba};
+    gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba,console100:mat.console100,console200:mat.console200,cryshka100:mat.cryshka100,cryshka200:mat.cryshka200,lotok100_sht:mat.lotok100_sht,lotok200_sht:mat.lotok200_sht};
   sys.materials.forEach((item,i)=>{
     const qty=vals[item.calc]||0;
     if(qty<=0&&!['cable','gofra','boxes'].includes(item.calc)) return;
@@ -11633,7 +11860,7 @@ ${journalHtml}
 <tr><th>#</th><th>Наименование</th><th>Артикул / Поставщик</th><th>Ед.</th><th>К закупке</th></tr>
 ${matRows}
 <tr class="birki-row"><td>—</td>
-  <td><b>Кабельные бирки ТМАРК-3-У136</b><br><span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
+  <td><b>Кабельные бирки ТМАРК-1-У134</b><br><span style="font-size:9px;color:#92400e">${birkaNote}</span></td>
   <td>1000шт+риббон 75м</td><td>компл.</td><td><b>${mat.birki}</b></td>
 </tr></table>
 
