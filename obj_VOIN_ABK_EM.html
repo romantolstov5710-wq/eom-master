@@ -873,7 +873,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   </p>
   <div id="sys-modal-body" style="display:flex;flex-direction:column"></div>
   <div style="margin-top:6px;padding:10px;background:#0d1117;border-radius:8px;font-size:10px;color:#64748b">
-    Активная марка: <b id="sys-cur-label" style="color:#4ade80">ЭОМ КЛ Розеточная сеть</b><br>
+    Активная марка: <b id="sys-cur-label" style="color:#4ade80">ЭОМ КЛ Кабели и кабеленесущие конструкции</b><br>
     Перечень материалов обновится в ведомости автоматически
   </div>
   <button class="btn b-gray" style="width:100%;margin-top:12px;padding:8px" onclick="closeM('msys')">✕ Закрыть</button>
@@ -1372,9 +1372,9 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <button id="sec-btn-ob" class="btn" onclick="setUISection('ob')" style="padding:6px 10px;font-size:11px;font-weight:700;background:transparent;color:#94a3b8;border-radius:4px" title="Раздел: оборудование (розетки, светильники — отдельная ИД)">💡 Оборудование</button>
   </div>
 
-  <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
+  <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(100, 116, 139); border: 1px solid rgb(100, 116, 139); border-radius: 5px; white-space: nowrap;">🧵 ЭМ (кабели)</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5">Гр.1с</option><option value="6" selected="">Гр.2с</option><option value="7">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="6" selected="">Гр.1с</option><option value="7">Гр.2с</option><option value="8">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1633,24 +1633,24 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi" style="border-color:#3b82f6" onclick="swG(5)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
+      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(7)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
+      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(8)">
       <div class="md" style="background:#f59e0b"></div>
       <div style="flex:1"><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+      <button onclick="event.stopPropagation();delGroup(8)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div></div>
     </div>
   </div>
@@ -1660,7 +1660,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <div id="st">
   <span>Режим: <b id="stm">Кабель</b></span>
-  <span>Группа: <b id="stg">Гр.2с</b></span>
+  <span>Группа: <b id="stg">Гр.1с</b></span>
   <span>X:<b id="stx">0</b> Y:<b id="sty">0</b>мм</span>
   <span>Отрезок: <b id="sts">0</b>м</span>
 </div>
@@ -1698,7 +1698,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb grn" onclick="showReady()">✅<span>Готово</span></button>
 </div>
 
-<div id="tip" class="s">▶ ВОИН/АБК — ЭУ. Публикую страницу…</div>
+<div id="tip" class="s">▶ ВОИН/АБК — ЭМ. Публикую страницу…</div>
 
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -13027,9 +13027,9 @@ window.addEventListener('load', function(){
   try{
     var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
     var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
-    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭМ";
     if(typeof updateShifrPreview==='function') updateShifrPreview();
-    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭМ");
   }catch(e){}
 });
 </script>
