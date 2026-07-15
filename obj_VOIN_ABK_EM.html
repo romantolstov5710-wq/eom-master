@@ -865,15 +865,16 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <!-- МОДАЛ: ВЫБОР СИСТЕМЫ ИД -->
 <div class="mbg" id="msys"><div class="mbox" style="max-width:420px;max-height:82vh;overflow:auto">
-  <h3>📋 Система / марка ЭОМ</h3>
-  <p style="font-size:11px;color:#9ca3af;margin-bottom:14px">
-    Выбери марку по регламенту ИД — материалы ведомости подтянутся автоматически.
-    Для марок без своего шаблона черчения (щитовое, заземление, наружные сети и т.п.)
-    рисуем по общему шаблону кабельных линий, но марка в шифре будет верной.
+  <h3>📋 Система / марка</h3>
+  <p style="font-size:11px;color:#9ca3af;margin-bottom:10px">
+    Выбери раздел и марку по регламенту ИД — материалы ведомости подтянутся автоматически.
+    Для марок без своего шаблона черчения рисуем по общему шаблону кабельных линий,
+    но марка в шифре будет верной.
   </p>
+  <div id="sys-modal-razdel" style="display:flex;gap:6px;margin-bottom:10px"></div>
   <div id="sys-modal-body" style="display:flex;flex-direction:column"></div>
   <div style="margin-top:6px;padding:10px;background:#0d1117;border-radius:8px;font-size:10px;color:#64748b">
-    Активная марка: <b id="sys-cur-label" style="color:#4ade80">ЭОМ КЛ Кабели и кабеленесущие конструкции</b><br>
+    Активная марка: <b id="sys-cur-label" style="color:#4ade80">ЭОМ КЛ Розеточная сеть</b><br>
     Перечень материалов обновится в ведомости автоматически
   </div>
   <button class="btn b-gray" style="width:100%;margin-top:12px;padding:8px" onclick="closeM('msys')">✕ Закрыть</button>
@@ -887,7 +888,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <select id="mg-s-sel" onchange="_mgSchitSelChange()"></select>
   <input id="mg-s" value="ЩС1" style="display:none;margin-top:5px" placeholder="Название нового щита">
   <div id="mg-s-hint" style="font-size:9.5px;color:#f59e0b;margin:2px 0 0;line-height:1.4"></div>
-  <label>Помещение</label><input id="mg-p" value="пом.1">
+  <label>Помещение</label><input id="mg-p" value="пом.1" list="mg-p-list">
+  <datalist id="mg-p-list"></datalist>
   <label>План (необязательно) — сколько точек должно получиться в этой группе, для индикатора прогресса</label>
   <div style="display:flex;gap:6px">
     <input id="mg-plan-rozet" type="number" min="0" placeholder="розеток" style="flex:1">
@@ -1372,9 +1374,9 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <button id="sec-btn-ob" class="btn" onclick="setUISection('ob')" style="padding:6px 10px;font-size:11px;font-weight:700;background:transparent;color:#94a3b8;border-radius:4px" title="Раздел: оборудование (розетки, светильники — отдельная ИД)">💡 Оборудование</button>
   </div>
 
-  <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(100, 116, 139); border: 1px solid rgb(100, 116, 139); border-radius: 5px; white-space: nowrap;">🧵 ЭМ (кабели)</button>
+  <button class="btn" id="sys-badge" onclick="openSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="6" selected="">Гр.1с</option><option value="7">Гр.2с</option><option value="8">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5">Гр.1с</option><option value="6" selected="">Гр.2с</option><option value="7">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1395,9 +1397,11 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button id="t-rigel" class="btn b-teal tool-shell" onclick="openM('mrig');sT('rigel')" title="Ригель/балка под потолком — кабель автоматически обходит его снизу, длина обхода считается сама">📏 Ригель</button>
   <button id="t-ssdev" class="btn b-red tool-system" onclick="openSSDevPicker()" title="Устройство СС — извещатель/оповещатель/камера/считыватель и т.п., в зависимости от текущей системы">⊙ Устройство СС</button>
   <button id="t-zone" class="btn b-teal tool-shell" onclick="openM('mzone');sT('zone')" title="Зона с другой высотой потолка — например, актовый зал или коридор с подшивным потолком. Стены и 3D в её пределах используют эту высоту">📐 Зона потолка</button>
+  <button id="t-room" class="btn b-teal tool-shell" onclick="doRoom()" title="Комната — два клика по углам прямоугольника сразу ставят все 4 стены, быстрее чем рисовать по одной линии" style="background:#0f766e;color:#5eead4">🏠 Комната</button>
   <button id="t-3d" class="btn" style="background:#312e81;color:#c7d2fe" onclick="start3DSelect()" title="Выдели прямоугольный участок на плане, потом кликни внутри — покажу его в 3D">📦 Участок в 3D</button>
   </span>
   <button id="t-er" class="btn b-red" onclick="sT('er')">✕ Ластик</button>
+  <button id="voice-btn" class="btn" onclick="toggleVoice()" style="background:#4c1d95;color:#e9d5ff" title="Голосовое управление — скажи название кнопки (Стена, Розетка, Кабель...) вместо нажатия">🎤 Голос</button>
 
   <button id="more-toggle-btn" class="btn" onclick="toggleMoreTools()" style="background:#334155;color:#cbd5e1;font-size:11px" title="Показать/скрыть остальные инструменты">⋯ Ещё</button>
 
@@ -1560,6 +1564,13 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <div id="shell-banner">
   <span>🏗 Режим: Шаблон здания — черти стены/ригели/зоны, они прикрепятся ко всем системам этого объекта</span>
+  <span id="shell-counters" style="font-size:11px;color:#a7f3d0;background:#0d1117;padding:3px 8px;border-radius:5px">Стен: 0 · Ригелей: 0 · Зон: 0 · Помещений: 0</span>
+  <span style="display:flex;gap:2px;background:#0d1117;border-radius:6px;padding:2px;margin-left:10px">
+    <button class="btn" id="shell-razdel-eom" onclick="_shellPickRazdel('eom')" style="padding:4px 9px;font-size:11px;font-weight:700">⚡ ЭОМ</button>
+    <button class="btn" id="shell-razdel-ss" onclick="_shellPickRazdel('ss')" style="padding:4px 9px;font-size:11px;font-weight:700">📡 СС</button>
+  </span>
+  <button class="btn b-gray" onclick="undo()" title="Отменить последнее действие">↩ Отменить</button>
+  <button class="btn b-gray" onclick="skipShellMode()" title="Каркас нарисуем позже — сразу к черчению кабелей">⏭ Пропустить</button>
   <button class="btn b-grn" style="margin-left:auto" onclick="finishShellMode()">✅ Шаблон готов — к системам</button>
 </div>
 
@@ -1633,24 +1644,24 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
+      <div id="glist"><div class="gi" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(7)">
+      <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(8)">
+      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
       <div class="md" style="background:#f59e0b"></div>
       <div style="flex:1"><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(8)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div></div>
     </div>
   </div>
@@ -1660,7 +1671,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <div id="st">
   <span>Режим: <b id="stm">Кабель</b></span>
-  <span>Группа: <b id="stg">Гр.1с</b></span>
+  <span>Группа: <b id="stg">Гр.2с</b></span>
   <span>X:<b id="stx">0</b> Y:<b id="sty">0</b>мм</span>
   <span>Отрезок: <b id="sts">0</b>м</span>
 </div>
@@ -1675,11 +1686,13 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb teal sec-kl tool-shell" id="mb-wall" onclick="openM('mw');sT('wall')">🧱<span>Стена</span></button>
   <button class="mb sec-kl" id="mb-3d" onclick="start3DSelect()" style="color:#c7d2fe">📦<span>3D</span></button>
   <button class="mb red" id="mb-er" onclick="sT('er')">✕<span>Ластик</span></button>
+  <button class="mb" id="voice-btn-m" onclick="toggleVoice()" style="color:#e9d5ff">🎤<span>Голос</span></button>
   <button class="mb" id="hand-btn-m" onclick="toggleHandMode()" style="color:#4ade80">✋<span>Рука</span></button>
   <button class="mb" id="lbl-btn-m" onclick="toggleLabels()" style="color:#93c5fd">🏷<span>Выноски</span></button>
   <button class="mb" id="lay-btn-m" onclick="openLayersPanel()" style="color:#93c5fd">🗂<span>Слои</span></button>
   <button class="mb tool-shell" id="t-rigel-m" onclick="openM('mrig');sT('rigel')" style="color:#d97706">📏<span>Ригель</span></button>
   <button class="mb tool-shell" id="t-zone-m" onclick="openM('mzone');sT('zone')" style="color:#14b8a6">📐<span>Зона</span></button>
+  <button class="mb tool-shell" id="t-room-m" onclick="doRoom()" style="color:#5eead4">🏠<span>Комната</span></button>
   <button class="mb tool-system" id="t-ssdev-m" onclick="openSSDevPicker()" style="color:#ef4444">⊙<span>Устр.СС</span></button>
   <button class="mb more-tools sec-kl" style="color: rgb(245, 158, 11);" onclick="startKDDist('cable')">📏<span>КЛ</span></button>
   <button class="mb more-tools sec-kl" style="color: rgb(251, 146, 60);" onclick="startKDDist('opusk')">📏<span>Оп-ст.</span></button>
@@ -1698,7 +1711,13 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb grn" onclick="showReady()">✅<span>Готово</span></button>
 </div>
 
-<div id="tip" class="s">▶ ВОИН/АБК — ЭМ. Публикую страницу…</div>
+<div id="tip" class="s">▶ ВОИН/АБК — ЭУ. Публикую страницу…</div>
+<div id="voice-indicator" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  z-index:9500;background:#1e1b4b;border:2px solid #a78bfa;border-radius:10px;padding:10px 18px;
+  color:#e9d5ff;font-size:13px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.5);min-width:220px">
+  <div id="voice-status" style="font-weight:700;margin-bottom:3px">🎤 Слушаю…</div>
+  <div id="voice-heard" style="font-size:11px;color:#c4b5fd;min-height:14px"></div>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -4155,7 +4174,7 @@ const S={
   wallDraw:false, wallP1:null, wallType:'cap',
   curX:0, curY:0,
   schPend:null, opPend:null,
-  groups:[], schits:[], walls:[], rigels:[], zones:[],
+  groups:[], schits:[], walls:[], rigels:[], zones:[], rooms:[],
   // Режим «Шаблон здания» — мастер чертит только стены/ригели/зоны (без
   // кабелей и устройств), этот каркас общий для ВСЕХ систем объекта, так
   // как S.walls/S.rigels/S.zones не привязаны к конкретной системе (в
@@ -4211,13 +4230,13 @@ function evMM(e){
 function snapG(x,y){
   return{x:Math.round(x/GRID)*GRID, y:Math.round(y/GRID)*GRID};
 }
-function snapP(x,y){  // snap к существующим точкам трасс, 400мм
-  let bx=x,by=y,bd=400;
+function snapP(x,y){  // snap к существующим точкам трасс, 400мм — null, если рядом ничего нет
+  let bx=null,by=null,bd=400;
   for(const g of S.groups) for(const s of g.segs)
     for(const p of [{x:s.x1,y:s.y1},{x:s.x2,y:s.y2}]){
       const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;bx=p.x;by=p.y;}
     }
-  return{x:bx,y:by};
+  return bx===null ? null : {x:bx,y:by};
 }
 function snapO(px,py,x,y){
   if(!S.ortho)return{x,y};
@@ -4240,12 +4259,21 @@ function snapAll(x,y,fromPt){
       if(ds<1500) return {x:sch.x, y:sch.y}; // привязка 1500мм
     }
   }
-  // Snap к сетке или к существующим точкам (что ближе)
+  // Snap к сетке или к существующим точкам (что ближе) — раньше snapP()
+  // при отсутствии рядом точки тихо возвращал СЫРЫЕ координаты курсора
+  // (расстояние 0), из-за чего в сравнении «что ближе» сетка не побеждала
+  // никогда — привязка к сетке фактически не работала. Теперь snapP()
+  // возвращает null, если рядом ничего нет, и сравнение расстояний честное.
   const sg=snapG(x,y);
   const sp=snapP(x,y);
-  const dg=Math.hypot(x-sg.x,y-sg.y);
-  const dp=Math.hypot(x-sp.x,y-sp.y);
-  let res=dg<dp?sg:sp;
+  let res;
+  if(sp){
+    const dg=Math.hypot(x-sg.x,y-sg.y);
+    const dp=Math.hypot(x-sp.x,y-sp.y);
+    res = dp<=dg ? sp : sg;
+  }else{
+    res = sg;
+  }
   if(fromPt)res=snapO(fromPt.x,fromPt.y,res.x,res.y);
   return res;
 }
@@ -4758,6 +4786,7 @@ function setSys(sysId){
   closeM('msys');
   updCnt();
   tip('📋 '+sys.name);
+  if(S.shellMode) _updateShellRazdelButtons();
 }
 
 // Марка ЭОМ для текущего выбора (для шифра ИД/АОСР) — учитывает переопределение
@@ -4788,27 +4817,69 @@ function setMarkaByKey(key){
   }else{
     tip('📋 Марка '+g.marka+' — черчение и материалы считаются по общему шаблону КЛ (ЭМ). Сверь ведомость с ПТО перед сдачей.');
   }
+  if(S.shellMode) _updateShellRazdelButtons();
 }
 
 // Рендер модалки выбора системы/марки — весь справочник регламента, сгруппированный
+// Раздел, выбранный в постоянном переключателе систем (кнопка sys-badge) —
+// подстраивается под текущую активную систему только при ОТКРЫТИИ модалки
+// (не на каждой перерисовке — иначе ручное переключение раздела откатывалось
+// бы назад само собой, если активная система принадлежит другому разделу)
+let _sysModalRazdel = 'eom';
+function openSysModal(){
+  const curSys = ID_SYSTEMS[CUR_SYS];
+  if(!CUR_MARKA_OVERRIDE && curSys) _sysModalRazdel = curSys.group==='ss' ? 'ss' : 'eom';
+  openM('msys');
+  renderSysModal();
+}
+function _sysModalPickRazdel(r){
+  _sysModalRazdel = r;
+  renderSysModal();
+}
 function renderSysModal(){
   const box = document.getElementById('sys-modal-body');
+  const razdelBox = document.getElementById('sys-modal-razdel');
   if(!box) return;
+
+  if(razdelBox){
+    const eomOn=_sysModalRazdel==='eom';
+    razdelBox.innerHTML = `
+      <button type="button" class="btn" onclick="_sysModalPickRazdel('eom')"
+        style="flex:1;padding:9px;font-size:12px;font-weight:700;
+        background:${eomOn?'#1a4a8a':'#0d1117'};color:${eomOn?'#fff':'#94a3b8'};
+        border:1px solid ${eomOn?'#3b82f6':'#334155'}">⚡ ЭОМ</button>
+      <button type="button" class="btn" onclick="_sysModalPickRazdel('ss')"
+        style="flex:1;padding:9px;font-size:12px;font-weight:700;
+        background:${!eomOn?'#1a4a8a':'#0d1117'};color:${!eomOn?'#fff':'#94a3b8'};
+        border:1px solid ${!eomOn?'#3b82f6':'#334155'}">📡 СС</button>`;
+  }
+
   const rows = [];
-  rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin:2px 0 6px">ВНУТРЕННИЕ СЕТИ</div>');
-  Object.entries(ID_SYSTEMS).forEach(([key,sys])=>{
-    if(sys.group!=='in') return;
-    rows.push(_sysBtnHtml(key, sys.marka, sys.markaFull, sys.color, true));
-  });
-  Object.entries(ID_SYSTEMS_GENERIC_ONLY).forEach(([key,g])=>{
-    if(g.group!=='in') return;
-    rows.push(_sysBtnHtml(key, g.marka, g.markaFull, '#64748b', false));
-  });
-  rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin:10px 0 6px">НАРУЖНЫЕ СЕТИ</div>');
-  Object.entries(ID_SYSTEMS_GENERIC_ONLY).forEach(([key,g])=>{
-    if(g.group!=='out') return;
-    rows.push(_sysBtnHtml(key, g.marka, g.markaFull, '#64748b', false));
-  });
+  if(_sysModalRazdel==='ss'){
+    rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin:2px 0 6px">СЛАБОТОЧНЫЕ СИСТЕМЫ (СС)</div>');
+    Object.entries(ID_SYSTEMS).forEach(([key,sys])=>{
+      if(sys.group!=='ss') return;
+      rows.push(_sysBtnHtml(key, sys.marka, sys.markaFull, sys.color, true));
+    });
+    Object.entries(ID_SYSTEMS_SS).forEach(([key,g])=>{
+      rows.push(_sysBtnHtml(key, g.marka, g.markaFull, g.color, false));
+    });
+  }else{
+    rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin:2px 0 6px">ВНУТРЕННИЕ СЕТИ</div>');
+    Object.entries(ID_SYSTEMS).forEach(([key,sys])=>{
+      if(sys.group!=='in') return;
+      rows.push(_sysBtnHtml(key, sys.marka, sys.markaFull, sys.color, true));
+    });
+    Object.entries(ID_SYSTEMS_GENERIC_ONLY).forEach(([key,g])=>{
+      if(g.group!=='in') return;
+      rows.push(_sysBtnHtml(key, g.marka, g.markaFull, '#64748b', false));
+    });
+    rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin:10px 0 6px">НАРУЖНЫЕ СЕТИ</div>');
+    Object.entries(ID_SYSTEMS_GENERIC_ONLY).forEach(([key,g])=>{
+      if(g.group!=='out') return;
+      rows.push(_sysBtnHtml(key, g.marka, g.markaFull, '#64748b', false));
+    });
+  }
   box.innerHTML = rows.join('');
   const lbl=document.getElementById('sys-cur-label');
   if(lbl){
@@ -5131,6 +5202,31 @@ function render(){
       CX.font=`bold ${12/s}px Arial`; CX.fillStyle='#14b8a6';
       CX.fillText(`${zn.name} — потолок ${(zn.hpot/1000).toFixed(2)}м`, zx1+8/s, zy1+16/s);
     }
+  }
+
+  // ── Превью «Комнаты» (пока не кликнут второй угол) ──
+  if(S.roomDraw&&S.roomP1){
+    CX.strokeStyle='rgba(94,234,212,.7)';CX.lineWidth=3/s;CX.setLineDash([8/s,5/s]);
+    const rx1=Math.min(S.roomP1.x,S.curX), ry1=Math.min(S.roomP1.y,S.curY);
+    const rw=Math.abs(S.curX-S.roomP1.x), rh=Math.abs(S.curY-S.roomP1.y);
+    CX.strokeRect(rx1,ry1,rw,rh);
+    CX.setLineDash([]);
+    CX.fillStyle='#5eead4';CX.beginPath();CX.arc(S.roomP1.x,S.roomP1.y,6/s,0,Math.PI*2);CX.fill();
+    if(S.showLabels && rw>10 && rh>10){
+      CX.font=`bold ${13/s}px Arial`; CX.fillStyle='#5eead4';
+      CX.fillText(`${((rw/1000)*(rh/1000)).toFixed(1)}м²`, rx1+rw/2-20/s, ry1+rh/2);
+    }
+  }
+  // ── Подписи готовых комнат (номер + площадь) — как в настоящей ИД ──
+  for(const rm of (S.rooms||[])){
+    if(!S.showLabels) continue;
+    const rx1=Math.min(rm.x1,rm.x2), ry1=Math.min(rm.y1,rm.y2);
+    const rw=Math.abs(rm.x2-rm.x1), rh=Math.abs(rm.y2-rm.y1);
+    CX.font=`bold ${13/s}px Arial`; CX.fillStyle='#5eead4'; CX.textAlign='center';
+    CX.fillText(rm.name, rx1+rw/2, ry1+rh/2-8/s);
+    CX.font=`${10/s}px Arial`; CX.fillStyle='#5eead4bb';
+    CX.fillText(rm.area+'м²', rx1+rw/2, ry1+rh/2+8/s);
+    CX.textAlign='left';
   }
 
   // ── Кабельные группы ──
@@ -6185,7 +6281,7 @@ function _build3DScene(rect, wrap){
         const trayH = 0.05; // высота борта, м
         const dx=lx(D.x2)-lx(D.x1), dz=lz(D.y2)-lz(D.y1);
         const fullLen=Math.hypot(dx,dz);
-        const detourPts = _buildDetourPts(D, ceilY);
+        const detourPts = _buildDetourPts(D);
         if(fullLen>0.01 && detourPts){
           for(let i=0;i<detourPts.length-1;i++){
             const p1=detourPts[i], p2=detourPts[i+1];
@@ -6229,28 +6325,21 @@ function _build3DScene(rect, wrap){
           }
         }
       }else{
-        const detour = _buildDetourPts(D, ceilY);
-        const pts = detour || [
-          new THREE.Vector3(lx(D.x1), ceilY-0.02, lz(D.y1)),
-          new THREE.Vector3(lx(D.x2), ceilY-0.02, lz(D.y2)),
-        ];
+        const pts = _buildDetourPts(D);
         const geo = new THREE.BufferGeometry().setFromPoints(pts);
         scene.add(new THREE.Line(geo, lineMat));
-        // Размеры обвода ригеля — высота нырка и длина участка под ним,
-        // тоже показываются кнопкой «📐 Включить размеры» и участвуют в
-        // расчёте (это те же точки, что вошли в gRigelExtra)
-        if(detour){
-          for(let i=1;i<detour.length-2;i++){
-            const p1=detour[i], p2=detour[i+1];
-            const segLen3=p1.distanceTo(p2);
-            if(segLen3<0.05) continue;
-            const isVertical = Math.abs(p1.x-p2.x)<0.005 && Math.abs(p1.z-p2.z)<0.005;
-            const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+'м', '#fca5a5');
-            dimSpr2.position.set((p1.x+p2.x)/2 + 0.06, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
-            dimSpr2.visible = _m3dDimsOn;
-            scene.add(dimSpr2);
-            _m3dDimObjects.push(dimSpr2);
-          }
+        // Размеры перепадов (обвод ригеля, подъём/спуск между зонами) —
+        // показываются кнопкой «📐 Включить размеры» и участвуют в расчёте
+        for(let i=1;i<pts.length-2;i++){
+          const p1=pts[i], p2=pts[i+1];
+          const segLen3=p1.distanceTo(p2);
+          if(segLen3<0.05) continue;
+          const isVertical = Math.abs(p1.x-p2.x)<0.005 && Math.abs(p1.z-p2.z)<0.005;
+          const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+'м', '#fca5a5');
+          dimSpr2.position.set((p1.x+p2.x)/2 + 0.06, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
+          dimSpr2.visible = _m3dDimsOn;
+          scene.add(dimSpr2);
+          _m3dDimObjects.push(dimSpr2);
         }
       }
       // Размерная подпись длины сегмента — по умолчанию скрыта, показывается
@@ -6258,7 +6347,8 @@ function _build3DScene(rect, wrap){
       const segLenM = Math.hypot(seg.x2-seg.x1, seg.y2-seg.y1)/1000;
       if(segLenM>0.15){
         const dimSpr = _makeTextSprite(segLenM.toFixed(2)+(isLotok?'м (лоток)':'м'), '#fde68a');
-        dimSpr.position.set((lx(D.x1)+lx(D.x2))/2, ceilY+0.05, (lz(D.y1)+lz(D.y2))/2);
+        const labelH = M(hpotAt((D.x1+D.x2)/2,(D.y1+D.y2)/2))+0.05; // по высоте потолка в середине отрезка (зоны)
+        dimSpr.position.set((lx(D.x1)+lx(D.x2))/2, labelH, (lz(D.y1)+lz(D.y2))/2);
         dimSpr.visible = _m3dDimsOn;
         scene.add(dimSpr);
         _m3dDimObjects.push(dimSpr);
@@ -6536,26 +6626,88 @@ function _build3DScene(rect, wrap){
     tMax=Math.min(1, tMax+0.02);
     return [tMin,tMax];
   }
-  // Строит точки трассы кабеля с «нырком» ПОД ригель на пересечениях —
-  // раньше линия просто проходила сквозь балку насквозь, теперь физически
-  // огибает её понизу, как в реальности (и как показано в узле ригеля)
-  function _buildDetourPts(D, ceilY){
-    const ranges=[];
+  // Высота потолка «трассы» (в метрах) в конкретной точке плана — с учётом
+  // зон (см. hpotAt). Используется вместо единого ceilY, чтобы кабель шёл
+  // по потолку СВОЕЙ комнаты, а не одной сплошной плоскостью на всё здание.
+  function _traceCeilM(px,py){ return M(hpotAt(px,py)); }
+  // Строит точки трассы кабеля/лотка с учётом:
+  //  1) нырка ПОД ригель на пересечениях (кабель огибает балку снизу);
+  //  2) подъёма/спуска в штробе стены при переходе между зонами разной
+  //     высоты потолка — раньше вся трасса рисовалась на одной глобальной
+  //     высоте (S.hpot), и при переходе в зону с другим потолком кабель
+  //     просто резал стену по диагонали на средней высоте, а не поднимался
+  //     в штробе и шёл дальше по потолку новой комнаты на её высоте.
+  // Всегда возвращает валидный массив точек (минимум — начало и конец).
+  function _buildDetourPts(D){
+    const dx=D.x2-D.x1, dy=D.y2-D.y1;
+    const posAt=t=>({x:D.x1+dx*t, y:D.y1+dy*t});
+    const at=(t,y)=>{ const p=posAt(t); return new THREE.Vector3(lx(p.x), y, lz(p.y)); };
+
+    const dipRanges=[];
     for(const rg of (S.rigels||[])){
       const r=_rigelCrossingRange(D.x1,D.y1,D.x2,D.y2, rg);
-      if(r) ranges.push({t0:r[0], t1:r[1], h:rg.h});
+      if(r) dipRanges.push({t0:r[0], t1:r[1], h:rg.h});
     }
-    if(!ranges.length) return null;
-    ranges.sort((a,b)=>a.t0-b.t0);
-    const dx=D.x2-D.x1, dy=D.y2-D.y1;
-    const at=(t,y)=>new THREE.Vector3(lx(D.x1+dx*t), y, lz(D.y1+dy*t));
-    const topY=ceilY-0.02;
-    const pts=[at(0,topY)];
-    for(const r of ranges){
-      const dipY=Math.max(0.15, ceilY-M(r.h)-0.06);
-      pts.push(at(r.t0,topY), at(r.t0,dipY), at(r.t1,dipY), at(r.t1,topY));
+    // Сэмплируем отрезок и находим, где меняется высота потолка (переход
+    // между зонами). Переход учитываем ТОЛЬКО если рядом реально есть стена
+    // (штроба) — иначе кабель «прыгал» бы прямо в воздухе посреди комнаты,
+    // если прямоугольник зоны не совпадает впритык со стенами (зона — это
+    // упрощённый прямоугольник, а не точный контур помещения).
+    const N=100;
+    const zoneTrans=[];
+    let prevH=hpotAt(D.x1,D.y1);
+    const segLenSq=dx*dx+dy*dy || 1;
+    for(let i=1;i<=N;i++){
+      const t=i/N; const p=posAt(t);
+      const h=hpotAt(p.x,p.y);
+      if(h!==prevH){
+        let wallPt=null, wallD=1e9;
+        for(const w of (S.walls||[])){
+          const wp=segInt(D.x1,D.y1,D.x2,D.y2, w.x1,w.y1,w.x2,w.y2);
+          if(wp){
+            const dd=Math.hypot(wp.x-p.x, wp.y-p.y);
+            if(dd<wallD){ wallD=dd; wallPt=wp; }
+          }
+        }
+        if(wallPt && wallD<600){
+          const tw=((wallPt.x-D.x1)*dx+(wallPt.y-D.y1)*dy)/segLenSq;
+          zoneTrans.push({t:Math.max(0,Math.min(1,tw)), h});
+        } // иначе — рядом нет стены, разрыв не создаём, просто едем дальше
+        prevH=h;
+      }
     }
-    pts.push(at(1,topY));
+
+    if(!dipRanges.length && !zoneTrans.length){
+      const h1=_traceCeilM(D.x1,D.y1)-0.02, h2=_traceCeilM(D.x2,D.y2)-0.02;
+      return [at(0,h1), at(1,h2)];
+    }
+
+    const events=[];
+    for(const zt of zoneTrans) events.push({t:zt.t, kind:'zone', h:zt.h});
+    for(const r of dipRanges) events.push({t:r.t0,kind:'rigelStart',h:r.h}, {t:r.t1,kind:'rigelEnd'});
+    events.sort((a,b)=>a.t-b.t);
+
+    const pts=[];
+    let curCeil=_traceCeilM(D.x1,D.y1);
+    let curH=curCeil-0.02;
+    pts.push(at(0,curH));
+    let inRigel=false, rigelDipY=null;
+
+    for(const ev of events){
+      if(ev.kind==='zone'){
+        const newCeil=M(ev.h), newH=newCeil-0.02;
+        if(!inRigel) pts.push(at(ev.t,curH), at(ev.t,newH)); // подъём/спуск в штробе стены
+        curCeil=newCeil; curH=newH;
+      }else if(ev.kind==='rigelStart'){
+        rigelDipY=Math.max(0.15, curCeil-M(ev.h)-0.06);
+        pts.push(at(ev.t,curH), at(ev.t,rigelDipY));
+        inRigel=true;
+      }else if(ev.kind==='rigelEnd'){
+        pts.push(at(ev.t,rigelDipY), at(ev.t,curH));
+        inRigel=false;
+      }
+    }
+    pts.push(at(1,curH));
     return pts;
   }
 
@@ -6660,7 +6812,16 @@ function handle3DClick(x, y){
 
 function move(mm){
   let {x,y}=mm;
-  if(S.draw&&S.pts.length){const l=S.pts[S.pts.length-1];const o=snapO(l.x,l.y,x,y);x=o.x;y=o.y;}
+  // Превью курсора ДОЛЖНО показывать ту же точку, что реально поставит клик —
+  // иначе линия на экране идёт в одну сторону, а по клику точка «перескакивает»
+  // в другое место (был баг: здесь применялся только ортогональный снап,
+  // а click() дополнительно снапал к сетке/существующим точкам/щиту).
+  if(S.t==='cable'){
+    const snap=snapAll(x,y,S.draw&&S.pts.length?S.pts[S.pts.length-1]:null);
+    x=snap.x;y=snap.y;
+  }else if(S.draw&&S.pts.length){
+    const l=S.pts[S.pts.length-1];const o=snapO(l.x,l.y,x,y);x=o.x;y=o.y;
+  }
   S.curX=x;S.curY=y;
   document.getElementById('stx').textContent=(x/10).toFixed(0);
   document.getElementById('sty').textContent=((BLD[1]-y)/10).toFixed(0);
@@ -6896,6 +7057,44 @@ function click(mm){
       });
       S.zoneP1=null;updCnt();
       tip(`✅ Зона «${S.zoneName}» (потолок ${S.zoneH}мм) добавлена — стены и 3D в её пределах теперь используют эту высоту`);
+      _updateShellCounters();
+    }
+    render();return;
+  }
+  // Комната — два клика по противоположным углам ставят сразу 4 стены
+  // периметра (не дублируя уже существующие рядом — например, общую стену
+  // с соседней уже нарисованной комнатой), плюс регистрируют помещение с
+  // автономером и посчитанной площадью для кабельного журнала
+  if(S.roomDraw){
+    if(!S.roomP1){
+      S.roomP1={x,y};tip('🏠 Кликни противоположный угол комнаты');
+    }else{
+      push();
+      const x1=Math.min(S.roomP1.x,x), x2=Math.max(S.roomP1.x,x);
+      const y1=Math.min(S.roomP1.y,y), y2=Math.max(S.roomP1.y,y);
+      const wallType='cap', thick=200, gilzaLen=0.55;
+      const candidates=[
+        {x1,y1,x2,y2:y1},   // верх
+        {x1:x2,y1,x2,y2},   // право
+        {x1:x2,y1:y2,x2:x1,y2},// низ
+        {x1,y1:y2,x2:x1,y2:y1}, // лево
+      ];
+      let added=0;
+      for(const cw of candidates){
+        const dup=S.walls.some(w=>{
+          const s1=Math.hypot(w.x1-cw.x1,w.y1-cw.y1)<50 && Math.hypot(w.x2-cw.x2,w.y2-cw.y2)<50;
+          const s2=Math.hypot(w.x1-cw.x2,w.y1-cw.y2)<50 && Math.hypot(w.x2-cw.x1,w.y2-cw.y1)<50;
+          return s1||s2;
+        });
+        if(Math.hypot(cw.x2-cw.x1,cw.y2-cw.y1)<10) continue; // вырожденная (нулевая) стена
+        if(!dup){ S.walls.push({...cw, t:wallType, thick, gilzaLen}); added++; }
+      }
+      const areaM2=+(((x2-x1)/1000)*((y2-y1)/1000)).toFixed(1);
+      const roomName='пом.'+(S.rooms.length+1);
+      S.rooms.push({x1,y1,x2,y2,name:roomName,area:areaM2});
+      for(const g of S.groups) rebuildGilzy(g);
+      S.roomP1=null; updCnt(); _updateShellCounters(); _refreshRoomList();
+      tip(`✅ Комната «${roomName}» готова: +${added} стен, площадь ${areaM2}м²`);
     }
     render();return;
   }
@@ -7122,6 +7321,14 @@ function eraseAt(x,y){
   // Ригели раньше вообще не стирались ластиком — добавил
   S.rigels=(S.rigels||[]).filter(rg=>Math.hypot((rg.x1+rg.x2)/2-x,(rg.y1+rg.y2)/2-y)>R);
   S.zones=(S.zones||[]).filter(zn=>Math.hypot((zn.x1+zn.x2)/2-x,(zn.y1+zn.y2)/2-y)>R);
+  { const before=(S.rooms||[]).length;
+    S.rooms=(S.rooms||[]).filter(rm=>Math.hypot((rm.x1+rm.x2)/2-x,(rm.y1+rm.y2)/2-y)>R);
+    if(S.rooms.length!==before){
+      // Перенумеровываем оставшиеся комнаты по порядку, чтобы не было дырок (пом.1, пом.3, ...)
+      S.rooms.forEach((rm,i)=>{ rm.name='пом.'+(i+1); });
+      _refreshRoomList();
+    }
+  }
   for(const g of S.groups)rebuildGilzy(g);
   updCnt();render();
 }
@@ -7133,6 +7340,7 @@ function calcPena(gC,gP){
   return(((Math.PI*(20**2-14**2)*550/1e6)*gC+(Math.PI*(20**2-14**2)*300/1e6)*gP)/65).toFixed(3);
 }
 function updCnt(){
+  if(S.shellMode) _updateShellCounters();
   let tK=0,tB=0,tR=0,tL=0,gC=0,gP=0;
   let tOp=0,tPodR=0;
   for(const g of S.groups){
@@ -7189,6 +7397,7 @@ function sT(t){
   if(t!=='wall'){S.wallDraw=false;S.wallP1=null;}
   if(t!=='rigel'){S.rigelDraw=false;S.rigelP1=null;}
   if(t!=='zone'){S.zoneDraw=false;S.zoneP1=null;}
+  if(t!=='room'){S.roomDraw=false;S.roomP1=null;}
   S.t=t;
   document.querySelectorAll('.btn[id^="t-"]').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('t-'+t);if(el)el.classList.add('on');
@@ -7225,6 +7434,7 @@ function openNewGroupModal(){
   const prEl=document.getElementById('mg-plan-rozet'); if(prEl) prEl.value='';
   const plEl=document.getElementById('mg-plan-lamp'); if(plEl) plEl.value='';
   _fillMgSchitSelect(g ? g.schit : null);
+  _refreshRoomList();
   openM('mg');
 }
 
@@ -7329,6 +7539,30 @@ function doZone(){
   S.zoneName=(document.getElementById('mzone-n').value||'Зона').trim();
   S.zoneP1=null;closeM('mzone');sT('zone');
   tip(`📐 Кликни первый угол зоны «${S.zoneName}» (потолок ${S.zoneH}мм)`);
+}
+// «Комната» — без модалки, сразу два клика (максимально просто): вместо
+// рисования 4 отдельных стен по одной линии мастер кликает по двум
+// противоположным углам прямоугольника, и все 4 стены периметра, площадь
+// и автономер помещения (пом.N) появляются сами.
+function doRoom(){
+  S.roomDraw=true;
+  S.roomP1=null;
+  sT('room');
+  tip('🏠 Кликни первый угол комнаты, потом противоположный — 4 стены появятся сами');
+}
+// Список автонумерованных комнат (для автокомплита поля «Помещение» при
+// создании кабельной группы — не нужно печатать вручную)
+function _refreshRoomList(){
+  const dl=document.getElementById('mg-p-list');
+  if(!dl) return;
+  dl.innerHTML = (S.rooms||[]).map(r=>`<option value="${r.name}">`).join('');
+}
+// Живой счётчик прогресса в баннере режима «Шаблон здания» — мастер сразу
+// видит, что уже нарисовано, без необходимости открывать списки
+function _updateShellCounters(){
+  const el=document.getElementById('shell-counters');
+  if(!el) return;
+  el.textContent = `Стен: ${S.walls.length} · Ригелей: ${S.rigels.length} · Зон: ${S.zones.length} · Помещений: ${S.rooms.length}`;
 }
 
 // Превью в модале стены при смене типа
@@ -12669,7 +12903,10 @@ function _mobjPickSys(key){
 function enterShellMode(){
   S.shellMode = true;
   document.body.classList.add('shell-mode');
-  tip('🏗 Режим «Шаблон здания» — черти стены, ригели, зоны. Кабели и устройства пока скрыты.');
+  _updateShellRazdelButtons();
+  _updateShellCounters();
+  _refreshRoomList();
+  tip('🏗 Режим «Шаблон здания» — черти стены, ригели, зоны. Кабели и устройства пока скрыты — жми «⏭ Пропустить», если каркас не нужен прямо сейчас.');
 }
 function finishShellMode(){
   S.shellMode = false;
@@ -12677,6 +12914,32 @@ function finishShellMode(){
   finDraw();
   sT('cable');
   tip('✅ Шаблон здания готов и прикреплён ко всем системам этого объекта — начинай чертить кабели');
+}
+// Мастеру не всегда нужно чертить каркас прямо сейчас (например, если он
+// уже есть на бумаге и достаточно просто начать с кабелей) — «Пропустить»
+// выходит из режима так же, как «Готово», просто без завершающей подсказки
+// про каркас (ничего не удаляется, каркас можно дочертить в любой момент
+// кнопками 🧱/📏/📐, они остаются в общей панели инструментов).
+function skipShellMode(){
+  S.shellMode = false;
+  document.body.classList.remove('shell-mode');
+  finDraw();
+  sT('cable');
+  tip('⏭ Ок, каркас можно дочертить позже (🧱 Стена / 📏 Ригель / 📐 Зона всегда доступны) — начинай чертить кабели');
+}
+// Быстрое переключение раздела ЭОМ/СС прямо из баннера режима шаблона —
+// то же самое окно (msys), что открывается кнопкой-маркой в шапке, просто
+// доступ в один клик, не выходя из режима черчения каркаса
+function _shellPickRazdel(r){
+  openSysModal();
+  _sysModalPickRazdel(r);
+}
+function _updateShellRazdelButtons(){
+  const sys = ID_SYSTEMS[CUR_SYS];
+  const isSS = !CUR_MARKA_OVERRIDE && sys && sys.group==='ss';
+  const eomBtn=document.getElementById('shell-razdel-eom'), ssBtn=document.getElementById('shell-razdel-ss');
+  if(eomBtn){ eomBtn.style.background=isSS?'transparent':'#1a4a8a'; eomBtn.style.color=isSS?'#94a3b8':'#fff'; }
+  if(ssBtn){ ssBtn.style.background=isSS?'#1a4a8a':'transparent'; ssBtn.style.color=isSS?'#fff':'#94a3b8'; }
 }
 
 function openStartModal(){
@@ -12919,11 +13182,173 @@ function dl(c,m,n){const a=document.createElement('a');a.href=URL.createObjectUR
 function tip(m){const el=document.getElementById('tip');el.textContent=m;el.classList.add('s');clearTimeout(tip._t);tip._t=setTimeout(()=>el.classList.remove('s'),5000);}
 
 // ══════════════════════════════════════════════════════════════
+// ГОЛОСОВОЕ УПРАВЛЕНИЕ (Web Speech API — работает в Chrome на ПК и мобильном)
+// ══════════════════════════════════════════════════════════════
+// Идея: вместо ручного списка из ~230 команд (который тут же разойдётся
+// с реальностью при любом изменении интерфейса) — сканируем ВСЕ кнопки
+// на странице, берём их подписи как есть, и ищем среди них ближайшую к
+// тому, что сказал мастер. Плюс словарь синонимов сверху для более
+// естественной речи («провод» = кабель и т.п.).
+const _voiceAliases = {
+  'провод':'кабель', 'линия':'кабель', 'трасса':'кабель',
+  'назад':'отменить', 'отмена':'отменить', 'повторить':'вернуть',
+  'выход':'закрыть', 'закрой':'закрыть',
+  'подрозетник':'коробка',
+  'выключить':'выключатель', 'свет':'светильник', 'лампа':'светильник',
+  'розеточка':'розетка',
+  'три д':'3d', 'трёхмерный':'3d', '3д':'3d',
+  'сохранить':'готово', 'сохрани':'готово',
+  'помещение':'комната', 'зал':'комната',
+  'штроба':'стена', // используется вместе с типом стены, не отдельная кнопка
+};
+// Нормализация текста: нижний регистр, без эмодзи/пунктуации, схлопнутые пробелы
+function _voiceNorm(s){
+  return (s||'')
+    .toLowerCase()
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'') // эмодзи
+    .replace(/[.,!?«»"'()]/g,'')
+    .replace(/ё/g,'е')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+// Строит (заново, при каждом распознавании — дёшево) индекс «подпись → элемент»
+// по всем кликабельным кнопкам на странице. includeHidden=true — для второго
+// прохода, если среди ВИДИМЫХ кнопок совпадения не нашлось (см. _voiceMatch) —
+// так голос «видит» и кнопки из другого раздела (Кабельные линии/Оборудование),
+// а не только то, что сейчас на экране.
+function _buildVoiceIndex(includeHidden){
+  const idx=[];
+  document.querySelectorAll('button[onclick], button[id]').forEach(btn=>{
+    if(!includeHidden && btn.offsetParent===null) return;
+    if(btn.id==='voice-btn'||btn.id==='voice-btn-m') return;
+    const raw = btn.textContent||'';
+    const norm = _voiceNorm(raw);
+    if(!norm) return;
+    idx.push({label:norm, el:btn, hidden: btn.offsetParent===null});
+  });
+  return idx;
+}
+// Ищет лучшее совпадение: точное > один из индекса начинается с фразы >
+// фраза содержится в подписи кнопки (самая короткая подходящая подпись —
+// чтобы «стена» не путалась с более длинной «зона потолка»). Сначала ищем
+// только среди ВИДИМЫХ кнопок; если ничего не нашли — расширяем поиск на
+// скрытые (например, «розетка» лежит в разделе «Оборудование», а сейчас
+// открыт раздел «Кабельные линии») и сами переключаем раздел.
+function _voiceMatch(phrase){
+  const tryIdx=(idx)=>{
+    let best=null, bestScore=-1;
+    for(const item of idx){
+      let score=-1;
+      if(item.label===phrase) score=100;
+      else if(item.label.startsWith(phrase+' ')||phrase.startsWith(item.label+' ')) score=80;
+      else if(item.label.includes(phrase)) score=60-item.label.length*0.1;
+      else if(phrase.includes(item.label)&&item.label.length>2) score=50-item.label.length*0.1;
+      if(score>bestScore){ bestScore=score; best=item; }
+    }
+    return bestScore>=40 ? best : null;
+  };
+  return tryIdx(_buildVoiceIndex(false)) || tryIdx(_buildVoiceIndex(true));
+}
+// Если найденная кнопка сейчас скрыта разделом «Кабельные линии»/«Оборудование»
+// (span.sec-kl / span.sec-ob с display:none) — переключаем раздел, чтобы
+// кнопка стала кликабельной, ПЕРЕД тем как её нажать
+function _voiceRevealIfNeeded(el){
+  const secOb = el.closest('.sec-ob');
+  const secKl = el.closest('.sec-kl');
+  if(secOb && getComputedStyle(secOb).display==='none'){ setUISection('ob'); return true; }
+  if(secKl && getComputedStyle(secKl).display==='none'){ setUISection('kl'); return true; }
+  return false;
+}
+let _voiceRec=null, _voiceOn=false;
+function toggleVoice(){
+  if(_voiceOn){ _voiceStop(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    tip('⚠️ Голосовое управление работает только в браузере Chrome (на ПК или телефоне)');
+    return;
+  }
+  _voiceRec = new SR();
+  _voiceRec.lang='ru-RU';
+  _voiceRec.continuous=true;
+  _voiceRec.interimResults=true;
+  _voiceRec.onstart=()=>{
+    _voiceOn=true;
+    document.getElementById('voice-indicator').style.display='block';
+    document.getElementById('voice-status').textContent='🎤 Слушаю…';
+    document.getElementById('voice-heard').textContent='';
+    ['voice-btn','voice-btn-m'].forEach(id=>{
+      const b=document.getElementById(id); if(b){ b.style.background='#7c3aed'; b.style.color='#fff'; }
+    });
+  };
+  _voiceRec.onresult=(ev)=>{
+    let finalText='', interimText='';
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const t=ev.results[i][0].transcript;
+      if(ev.results[i].isFinal) finalText+=t; else interimText+=t;
+    }
+    if(interimText) document.getElementById('voice-heard').textContent='«'+interimText.trim()+'»…';
+    if(finalText) _voiceExecute(finalText.trim());
+  };
+  _voiceRec.onerror=(ev)=>{
+    if(ev.error==='no-speech') return; // тишина — это нормально, просто ждём дальше
+    if(ev.error==='not-allowed'){
+      tip('⚠️ Нет доступа к микрофону — разреши в настройках браузера');
+      _voiceStop();
+    }
+  };
+  _voiceRec.onend=()=>{
+    if(_voiceOn){ try{ _voiceRec.start(); }catch(e){} } // авто-перезапуск (браузер иногда сам останавливает через паузу)
+  };
+  try{ _voiceRec.start(); }catch(e){ tip('⚠️ Не удалось запустить микрофон'); }
+}
+function _voiceStop(){
+  _voiceOn=false;
+  if(_voiceRec){ try{ _voiceRec.stop(); }catch(e){} _voiceRec=null; }
+  document.getElementById('voice-indicator').style.display='none';
+  ['voice-btn','voice-btn-m'].forEach(id=>{
+    const b=document.getElementById(id); if(b){ b.style.background=''; b.style.color=''; }
+  });
+}
+function _voiceExecute(rawPhrase){
+  let phrase=_voiceNorm(rawPhrase);
+  if(!phrase) return;
+  // Применяем словарь синонимов целиком (по словам) — «отмена» → «отменить» и т.п.
+  Object.entries(_voiceAliases).forEach(([from,to])=>{
+    if(phrase===from) phrase=to;
+    else phrase=phrase.replace(new RegExp('\\b'+from+'\\b','g'), to);
+  });
+  const heardEl=document.getElementById('voice-heard');
+
+  // Если сейчас активно текстовое поле — считаем это диктовкой в него,
+  // а не командой (не подменяем ввод названия проекта на нажатие кнопки)
+  const active=document.activeElement;
+  const isTextInput = active && (active.tagName==='INPUT'||active.tagName==='TEXTAREA') &&
+    !['button','submit','checkbox','radio'].includes(active.type);
+  if(isTextInput){
+    active.value = rawPhrase.trim();
+    active.dispatchEvent(new Event('input',{bubbles:true}));
+    if(heardEl) heardEl.textContent='✏️ Вписано в поле: «'+rawPhrase.trim()+'»';
+    return;
+  }
+
+  const match=_voiceMatch(phrase);
+  if(match){
+    _voiceRevealIfNeeded(match.el);
+    if(heardEl) heardEl.textContent='✅ «'+rawPhrase.trim()+'» → '+match.el.textContent.trim();
+    match.el.click();
+  }else{
+    if(heardEl) heardEl.textContent='❓ Не понял: «'+rawPhrase.trim()+'»';
+    tip('🎤 Не распознал команду: «'+rawPhrase.trim()+'»');
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════
 // КЛАВИШИ
 // ══════════════════════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key==='z'){e.preventDefault();undo();return;}
-  if(e.key==='Escape'){finDraw();S.wallDraw=false;S.wallP1=null;S.rigelDraw=false;S.rigelP1=null;S.zoneDraw=false;S.zoneP1=null;S.opPend=null;S.schPend=null;if(S.calibMode)cancelCalib();render();return;}
+  if(e.key==='Escape'){finDraw();S.wallDraw=false;S.wallP1=null;S.rigelDraw=false;S.rigelP1=null;S.zoneDraw=false;S.zoneP1=null;S.roomDraw=false;S.roomP1=null;S.opPend=null;S.schPend=null;if(S.calibMode)cancelCalib();render();return;}
   if(e.key==='Enter'&&S.draw){finDraw();return;}
   if(!e.ctrlKey&&!e.altKey&&!e.shiftKey){
     const k={c:'cable',b:'box',r:'rozet',l:'lamp',o:'opusk',w:'wall',x:'er'};
@@ -13027,9 +13452,9 @@ window.addEventListener('load', function(){
   try{
     var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
     var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
-    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭМ";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
     if(typeof updateShifrPreview==='function') updateShifrPreview();
-    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭМ");
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
   }catch(e){}
 });
 </script>
