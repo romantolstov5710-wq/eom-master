@@ -1396,7 +1396,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(100, 116, 139); border: 1px solid rgb(100, 116, 139); border-radius: 5px; white-space: nowrap;">🧵 ЭМ (кабели)</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5">Гр.1с</option><option value="6" selected="">Гр.2с</option><option value="7">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1423,9 +1423,9 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button id="t-er" class="btn b-red" onclick="sT('er')">✕ Ластик</button>
   <button id="voice-btn" class="btn" onclick="toggleVoice()" style="background:#4c1d95;color:#e9d5ff" title="Голосовое управление — скажи название кнопки (Стена, Розетка, Кабель...) вместо нажатия">🎤 Голос</button>
 
-  <button id="more-toggle-btn" class="btn" onclick="toggleMoreTools()" style="background:#334155;color:#cbd5e1;font-size:11px" title="Показать/скрыть остальные инструменты">⋯ Ещё</button>
+  <button id="more-toggle-btn" class="btn" onclick="toggleMoreTools()" style="background: rgb(71, 85, 105); color: rgb(203, 213, 225); font-size: 11px;" title="Показать/скрыть остальные инструменты">⋯ Скрыть</button>
 
-  <span class="more-tools" style="display:none">
+  <span class="more-tools" style="">
   <label style="font-size:10px;color:#64748b;display:flex;align-items:center;gap:3px">
     <input type="checkbox" id="cb-o" checked=""> Выровн.</label>
   <label style="font-size:10px;color:#64748b;display:flex;align-items:center;gap:3px">
@@ -1437,7 +1437,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">62%</span>
   </label>
   </span>
 
@@ -1480,7 +1480,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button id="kd-btn" class="btn b-or" onclick="startKDDist('cable')" title="Нажми → кликни кабель → кликни стену → введи размер">📏 КЛ</button>
   <button id="od-btn" class="btn b-or" onclick="startKDDist('opusk')" title="Нажми → кликни один или несколько опусков → кликни стену → введи общий размер" style="background:#ea580c;color:#fff">📏 Оп-стена</button>
   </span>
-  <span class="more-tools" style="display:none">
+  <span class="more-tools" style="">
   <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения (для раздела Оборудование)" id="mh-btn-ob">📐</button>
   </span>
   <span id="kd-panel" style="display:none;align-items:center;gap:5px">
@@ -1565,13 +1565,13 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <span style="display:none"><!-- kd close -->
   </span>
   <button class="btn b-grn" onclick="expV()" title="Ведомость в браузере">📋</button>
-  <span class="more-tools" style="display:none">
+  <span class="more-tools" style="">
   <button class="btn b-blue" onclick="exportVedFile()" title="Скачать HTML для телефона">📱</button>
   <button class="btn b-or" onclick="open1C()" title="1С: Склад и ЛФУ">🏭 1С</button>
   </span>
   <button class="btn" onclick="openStartModal()" title="Сменить объект / систему" style="background:#334155;color:#93c5fd">🏗️ Объект</button>
   <button class="btn" id="working-here-btn" onclick="markWorkingHere()" title="Отметить, что сейчас активно работаешь именно на этом устройстве — полезно при переходе с компьютера на планшет и обратно" style="background:#334155;color:#fbbf24">🖐️ Работаю здесь</button>
-  <span class="more-tools" style="display:none">
+  <span class="more-tools" style="">
   <button class="btn" onclick="clearProjectAll()" title="Очистить всё: локально и в онлайн-данных этого объекта" style="background:#7f1d1d;color:#fca5a5">🗑 Очистить всё</button>
   <button class="btn b-pur" onclick="openLayerModal()" title="Новый слой / защита ИД">📑 Слой</button>
   <button class="btn" id="correction-btn" onclick="toggleCorrectionBtn()" title="Выдели прямоугольный участок → он заморозится ч/б → перечерти его заново, новое подсветится красным" style="background:#7f1d1d;color:#fecaca">🔄 Корректировка</button>
@@ -1664,13 +1664,13 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
+      <div id="glist"><div class="gi" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
       <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
+    </div><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
@@ -1691,8 +1691,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <div id="st">
   <span>Режим: <b id="stm">Кабель</b></span>
-  <span>Группа: <b id="stg">Гр.1с</b></span>
-  <span>X:<b id="stx">0</b> Y:<b id="sty">0</b>мм</span>
+  <span>Группа: <b id="stg">Гр.2с</b></span>
+  <span>X:<b id="stx">650</b> Y:<b id="sty">1915</b>мм</span>
   <span>Отрезок: <b id="sts">0</b>м</span>
 </div>
 
@@ -1721,8 +1721,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb teal more-tools sec-kl" style="" onclick="openCalib()">📏<span>Масштаб</span></button>
   <button class="mb" onclick="openNewGroupModal()" style="color:#a78bfa">+<span>Группа</span></button>
   <button class="mb or" onclick="expV()" style="color:#fed7aa">📋<span>Ведом.</span></button>
-  <button class="mb more-tools" onclick="open1C()" style="display:none;color:#f97316">🏭<span>1С</span></button>
-  <button class="mb more-tools" onclick="exportVedFile()" style="display:none;color:#93c5fd">📱<span>HTML</span></button>
+  <button class="mb more-tools" onclick="open1C()" style="color: rgb(249, 115, 22);">🏭<span>1С</span></button>
+  <button class="mb more-tools" onclick="exportVedFile()" style="color: rgb(147, 197, 253);">📱<span>HTML</span></button>
   <button class="mb" onclick="exportDXF()" style="color:#a78bfa">📐<span>DXF</span></button>
   <button class="mb pur" onclick="openLayerModal()">📑<span>Слой</span></button>
   <button class="mb" onclick="startCorrectionSelect()" style="color:#fca5a5">🔄<span>Корр.</span></button>
@@ -13534,6 +13534,19 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭМ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭМ");
+  }catch(e){}
+});
+</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
