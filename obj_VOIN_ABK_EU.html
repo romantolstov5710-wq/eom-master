@@ -6194,7 +6194,7 @@ function _build3DScene(rect, wrap){
         const trayH = 0.05; // высота борта, м
         const dx=lx(D.x2)-lx(D.x1), dz=lz(D.y2)-lz(D.y1);
         const fullLen=Math.hypot(dx,dz);
-        const detourPts = _buildDetourPts(D, ceilY);
+        const detourPts = _buildDetourPts(D);
         if(fullLen>0.01 && detourPts){
           for(let i=0;i<detourPts.length-1;i++){
             const p1=detourPts[i], p2=detourPts[i+1];
@@ -6238,28 +6238,21 @@ function _build3DScene(rect, wrap){
           }
         }
       }else{
-        const detour = _buildDetourPts(D, ceilY);
-        const pts = detour || [
-          new THREE.Vector3(lx(D.x1), ceilY-0.02, lz(D.y1)),
-          new THREE.Vector3(lx(D.x2), ceilY-0.02, lz(D.y2)),
-        ];
+        const pts = _buildDetourPts(D);
         const geo = new THREE.BufferGeometry().setFromPoints(pts);
         scene.add(new THREE.Line(geo, lineMat));
-        // Размеры обвода ригеля — высота нырка и длина участка под ним,
-        // тоже показываются кнопкой «📐 Включить размеры» и участвуют в
-        // расчёте (это те же точки, что вошли в gRigelExtra)
-        if(detour){
-          for(let i=1;i<detour.length-2;i++){
-            const p1=detour[i], p2=detour[i+1];
-            const segLen3=p1.distanceTo(p2);
-            if(segLen3<0.05) continue;
-            const isVertical = Math.abs(p1.x-p2.x)<0.005 && Math.abs(p1.z-p2.z)<0.005;
-            const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+'м', '#fca5a5');
-            dimSpr2.position.set((p1.x+p2.x)/2 + 0.06, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
-            dimSpr2.visible = _m3dDimsOn;
-            scene.add(dimSpr2);
-            _m3dDimObjects.push(dimSpr2);
-          }
+        // Размеры перепадов (обвод ригеля, подъём/спуск между зонами) —
+        // показываются кнопкой «📐 Включить размеры» и участвуют в расчёте
+        for(let i=1;i<pts.length-2;i++){
+          const p1=pts[i], p2=pts[i+1];
+          const segLen3=p1.distanceTo(p2);
+          if(segLen3<0.05) continue;
+          const isVertical = Math.abs(p1.x-p2.x)<0.005 && Math.abs(p1.z-p2.z)<0.005;
+          const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+'м', '#fca5a5');
+          dimSpr2.position.set((p1.x+p2.x)/2 + 0.06, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
+          dimSpr2.visible = _m3dDimsOn;
+          scene.add(dimSpr2);
+          _m3dDimObjects.push(dimSpr2);
         }
       }
       // Размерная подпись длины сегмента — по умолчанию скрыта, показывается
@@ -6267,7 +6260,8 @@ function _build3DScene(rect, wrap){
       const segLenM = Math.hypot(seg.x2-seg.x1, seg.y2-seg.y1)/1000;
       if(segLenM>0.15){
         const dimSpr = _makeTextSprite(segLenM.toFixed(2)+(isLotok?'м (лоток)':'м'), '#fde68a');
-        dimSpr.position.set((lx(D.x1)+lx(D.x2))/2, ceilY+0.05, (lz(D.y1)+lz(D.y2))/2);
+        const labelH = M(hpotAt((D.x1+D.x2)/2,(D.y1+D.y2)/2))+0.05; // по высоте потолка в середине отрезка (зоны)
+        dimSpr.position.set((lx(D.x1)+lx(D.x2))/2, labelH, (lz(D.y1)+lz(D.y2))/2);
         dimSpr.visible = _m3dDimsOn;
         scene.add(dimSpr);
         _m3dDimObjects.push(dimSpr);
@@ -6545,26 +6539,71 @@ function _build3DScene(rect, wrap){
     tMax=Math.min(1, tMax+0.02);
     return [tMin,tMax];
   }
-  // Строит точки трассы кабеля с «нырком» ПОД ригель на пересечениях —
-  // раньше линия просто проходила сквозь балку насквозь, теперь физически
-  // огибает её понизу, как в реальности (и как показано в узле ригеля)
-  function _buildDetourPts(D, ceilY){
-    const ranges=[];
+  // Высота потолка «трассы» (в метрах) в конкретной точке плана — с учётом
+  // зон (см. hpotAt). Используется вместо единого ceilY, чтобы кабель шёл
+  // по потолку СВОЕЙ комнаты, а не одной сплошной плоскостью на всё здание.
+  function _traceCeilM(px,py){ return M(hpotAt(px,py)); }
+  // Строит точки трассы кабеля/лотка с учётом:
+  //  1) нырка ПОД ригель на пересечениях (кабель огибает балку снизу);
+  //  2) подъёма/спуска в штробе стены при переходе между зонами разной
+  //     высоты потолка — раньше вся трасса рисовалась на одной глобальной
+  //     высоте (S.hpot), и при переходе в зону с другим потолком кабель
+  //     просто резал стену по диагонали на средней высоте, а не поднимался
+  //     в штробе и шёл дальше по потолку новой комнаты на её высоте.
+  // Всегда возвращает валидный массив точек (минимум — начало и конец).
+  function _buildDetourPts(D){
+    const dx=D.x2-D.x1, dy=D.y2-D.y1;
+    const posAt=t=>({x:D.x1+dx*t, y:D.y1+dy*t});
+    const at=(t,y)=>{ const p=posAt(t); return new THREE.Vector3(lx(p.x), y, lz(p.y)); };
+
+    const dipRanges=[];
     for(const rg of (S.rigels||[])){
       const r=_rigelCrossingRange(D.x1,D.y1,D.x2,D.y2, rg);
-      if(r) ranges.push({t0:r[0], t1:r[1], h:rg.h});
+      if(r) dipRanges.push({t0:r[0], t1:r[1], h:rg.h});
     }
-    if(!ranges.length) return null;
-    ranges.sort((a,b)=>a.t0-b.t0);
-    const dx=D.x2-D.x1, dy=D.y2-D.y1;
-    const at=(t,y)=>new THREE.Vector3(lx(D.x1+dx*t), y, lz(D.y1+dy*t));
-    const topY=ceilY-0.02;
-    const pts=[at(0,topY)];
-    for(const r of ranges){
-      const dipY=Math.max(0.15, ceilY-M(r.h)-0.06);
-      pts.push(at(r.t0,topY), at(r.t0,dipY), at(r.t1,dipY), at(r.t1,topY));
+    // Сэмплируем отрезок и находим, где меняется высота потолка (переход
+    // между зонами — границы зон это прямоугольники произвольной ориентации
+    // относительно кабеля, сэмплирование работает при любом угле)
+    const N=100;
+    const zoneTrans=[];
+    let prevH=hpotAt(D.x1,D.y1);
+    for(let i=1;i<=N;i++){
+      const t=i/N; const p=posAt(t);
+      const h=hpotAt(p.x,p.y);
+      if(h!==prevH){ zoneTrans.push({t:(i-0.5)/N, h}); prevH=h; }
     }
-    pts.push(at(1,topY));
+
+    if(!dipRanges.length && !zoneTrans.length){
+      const h1=_traceCeilM(D.x1,D.y1)-0.02, h2=_traceCeilM(D.x2,D.y2)-0.02;
+      return [at(0,h1), at(1,h2)];
+    }
+
+    const events=[];
+    for(const zt of zoneTrans) events.push({t:zt.t, kind:'zone', h:zt.h});
+    for(const r of dipRanges) events.push({t:r.t0,kind:'rigelStart',h:r.h}, {t:r.t1,kind:'rigelEnd'});
+    events.sort((a,b)=>a.t-b.t);
+
+    const pts=[];
+    let curCeil=_traceCeilM(D.x1,D.y1);
+    let curH=curCeil-0.02;
+    pts.push(at(0,curH));
+    let inRigel=false, rigelDipY=null;
+
+    for(const ev of events){
+      if(ev.kind==='zone'){
+        const newCeil=M(ev.h), newH=newCeil-0.02;
+        if(!inRigel) pts.push(at(ev.t,curH), at(ev.t,newH)); // подъём/спуск в штробе стены
+        curCeil=newCeil; curH=newH;
+      }else if(ev.kind==='rigelStart'){
+        rigelDipY=Math.max(0.15, curCeil-M(ev.h)-0.06);
+        pts.push(at(ev.t,curH), at(ev.t,rigelDipY));
+        inRigel=true;
+      }else if(ev.kind==='rigelEnd'){
+        pts.push(at(ev.t,rigelDipY), at(ev.t,curH));
+        inRigel=false;
+      }
+    }
+    pts.push(at(1,curH));
     return pts;
   }
 
