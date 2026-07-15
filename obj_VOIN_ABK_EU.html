@@ -1413,7 +1413,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">3%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
   </label>
   </span>
 
@@ -1655,7 +1655,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="769" height="736"></canvas></div>
+  <div id="cw"><canvas id="cv" width="1760" height="819"></canvas></div>
 </div>
 
 <div id="st">
@@ -4211,13 +4211,13 @@ function evMM(e){
 function snapG(x,y){
   return{x:Math.round(x/GRID)*GRID, y:Math.round(y/GRID)*GRID};
 }
-function snapP(x,y){  // snap к существующим точкам трасс, 400мм
-  let bx=x,by=y,bd=400;
+function snapP(x,y){  // snap к существующим точкам трасс, 400мм — null, если рядом ничего нет
+  let bx=null,by=null,bd=400;
   for(const g of S.groups) for(const s of g.segs)
     for(const p of [{x:s.x1,y:s.y1},{x:s.x2,y:s.y2}]){
       const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;bx=p.x;by=p.y;}
     }
-  return{x:bx,y:by};
+  return bx===null ? null : {x:bx,y:by};
 }
 function snapO(px,py,x,y){
   if(!S.ortho)return{x,y};
@@ -4240,12 +4240,21 @@ function snapAll(x,y,fromPt){
       if(ds<1500) return {x:sch.x, y:sch.y}; // привязка 1500мм
     }
   }
-  // Snap к сетке или к существующим точкам (что ближе)
+  // Snap к сетке или к существующим точкам (что ближе) — раньше snapP()
+  // при отсутствии рядом точки тихо возвращал СЫРЫЕ координаты курсора
+  // (расстояние 0), из-за чего в сравнении «что ближе» сетка не побеждала
+  // никогда — привязка к сетке фактически не работала. Теперь snapP()
+  // возвращает null, если рядом ничего нет, и сравнение расстояний честное.
   const sg=snapG(x,y);
   const sp=snapP(x,y);
-  const dg=Math.hypot(x-sg.x,y-sg.y);
-  const dp=Math.hypot(x-sp.x,y-sp.y);
-  let res=dg<dp?sg:sp;
+  let res;
+  if(sp){
+    const dg=Math.hypot(x-sg.x,y-sg.y);
+    const dp=Math.hypot(x-sp.x,y-sp.y);
+    res = dp<=dg ? sp : sg;
+  }else{
+    res = sg;
+  }
   if(fromPt)res=snapO(fromPt.x,fromPt.y,res.x,res.y);
   return res;
 }
@@ -6660,7 +6669,16 @@ function handle3DClick(x, y){
 
 function move(mm){
   let {x,y}=mm;
-  if(S.draw&&S.pts.length){const l=S.pts[S.pts.length-1];const o=snapO(l.x,l.y,x,y);x=o.x;y=o.y;}
+  // Превью курсора ДОЛЖНО показывать ту же точку, что реально поставит клик —
+  // иначе линия на экране идёт в одну сторону, а по клику точка «перескакивает»
+  // в другое место (был баг: здесь применялся только ортогональный снап,
+  // а click() дополнительно снапал к сетке/существующим точкам/щиту).
+  if(S.t==='cable'){
+    const snap=snapAll(x,y,S.draw&&S.pts.length?S.pts[S.pts.length-1]:null);
+    x=snap.x;y=snap.y;
+  }else if(S.draw&&S.pts.length){
+    const l=S.pts[S.pts.length-1];const o=snapO(l.x,l.y,x,y);x=o.x;y=o.y;
+  }
   S.curX=x;S.curY=y;
   document.getElementById('stx').textContent=(x/10).toFixed(0);
   document.getElementById('sty').textContent=((BLD[1]-y)/10).toFixed(0);
