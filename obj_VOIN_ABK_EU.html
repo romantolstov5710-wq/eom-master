@@ -27,6 +27,17 @@ body{background:#0f172a;color:#e2e8f0;display:flex;flex-direction:column}
   padding:5px 8px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-shrink:0;z-index:10}
 #bar h1{font-size:13px;color:#ef4444;font-weight:900;margin-right:2px}
 
+/* ── Режим «Шаблон здания» ─────────────────────────────────────────
+   Пока идёт черчение общего каркаса объекта (стены/ригели/зоны), прячем
+   инструменты, специфичные для конкретной системы (кабель/устройства/
+   розетки и т.п.) — они снова появляются, как только мастер нажимает
+   «Шаблон готов». Сам каркас (.tool-shell) остаётся виден всегда. */
+body.shell-mode .tool-system{display:none!important}
+body.shell-mode .tool-shell{outline:2px solid #14b8a6;outline-offset:1px}
+#shell-banner{display:none;background:#0f766e;color:#fff;padding:6px 12px;
+  font-size:12px;font-weight:700;align-items:center;gap:10px;flex-shrink:0}
+body.shell-mode #shell-banner{display:flex}
+
 .btn{padding:5px 9px;border-radius:5px;border:none;cursor:pointer;
   font-size:11px;font-weight:700;white-space:nowrap;transition:all .12s;line-height:1.2}
 .btn:active{opacity:.7;transform:scale(.95)}
@@ -1023,6 +1034,23 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   </div>
 </div></div>
 
+<div class="mbg" id="mzone"><div class="mbox">
+  <h3>📐 Зона потолка</h3>
+  <p style="font-size:11px;color:#9ca3af;margin-bottom:10px">
+    Кликни два противоположных угла комнаты/зоны, где потолок выше или ниже
+    общего. Внутри зоны стены и 3D будут использовать эту высоту вместо
+    общей высоты этажа.
+  </p>
+  <label>Высота потолка в зоне, мм</label>
+  <input id="mzone-h" type="number" value="3600" min="2000" step="50">
+  <label style="margin-top:8px">Название зоны (для подписи на чертеже)</label>
+  <input id="mzone-n" type="text" value="Актовый зал">
+  <div class="mbtns">
+    <button class="btn b-grn" onclick="doZone()">✏️ Рисовать</button>
+    <button class="btn b-gray" onclick="closeM('mzone')">✕ Отмена</button>
+  </div>
+</div></div>
+
 <div class="mbg" id="mlay"><div class="mbox">
   <h3>🗂 Слои систем</h3>
   <div style="font-size:10.5px;color:#94a3b8;margin-bottom:10px;line-height:1.5">
@@ -1037,6 +1065,17 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   </div>
   <div class="mbtns">
     <button class="btn b-gray" onclick="closeM('mlay')">✕ Закрыть</button>
+  </div>
+</div></div>
+
+<div class="mbg" id="mssdev"><div class="mbox">
+  <h3>⊙ Устройство СС</h3>
+  <div style="font-size:10.5px;color:#94a3b8;margin-bottom:10px;line-height:1.5">
+    Выбери тип устройства, затем кликни на план, чтобы поставить его на трассу шлейфа.
+  </div>
+  <div id="mssdev-body" style="max-height:340px;overflow:auto"></div>
+  <div class="mbtns">
+    <button class="btn b-gray" onclick="closeM('mssdev')">✕ Отмена</button>
   </div>
 </div></div>
 
@@ -1341,19 +1380,21 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   </div>
 
   <span class="sec-kl">
-  <button id="t-cable" class="btn b-blue on" onclick="sT('cable')">⟿ Кабель</button>
-  <button id="t-opusk" class="btn b-pur" onclick="sT('opusk')">↓ Опуск</button>
-  <button id="t-box" class="btn b-yel" onclick="sT('box')">⊡ Коробка</button>
+  <button id="t-cable" class="btn b-blue on tool-system" onclick="sT('cable')">⟿ Кабель</button>
+  <button id="t-opusk" class="btn b-pur tool-system" onclick="sT('opusk')">↓ Опуск</button>
+  <button id="t-box" class="btn b-yel tool-system" onclick="sT('box')">⊡ Коробка</button>
   </span>
   <span class="sec-ob" style="display:none">
-  <button id="t-rozet" class="btn b-grn" onclick="sT('rozet')">⊙ Розетка</button>
-  <button id="t-switch" class="btn" style="background:#164e63;color:#67e8f9" onclick="sT('switch')">⏻ Выключатель</button>
-  <button id="t-lamp" class="btn b-yel" onclick="sT('lamp')" style="color:#fde68a">○ Свет.</button>
+  <button id="t-rozet" class="btn b-grn tool-system" onclick="sT('rozet')">⊙ Розетка</button>
+  <button id="t-switch" class="btn tool-system" style="background:#164e63;color:#67e8f9" onclick="sT('switch')">⏻ Выключатель</button>
+  <button id="t-lamp" class="btn b-yel tool-system" onclick="sT('lamp')" style="color:#fde68a">○ Свет.</button>
   </span>
   <span class="sec-kl">
   <button id="t-schit" class="btn b-blue" onclick="openM('ms');sT('schit')">⊠ Щит</button>
-  <button id="t-wall" class="btn b-teal" onclick="openM('mw');sT('wall')">🧱 Стена</button>
-  <button id="t-rigel" class="btn b-teal" onclick="openM('mrig');sT('rigel')" title="Ригель/балка под потолком — кабель автоматически обходит его снизу, длина обхода считается сама">📏 Ригель</button>
+  <button id="t-wall" class="btn b-teal tool-shell" onclick="openM('mw');sT('wall')">🧱 Стена</button>
+  <button id="t-rigel" class="btn b-teal tool-shell" onclick="openM('mrig');sT('rigel')" title="Ригель/балка под потолком — кабель автоматически обходит его снизу, длина обхода считается сама">📏 Ригель</button>
+  <button id="t-ssdev" class="btn b-red tool-system" onclick="openSSDevPicker()" title="Устройство СС — извещатель/оповещатель/камера/считыватель и т.п., в зависимости от текущей системы">⊙ Устройство СС</button>
+  <button id="t-zone" class="btn b-teal tool-shell" onclick="openM('mzone');sT('zone')" title="Зона с другой высотой потолка — например, актовый зал или коридор с подшивным потолком. Стены и 3D в её пределах используют эту высоту">📐 Зона потолка</button>
   <button id="t-3d" class="btn" style="background:#312e81;color:#c7d2fe" onclick="start3DSelect()" title="Выдели прямоугольный участок на плане, потом кликни внутри — покажу его в 3D">📦 Участок в 3D</button>
   </span>
   <button id="t-er" class="btn b-red" onclick="sT('er')">✕ Ластик</button>
@@ -1372,7 +1413,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">3%</span>
   </label>
   </span>
 
@@ -1411,7 +1452,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn b-or" onclick="openM('mh')" title="Высоты помещения">📐</button>
   <button class="btn b-or" onclick="openM('mplan')" title="Загрузить план / фон">🗺 План</button>
   <button class="btn b-teal" onclick="autoDetectWalls()" title="Автораспознать стены по загруженному плану">🏗 Стены</button>
-  <button class="btn b-teal" onclick="openCalib()" title="Проверить масштаб">📏 Масштаб</button>
+  <button class="btn b-teal tool-shell" onclick="openCalib()" title="Проверить масштаб">📏 Масштаб</button>
   <button id="kd-btn" class="btn b-or" onclick="startKDDist('cable')" title="Нажми → кликни кабель → кликни стену → введи размер">📏 КЛ</button>
   <button id="od-btn" class="btn b-or" onclick="startKDDist('opusk')" title="Нажми → кликни один или несколько опусков → кликни стену → введи общий размер" style="background:#ea580c;color:#fff">📏 Оп-стена</button>
   </span>
@@ -1517,6 +1558,11 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="btn b-grn" style="font-weight:900;font-size:12px" onclick="showReady()">✅ ГОТОВО</button>
 </div>
 
+<div id="shell-banner">
+  <span>🏗 Режим: Шаблон здания — черти стены/ригели/зоны, они прикрепятся ко всем системам этого объекта</span>
+  <button class="btn b-grn" style="margin-left:auto" onclick="finishShellMode()">✅ Шаблон готов — к системам</button>
+</div>
+
 <!-- ОСНОВНАЯ ЗОНА -->
 <div id="main">
   <div id="left">
@@ -1609,7 +1655,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="1760" height="850"></canvas></div>
+  <div id="cw"><canvas id="cv" width="769" height="736"></canvas></div>
 </div>
 
 <div id="st">
@@ -1621,18 +1667,20 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
 <!-- ПЛАНШЕТНАЯ ПАНЕЛЬ -->
 <div id="mob">
-  <button class="mb sec-kl" id="mb-cable" onclick="sT('cable')">⟿<span>Кабель</span></button>
-  <button class="mb pur sec-kl" id="mb-opusk" onclick="sT('opusk')">↓<span>Опуск</span></button>
-  <button class="mb yel sec-kl" id="mb-box" onclick="sT('box')">⊡<span>Коробка</span></button>
-  <button class="mb grn sec-ob" id="mb-rozet" style="display:none" onclick="sT('rozet')">⊙<span>Розетка</span></button>
-  <button class="mb sec-ob" id="mb-lamp" style="display:none;color:#fde68a" onclick="sT('lamp')">○<span>Свет.</span></button>
-  <button class="mb teal sec-kl" id="mb-wall" onclick="openM('mw');sT('wall')">🧱<span>Стена</span></button>
+  <button class="mb sec-kl tool-system" id="mb-cable" onclick="sT('cable')">⟿<span>Кабель</span></button>
+  <button class="mb pur sec-kl tool-system" id="mb-opusk" onclick="sT('opusk')">↓<span>Опуск</span></button>
+  <button class="mb yel sec-kl tool-system" id="mb-box" onclick="sT('box')">⊡<span>Коробка</span></button>
+  <button class="mb grn sec-ob tool-system" id="mb-rozet" style="display:none" onclick="sT('rozet')">⊙<span>Розетка</span></button>
+  <button class="mb sec-ob tool-system" id="mb-lamp" style="display:none;color:#fde68a" onclick="sT('lamp')">○<span>Свет.</span></button>
+  <button class="mb teal sec-kl tool-shell" id="mb-wall" onclick="openM('mw');sT('wall')">🧱<span>Стена</span></button>
   <button class="mb sec-kl" id="mb-3d" onclick="start3DSelect()" style="color:#c7d2fe">📦<span>3D</span></button>
   <button class="mb red" id="mb-er" onclick="sT('er')">✕<span>Ластик</span></button>
   <button class="mb" id="hand-btn-m" onclick="toggleHandMode()" style="color:#4ade80">✋<span>Рука</span></button>
   <button class="mb" id="lbl-btn-m" onclick="toggleLabels()" style="color:#93c5fd">🏷<span>Выноски</span></button>
   <button class="mb" id="lay-btn-m" onclick="openLayersPanel()" style="color:#93c5fd">🗂<span>Слои</span></button>
-  <button class="mb" id="t-rigel-m" onclick="openM('mrig');sT('rigel')" style="color:#d97706">📏<span>Ригель</span></button>
+  <button class="mb tool-shell" id="t-rigel-m" onclick="openM('mrig');sT('rigel')" style="color:#d97706">📏<span>Ригель</span></button>
+  <button class="mb tool-shell" id="t-zone-m" onclick="openM('mzone');sT('zone')" style="color:#14b8a6">📐<span>Зона</span></button>
+  <button class="mb tool-system" id="t-ssdev-m" onclick="openSSDevPicker()" style="color:#ef4444">⊙<span>Устр.СС</span></button>
   <button class="mb more-tools sec-kl" style="color: rgb(245, 158, 11);" onclick="startKDDist('cable')">📏<span>КЛ</span></button>
   <button class="mb more-tools sec-kl" style="color: rgb(251, 146, 60);" onclick="startKDDist('opusk')">📏<span>Оп-ст.</span></button>
   <button class="mb" onclick="undo()" style="color:#f97316">↩<span>Отмена</span></button>
@@ -2786,6 +2834,7 @@ function aosrFillFromDrawing(){
   //    (та же формула vals{}, что использует ведомость и сверка с 1С — см. calcMat())
   const mat = calcMat(curSysKey(), allGroups);
   const vals = {
+    ...mat,
     cable: mat.cable, boxes_ip55: mat.boxCounts?.ip55||0, boxes_fr: mat.boxCounts?.fr||0,
     boxes: mat.boxes, gofra: mat.gofra, gofra_sthr: mat.gofra_sthr, clips: mat.clips,
     clips_fr: mat.clips_fr, rozets: mat.rozets, rozet_device: mat.rozet_device, lamps: mat.lamps, switches: mat.switches, wago3: mat.wago3, wago5: mat.wago5,
@@ -2802,7 +2851,10 @@ function aosrFillFromDrawing(){
   if(!addedAny) aosrAddMaterialRow();
 
   // 3. П.1 (наименование работ) — по маркам кабеля, реально начерченным в группах
-  const marks = [...new Set(allGroups.map(g=>KN[g.kab]||g.kab).filter(Boolean))];
+  //    ТЕКУЩЕЙ системы (иначе сюда попадали бы марки кабелей других систем,
+  //    если в одном чертеже ведётся несколько систем)
+  const sysGroupsForMarks = allGroups.filter(g => !g.sys || g.sys===curSysKey());
+  const marks = [...new Set(sysGroupsForMarks.map(g=>KN[g.kab]||g.kab).filter(Boolean))];
   const sysWorkText = CUR_MARKA_OVERRIDE
     ? `Прокладка кабельных линий по марке «${CUR_MARKA_OVERRIDE.marka}» (${CUR_MARKA_OVERRIDE.markaFull})`
     : ({
@@ -3613,6 +3665,8 @@ const CALC_STAGE = {
   birki:'kl', lotok:'kl', boxes:'kl', boxes_ip55:'kl', boxes_fr:'kl', rozets:'kl',
   console100:'kl', console200:'kl', cryshka100:'kl', cryshka200:'kl', lotok100_sht:'kl', lotok200_sht:'kl',
   rozet_device:'ob', lamps:'ob', switches:'ob', schits:'ob',
+  // Устройства СС (извещатели/оповещатели/приборы) — это тоже «Оборудование»
+  izv_dym:'ob', izv_teplo:'ob', izv_ruch:'ob', opov_sz:'ob', opov_svet:'ob', ppkp:'ob',
 };
 let _vedStages = {os:true, kl:true, ob:true}; // выбор этапов по умолчанию — все
 
@@ -3734,6 +3788,44 @@ const ID_SYSTEMS = {
       {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
       {name:'Штробление стен под кабель (сечение до 20×20мм, вкл. заделку)', art:'работа', unit:'м', calc:'shtroba'},
     ]
+  },
+  apssoue: {
+    name: 'СС АПС.СОУЭ Пожарная сигнализация и оповещение',
+    short: 'АПС.СОУЭ',
+    marka: 'АПС.СОУЭ',
+    markaFull: 'Автоматическая пожарная сигнализация и система оповещения и управления эвакуацией при пожаре',
+    group: 'ss',
+    color: '#ef4444',
+    kab: 'ap_shl',
+    // Устройства АПС.СОУЭ, доступные инструментом «⊙ Устройство СС» —
+    // ставятся на трассу шлейфа как розетка/светильник ставится на опуск
+    ssDevices: [
+      {key:'izv_dym',   name:'Извещатель пожарный дымовой оптико-электронный', art:'ИП 212-142 (Рубеж)', color:'#f97316'},
+      {key:'izv_teplo', name:'Извещатель пожарный тепловой максимальный', art:'ИП 101-18-А2Р (Рубеж)', color:'#fb923c'},
+      {key:'izv_ruch',  name:'Извещатель пожарный ручной', art:'ИПР 513-3М (Рубеж)', color:'#dc2626'},
+      {key:'opov_sz',   name:'Оповещатель свето-звуковой', art:'Молния-24 СЗ (Рубеж)', color:'#facc15'},
+      {key:'opov_svet', name:'Табло «Выход»', art:'Молния-12 (Рубеж)', color:'#4ade80'},
+      {key:'ppkp',      name:'ППКП и УОО', art:'Рубеж-2ОП прот.R3', color:'#a78bfa'},
+    ],
+    materials: [
+      {name:'Кабель КПСнг(А)-FRLS 1×2×0,5 (шлейф ИП)', art:'', unit:'м', calc:'cable'},
+      {name:'Труба гофрированная ПВХ лёгкая чёрная с/з д20 — потолок (50м/уп)', art:'PR01.0056 Промрукав', unit:'м', calc:'gofra'},
+      {name:'Крепёж-клипса с дюбелем и саморезом чёрная д20', art:'PR13.0312 Промрукав', unit:'шт', calc:'clips'},
+      {name:'Труба гофрированная ПВХ лёгкая чёрная с/з д20 — штроба/опуски (50м/уп)', art:'PR01.0056 Промрукав', unit:'м', calc:'gofra_sthr'},
+      {name:'Коробка распр. огнестойкая FR-Е90 100×100×50мм', art:'40-0300-FR1.5-8 Промрукав', unit:'шт', calc:'boxes_fr'},
+      {name:'Извещатель пожарный дымовой оптико-электронный', art:'ИП 212-142 (Рубеж)', unit:'шт', calc:'izv_dym'},
+      {name:'Извещатель пожарный тепловой максимальный', art:'ИП 101-18-А2Р (Рубеж)', unit:'шт', calc:'izv_teplo'},
+      {name:'Извещатель пожарный ручной', art:'ИПР 513-3М (Рубеж)', unit:'шт', calc:'izv_ruch'},
+      {name:'Оповещатель свето-звуковой', art:'Молния-24 СЗ (Рубеж)', unit:'шт', calc:'opov_sz'},
+      {name:'Табло «Выход»', art:'Молния-12 (Рубеж)', unit:'шт', calc:'opov_svet'},
+      {name:'ППКП и УОО', art:'Рубеж-2ОП прот.R3', unit:'шт', calc:'ppkp'},
+      {name:'Пена монтажная Roof Complect огнеупорная (890г)', art:'', unit:'бал.', calc:'pena'},
+      {name:'Кабельная бирка ТМАРК-1-У134 компл. 2в1 универсальный квадрат 55×55мм', art:'1000шт+риббон 75м', unit:'компл.', calc:'birki'},
+      {name:'Гильза ВГП Ду20×2,8 L=550мм (кап. стена)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_cap'},
+      {name:'Гильза ВГП Ду20×2,8 L=300мм (перегородка)', art:'ГОСТ 3262-75', unit:'шт', calc:'gilzy_perg'},
+      {name:'Сверление отверстий под гильзы (бурение/алмазное бурение)', art:'работа', unit:'шт', calc:'drilling'},
+      {name:'Штробление стен под кабель (сечение до 20×20мм, вкл. заделку)', art:'работа', unit:'м', calc:'shtroba'},
+    ]
   }
 };
 
@@ -3766,7 +3858,6 @@ const ID_PROJECTS = {
 //    делать по одной вместе) — марка в шифре ИД проставляется правильно,
 //    а черчение временно идёт по общему шаблону КЛ, как и для ID_SYSTEMS_GENERIC_ONLY.
 const ID_SYSTEMS_SS = {
-  apssoue: {marka:'АПС.СОУЭ', markaFull:'Автоматическая пожарная сигнализация и система оповещения и управления эвакуацией при пожаре', color:'#ef4444'},
   sot:     {marka:'СОТ',      markaFull:'Система охранного телевидения (видеонаблюдение)', color:'#0ea5e9'},
   sks:     {marka:'СКС',      markaFull:'Структурированная кабельная система', color:'#8b5cf6'},
   skud:    {marka:'СКУД',     markaFull:'Система контроля и управления доступом', color:'#f59e0b'},
@@ -3802,6 +3893,39 @@ function calcBirki(groups){
 // именно по этому ключу группы помечаются полем g.sys при создании
 function curSysKey(){ return CUR_MARKA_OVERRIDE ? CUR_MARKA_OVERRIDE.key : CUR_SYS; }
 
+// ── Зоны с индивидуальной высотой потолка ────────────────────────────
+// По умолчанию высота потолка (S.hpot) одна на весь этаж. Если в какой-то
+// комнате/зоне потолок выше (актовый зал, коридор с подшивным потолком и
+// т.п.), мастер обозначает эту зону прямоугольником со своей высотой — и
+// стены/чертёж/3D в её пределах используют именно её, а не общую высоту.
+function zoneAt(x,y){
+  for(const z of (S.zones||[])){
+    const x1=Math.min(z.x1,z.x2), x2=Math.max(z.x1,z.x2);
+    const y1=Math.min(z.y1,z.y2), y2=Math.max(z.y1,z.y2);
+    if(x>=x1 && x<=x2 && y>=y1 && y<=y2) return z;
+  }
+  return null;
+}
+// Эффективная высота потолка в точке — из зоны, если точка внутри неё,
+// иначе общая высота этажа (S.hpot)
+function hpotAt(x,y){
+  const z = zoneAt(x,y);
+  return z ? z.hpot : (S.hpot||3100);
+}
+// Эффективная высота для стены — берём по её середине
+function hpotAtWall(w){ return hpotAt((w.x1+w.x2)/2, (w.y1+w.y2)/2); }
+
+// Группы для ТЕКУЩЕЙ ведомости: с трассой И принадлежащие нужной системе.
+// Раньше кабельный журнал, таблица высот и «Прокладка по типу монтажа»
+// брали ВСЕ S.groups без фильтра по системе — из-за этого в ведомости
+// по одной системе (например «Рабочее освещение») в журнал всё равно
+// попадали группы розеток/аварийного и т.п. Теперь везде одна и та же
+// фильтрация, что и в calcMat.
+function groupsForVed(sysKey){
+  sysKey = sysKey || curSysKey();
+  return S.groups.filter(g => g.segs.length>0 && (!g.sys || g.sys===sysKey));
+}
+
 // ── РАСЧЁТ МАТЕРИАЛОВ ДЛЯ ГРУППЫ ────────────────────────────
 function calcMat(sys, groups){
   // Считаем материалы ТОЛЬКО по группам этой системы — если в одном проекте
@@ -3815,15 +3939,26 @@ function calcMat(sys, groups){
   let totBoxes=0, totGC=0, totGP=0;
   let totRozets=0, totLamps=0, totOpuski=0, totSwitches=0;
   const _boxCounts={}, _lotokCounts={}, _lotokRigelCrossings={};
+  const _ssDevCounts={}; // {izv_dym: 5, izv_ruch: 2, ...} — по каждому типу устройства СС
 
   for(const g of groups){
     const Lcable  = gLF(g);
     totCable += Lcable;
 
+    // Устройства СС — считаем по типу устройства (izv_dym, opov_sz, ppkp и т.п.)
+    for(const dv of (g.ssdev||[])){
+      if(!_ssDevCounts[dv.type]) _ssDevCounts[dv.type]=0;
+      _ssDevCounts[dv.type]++;
+    }
+
     // Опуск светильника (основной потолок → фальш-потолок) идёт в
     // запотолочном пространстве — это гофра по потолку (КЛ), а не штроба
-    // (штроба считается отдельно в gSthrLen, светильники туда больше не входят)
-    const lampDropLen = g.lamps.reduce((s,l)=>s+(l.ol||0)/1000,0);
+    // (штроба считается отдельно в gSthrLen, светильники туда больше не входят).
+    // Устройства СС на фальш-потолке — тот же принцип: датчик, видимый снизу,
+    // требует опуска от основного потолка; запотолочные (mount:'main') опуска
+    // не имеют — они и так на основном потолке, где идёт трасса.
+    const lampDropLen = g.lamps.reduce((s,l)=>s+(l.ol||0)/1000,0)
+      + (g.ssdev||[]).reduce((s,dv)=>s+(dv.ol||0)/1000,0);
     if(lampDropLen>0){
       totGofCeil += lampDropLen;
       totClipsCeil += Math.ceil(lampDropLen/0.5);
@@ -3898,6 +4033,8 @@ function calcMat(sys, groups){
   return {
     boxCounts:   _boxCounts,
     lotokCounts: _lotokCounts,
+    ssDevCounts: _ssDevCounts, // {izv_dym:5, ...} — для справки/отчётности
+    ...(_ssDevCounts),         // и сразу плоско: vals['izv_dym'] = 5 — как остальные calc-ключи
     console100, console200, cryshka100, cryshka200, lotok100_sht, lotok200_sht,
     cable:       +(totCable*1.06).toFixed(2),
     cable_net:   +totCable.toFixed(2),
@@ -3934,8 +4071,20 @@ Object.assign(KN, {
   o15:    'ВВГ-Пнг(А)-LSLTx 3×1,5(N,PE)-0,660',
   a15fr:  'ВВГнг(А)-FRLSLTx 4×1,5(PE)-0,660',
   a15:    'ВВГнг(А)-FRLSLTx 3×1,5',
-  r25:    'ВВГнг(А)-LSLTx 3×2,5'
+  r25:    'ВВГнг(А)-LSLTx 3×2,5',
+  // АПС.СОУЭ — шлейфовые кабели пожарной сигнализации (огнестойкие,
+  // не поддерживающие горение), и силовая линия оповещения
+  ap_shl:  'КПСнг(А)-FRLS 1×2×0,5 (шлейф ИП)',
+  ap_shl2: 'КПСнг(А)-FRLS 2×2×0,5 (кольцевой шлейф)',
+  ap_pit:  'ВВГнг(А)-FRLS 3×1,5 (питание/СОУЭ 24В)',
+  ap_snk:  'КПСнг(А)-FRLS 2×2×0,5 (линия связи ППКП)',
 });
+const KAB_COLOR_SS = {
+  ap_shl:  '#ef4444',
+  ap_shl2: '#dc2626',
+  ap_pit:  '#f97316',
+  ap_snk:  '#fb923c',
+};
 const GOFRA={
   d16:{art:'ИЭК CTG20-016-K41-100',name:'Гофра ПВХ d16 (серая)',clip:'Клипса ИЭК d16 CTA10D-016'},
   d20:{art:'ИЭК CTG20-020-K41-100',name:'Гофра ПВХ d20 (серая)',clip:'Клипса ИЭК d20 CTA10D-020'},
@@ -3968,6 +4117,7 @@ const KAB_COLOR = {
 };
 // Получить цвет по марке
 function kabColor(kab){ return KAB_COLOR[kab]||KAB_COLOR.default; }
+Object.assign(KAB_COLOR, KAB_COLOR_SS);
 
 // Типы коробок
 const BOX_TYPES = {
@@ -4005,7 +4155,12 @@ const S={
   wallDraw:false, wallP1:null, wallType:'cap',
   curX:0, curY:0,
   schPend:null, opPend:null,
-  groups:[], schits:[], walls:[], rigels:[],
+  groups:[], schits:[], walls:[], rigels:[], zones:[],
+  // Режим «Шаблон здания» — мастер чертит только стены/ригели/зоны (без
+  // кабелей и устройств), этот каркас общий для ВСЕХ систем объекта, так
+  // как S.walls/S.rigels/S.zones не привязаны к конкретной системе (в
+  // отличие от групп кабеля, у которых есть g.sys)
+  shellMode:false,
   cur:null, undo:[],
   // Слои (защиты ИД)
   layers:[], curLayer:0,
@@ -4319,7 +4474,9 @@ function mkG(n,s,p,m,k,c,boxType,plan){
     // считать всё как одну текущую (CUR_SYS может измениться позже).
     sys: CUR_MARKA_OVERRIDE ? CUR_MARKA_OVERRIDE.key : CUR_SYS,
     plan: plan||{rozet:0, lamp:0}, // план по количеству — для индикатора прогресса «факт/план»
-    segs:[],boxes:[],rozets:[],lamps:[],gilzy:[],opuski:[],birki:[],ok:true};
+    segs:[],boxes:[],rozets:[],lamps:[],gilzy:[],opuski:[],birki:[],
+    ssdev:[], // устройства СС (извещатели/оповещатели/считыватели и т.п.) — {x,y,type}
+    ok:true};
 }
 // Длина кабеля в штробе (опуски) в метрах
 // Опуск cnt=3 значит 3 параллельных штробы одной длины
@@ -4954,6 +5111,28 @@ function render(){
     }
   }
 
+  // ── Зона предпросмотра (второй угол ещё не кликнут) ──
+  if(S.zoneDraw&&S.zoneP1){
+    CX.strokeStyle='rgba(20,184,166,.6)';CX.lineWidth=2/s;CX.setLineDash([10/s,6/s]);
+    const zx1=Math.min(S.zoneP1.x,S.curX), zy1=Math.min(S.zoneP1.y,S.curY);
+    const zw=Math.abs(S.curX-S.zoneP1.x), zh=Math.abs(S.curY-S.zoneP1.y);
+    CX.strokeRect(zx1,zy1,zw,zh);
+    CX.setLineDash([]);
+    CX.fillStyle='#14b8a6';CX.beginPath();CX.arc(S.zoneP1.x,S.zoneP1.y,6/s,0,Math.PI*2);CX.fill();
+  }
+  // ── Зоны с другой высотой потолка — уже размещённые ──
+  for(const zn of (S.zones||[])){
+    const zx1=Math.min(zn.x1,zn.x2), zy1=Math.min(zn.y1,zn.y2);
+    const zw=Math.abs(zn.x2-zn.x1), zh=Math.abs(zn.y2-zn.y1);
+    CX.strokeStyle='#14b8a6'; CX.lineWidth=1.5/s; CX.setLineDash([12/s,5/s]);
+    CX.strokeRect(zx1,zy1,zw,zh);
+    CX.setLineDash([]);
+    if(S.showLabels){
+      CX.font=`bold ${12/s}px Arial`; CX.fillStyle='#14b8a6';
+      CX.fillText(`${zn.name} — потолок ${(zn.hpot/1000).toFixed(2)}м`, zx1+8/s, zy1+16/s);
+    }
+  }
+
   // ── Кабельные группы ──
   const LW=2/s, SZ=12/s; // линия 2px, символ 12px в мировых мм
   for(const g of S.groups){
@@ -5141,6 +5320,52 @@ function render(){
       }
     }
 
+    // Устройства СС (извещатели/оповещатели/считыватели и т.п.) — символ
+    // зависит от типа устройства, чтобы визуально различать на чертеже
+    for(const dv of (g.ssdev||[])){
+      const sysDict = ID_SYSTEMS[g.sys];
+      const devInfo = sysDict?.ssDevices?.find(d=>d.key===dv.type);
+      const dCol = devInfo?.color || g.color;
+      const DSZ = SZ*1.3;
+      if(dv._corr){ CX.shadowColor='#ff2d55'; CX.shadowBlur=9/s; }
+      if(dv.type==='izv_dym'){
+        // Дымовой извещатель — круг с точкой в центре
+        CX.strokeStyle=dCol; CX.lineWidth=LW;
+        CX.beginPath(); CX.arc(dv.x,dv.y,DSZ,0,Math.PI*2); CX.stroke();
+        CX.fillStyle=dCol; CX.beginPath(); CX.arc(dv.x,dv.y,DSZ*0.25,0,Math.PI*2); CX.fill();
+      }else if(dv.type==='izv_teplo'){
+        // Тепловой — треугольник
+        CX.strokeStyle=dCol; CX.lineWidth=LW; CX.beginPath();
+        CX.moveTo(dv.x,dv.y-DSZ); CX.lineTo(dv.x+DSZ*0.87,dv.y+DSZ*0.5); CX.lineTo(dv.x-DSZ*0.87,dv.y+DSZ*0.5);
+        CX.closePath(); CX.stroke();
+      }else if(dv.type==='izv_ruch'){
+        // Ручной извещатель — квадрат с буквой П
+        CX.strokeStyle=dCol; CX.lineWidth=LW;
+        CX.strokeRect(dv.x-DSZ,dv.y-DSZ,DSZ*2,DSZ*2);
+        CX.font=`bold ${DSZ}px Arial`; CX.fillStyle=dCol; CX.textAlign='center';
+        CX.fillText('П',dv.x,dv.y+DSZ*0.35); CX.textAlign='left';
+      }else if(dv.type==='opov_sz'||dv.type==='opov_svet'){
+        // Оповещатель/табло — ромб
+        CX.strokeStyle=dCol; CX.lineWidth=LW; CX.beginPath();
+        CX.moveTo(dv.x,dv.y-DSZ); CX.lineTo(dv.x+DSZ,dv.y); CX.lineTo(dv.x,dv.y+DSZ); CX.lineTo(dv.x-DSZ,dv.y);
+        CX.closePath(); CX.stroke();
+      }else if(dv.type==='ppkp'){
+        // Прибор (ППКП) — прямоугольник побольше с заливкой
+        CX.strokeStyle=dCol; CX.fillStyle=dCol+'33'; CX.lineWidth=LW;
+        CX.fillRect(dv.x-DSZ*1.4,dv.y-DSZ,DSZ*2.8,DSZ*2);
+        CX.strokeRect(dv.x-DSZ*1.4,dv.y-DSZ,DSZ*2.8,DSZ*2);
+      }else{
+        // Прочие устройства СС (иных систем) — универсальный кружок
+        CX.strokeStyle=dCol; CX.lineWidth=LW;
+        CX.beginPath(); CX.arc(dv.x,dv.y,DSZ,0,Math.PI*2); CX.stroke();
+      }
+      if(dv._corr){ CX.shadowColor='transparent'; CX.shadowBlur=0; }
+      if(S.showLabels && devInfo){
+        CX.font=`${9/s}px Arial`; CX.fillStyle=dCol;
+        const mountTag = dv.mount==='fal' ? ` [фальш, оп.${((dv.ol||0)/1000).toFixed(2)}м]` : ' [запотолочн.]';
+        CX.fillText(devInfo.name.split(' ').slice(0,2).join(' ')+mountTag, dv.x+DSZ*1.3, dv.y+3/s);
+      }
+    }
     // Опуски — вид сверху: точка на трассе + выноска с размером
     for(const op of g.opuski){
       const cnt = op.cnt||1;
@@ -5521,6 +5746,58 @@ function sysDisplayName(key){
 function sysDisplayColor(key){
   return ID_SYSTEMS[key]?.color || (ID_SYSTEMS_SS[key]?.color) || '#64748b';
 }
+// ── Устройства СС (извещатели/оповещатели/считыватели и т.п.) ──────────
+// Список устройств зависит от активной системы (sys.ssDevices). Работает
+// как «Розетка»/«Светильник» у ЭОМ, но без привязки к подрозетнику —
+// устройство ставится прямо на трассу шлейфа кликом.
+// Место монтажа (как и у светильников): «запотолочные» датчики стоят на
+// ОСНОВНОМ потолке в скрытом пространстве — кабель до них идёт по основному
+// потолку без доп. опуска. Датчики «на фальш-потолке» видны снизу — от
+// основного потолка к ним нужен опуск (глубина зазора S.hfal), как у
+// светильника. Выбор запоминается до следующей смены (по умолчанию —
+// основной потолок, это самый частый случай для дымовых/тепловых).
+let _ssDevPicked = null;
+let _ssDevMount = 'main'; // 'main' | 'fal'
+function openSSDevPicker(){
+  const sys = ID_SYSTEMS[curSysKey()];
+  const box = document.getElementById('mssdev-body');
+  if(!sys || !sys.ssDevices || !sys.ssDevices.length){
+    if(box) box.innerHTML = '<div style="font-size:11px;color:#f59e0b;padding:10px">Для текущей системы устройства ещё не заведены — выбери систему СС с готовым шаблоном (например АПС.СОУЭ).</div>';
+    openM('mssdev');
+    return;
+  }
+  if(box){
+    const mountToggle = `
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button type="button" class="btn" onclick="_setSSDevMount('main')"
+          style="flex:1;padding:8px;font-size:11px;font-weight:700;
+          background:${_ssDevMount==='main'?'#1a4a8a':'#0d1117'};color:${_ssDevMount==='main'?'#fff':'#94a3b8'};
+          border:1px solid ${_ssDevMount==='main'?'#3b82f6':'#334155'}">🔲 Осн. потолок (запотолочный)</button>
+        <button type="button" class="btn" onclick="_setSSDevMount('fal')"
+          style="flex:1;padding:8px;font-size:11px;font-weight:700;
+          background:${_ssDevMount==='fal'?'#1a4a8a':'#0d1117'};color:${_ssDevMount==='fal'?'#fff':'#94a3b8'};
+          border:1px solid ${_ssDevMount==='fal'?'#3b82f6':'#334155'}">🔳 Фальш-потолок (виден снизу)</button>
+      </div>`;
+    box.innerHTML = mountToggle + sys.ssDevices.map(d=>`
+      <button type="button" class="btn" onclick="_pickSSDev('${d.key}')"
+        style="display:block;width:100%;text-align:left;padding:9px;margin-bottom:5px;
+        background:#0d1117;color:#e2e8f0;border:1px solid ${d.color}">
+        <b style="color:${d.color}">${d.name}</b><br><span style="font-size:9.5px;color:#64748b">${d.art}</span>
+      </button>`).join('');
+  }
+  openM('mssdev');
+}
+function _setSSDevMount(m){ _ssDevMount = m; openSSDevPicker(); }
+function _pickSSDev(key){
+  _ssDevPicked = key;
+  closeM('mssdev');
+  sT('ssdev');
+  const sys = ID_SYSTEMS[curSysKey()];
+  const d = sys?.ssDevices?.find(x=>x.key===key);
+  const mountLbl = _ssDevMount==='fal' ? 'фальш-потолок' : 'осн. потолок (запотолочный)';
+  tip('⊙ Кликай на трассу шлейфа, чтобы ставить «'+(d?.name||key)+'» ('+mountLbl+'). Esc — закончить.');
+}
+
 function openLayersPanel(){
   const keys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
   const box = document.getElementById('mlay-body');
@@ -5853,11 +6130,34 @@ function _build3DScene(rect, wrap){
     const thick = M(wallThick(w));
     const dx=w.x2-w.x1, dy=w.y2-w.y1, len=Math.hypot(dx,dy);
     if(len<10) continue;
-    const geo = new THREE.BoxGeometry(M(len), ceilY, thick);
+    // Стена берёт высоту потолка своей зоны (комнаты), если она попадает в
+    // зону с индивидуальной высотой — иначе общую высоту этажа (ceilY)
+    const wallH = M(hpotAtWall(w));
+    const geo = new THREE.BoxGeometry(M(len), wallH, thick);
     const mesh = new THREE.Mesh(geo, wallMat);
-    mesh.position.set(lx((w.x1+w.x2)/2), ceilY/2, lz((w.y1+w.y2)/2));
+    mesh.position.set(lx((w.x1+w.x2)/2), wallH/2, lz((w.y1+w.y2)/2));
     mesh.rotation.y = -Math.atan2(dy,dx);
     scene.add(mesh);
+  }
+
+  // ── Зоны с индивидуальной высотой потолка — показываем контур на полу и
+  //    подпись с высотой над зоной, чтобы было видно в 3D, где потолок выше ──
+  const zoneLineMat = new THREE.LineBasicMaterial({color:0x14b8a6});
+  for(const zn of (S.zones||[])){
+    if(!inRect((zn.x1+zn.x2)/2, (zn.y1+zn.y2)/2, Math.max(Math.abs(zn.x2-zn.x1),Math.abs(zn.y2-zn.y1))/2+500)) continue;
+    const zx1=Math.min(zn.x1,zn.x2), zy1=Math.min(zn.y1,zn.y2);
+    const zx2=Math.max(zn.x1,zn.x2), zy2=Math.max(zn.y1,zn.y2);
+    const zH = M(zn.hpot);
+    // Контур зоны на уровне ЕЁ потолка (обозначает объём с другой высотой)
+    const pts=[
+      new THREE.Vector3(lx(zx1),zH,lz(zy1)), new THREE.Vector3(lx(zx2),zH,lz(zy1)),
+      new THREE.Vector3(lx(zx2),zH,lz(zy2)), new THREE.Vector3(lx(zx1),zH,lz(zy2)),
+      new THREE.Vector3(lx(zx1),zH,lz(zy1)),
+    ];
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), zoneLineMat));
+    const zoneLbl = _makeTextSprite(zn.name+' — '+(zn.hpot/1000).toFixed(2)+'м', '#5eead4');
+    zoneLbl.position.set(lx((zx1+zx2)/2), zH+0.15, lz((zy1+zy2)/2));
+    scene.add(zoneLbl);
   }
 
   const legendItems = [];
@@ -5945,7 +6245,7 @@ function _build3DScene(rect, wrap){
             const segLen3=p1.distanceTo(p2);
             if(segLen3<0.05) continue;
             const isVertical = Math.abs(p1.x-p2.x)<0.005 && Math.abs(p1.z-p2.z)<0.005;
-            const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+(isVertical?'м (обвод ригеля)':'м (под ригелем)'), '#fca5a5');
+            const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+'м', '#fca5a5');
             dimSpr2.position.set((p1.x+p2.x)/2 + 0.06, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
             dimSpr2.visible = _m3dDimsOn;
             scene.add(dimSpr2);
@@ -6164,6 +6464,30 @@ function _build3DScene(rect, wrap){
         scene.add(dimSpr);
         _m3dDimObjects.push(dimSpr);
       }
+    }
+    // Устройства СС — простые цветные маркеры (каждый тип своим цветом из
+    // sys.ssDevices). Запотолочные (mount:'main') — прямо на основном
+    // потолке, без опуска. Устройства на фальш-потолке (mount:'fal') —
+    // видны снизу, с опуском от основного потолка (как у светильников).
+    const sysDict3D = ID_SYSTEMS[g.sys];
+    for(const dv of (g.ssdev||[])){
+      if(!inRect(dv.x,dv.y,200)) continue;
+      any=true;
+      const devInfo = sysDict3D?.ssDevices?.find(d=>d.key===dv.type);
+      const devMat = new THREE.MeshStandardMaterial({color: devInfo?.color || col});
+      const devY = (dv.mount==='fal' && dv.ol>0) ? Math.max(0.1, ceilY-M(dv.ol)) : ceilY-0.03;
+      if(dv.mount==='fal' && dv.ol>0){
+        const dpts=[new THREE.Vector3(lx(dv.x),ceilY,lz(dv.y)), new THREE.Vector3(lx(dv.x),devY,lz(dv.y))];
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(dpts), lineMat));
+        const dimSpr3 = _makeTextSprite((dv.ol/1000).toFixed(2)+'м (фальш)', '#93c5fd');
+        dimSpr3.position.set(lx(dv.x)+0.08, (ceilY+devY)/2, lz(dv.y));
+        dimSpr3.visible = _m3dDimsOn;
+        scene.add(dimSpr3);
+        _m3dDimObjects.push(dimSpr3);
+      }
+      const dm = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.05,0.08), devMat);
+      dm.position.set(lx(dv.x), devY, lz(dv.y));
+      scene.add(dm);
     }
     if(any) legendItems.push({name:g.name, color:g.color});
   }
@@ -6560,6 +6884,21 @@ function click(mm){
     }
     render();return;
   }
+  // Зона с другой высотой потолка — два клика противоположных углов
+  if(S.zoneDraw){
+    if(!S.zoneP1){
+      S.zoneP1={x,y};tip('📐 Кликни противоположный угол зоны');
+    }else{
+      push();
+      S.zones.push({
+        x1:S.zoneP1.x, y1:S.zoneP1.y, x2:x, y2:y,
+        hpot:S.zoneH, name:S.zoneName
+      });
+      S.zoneP1=null;updCnt();
+      tip(`✅ Зона «${S.zoneName}» (потолок ${S.zoneH}мм) добавлена — стены и 3D в её пределах теперь используют эту высоту`);
+    }
+    render();return;
+  }
   // Ластик
   if(S.t==='er'){eraseAt(x,y);return;}
   // Кабель
@@ -6671,6 +7010,32 @@ function placeSymbol(x,y){
     }else{
       tip('⚠️ Рядом нет свободного подрозетника — сначала поставь «↓ Опуск», потом сюда выключатель');
     }
+  }else if(S.t==='ssdev'){
+    // Устройство СС — привязываем к ближайшей точке трассы ТЕКУЩЕЙ группы
+    // (шлейфа), в пределах разумного допуска; если рядом нет трассы — ставим
+    // как есть по клику (мастер потом дорисует к нему кабель)
+    const g=cg();
+    if(!g || !_ssDevPicked){ tip('⚠️ Сначала выбери тип устройства'); return; }
+    let px=x, py=y, bestD=1e9;
+    for(const s2 of (g.segs||[])){
+      const sdx=s2.x2-s2.x1, sdy=s2.y2-s2.y1, sl=Math.hypot(sdx,sdy);
+      if(sl<1) continue;
+      const t=Math.max(0,Math.min(1, ((x-s2.x1)*sdx+(y-s2.y1)*sdy)/(sl*sl)));
+      const qx=s2.x1+t*sdx, qy=s2.y1+t*sdy;
+      const dd=Math.hypot(qx-x,qy-y);
+      if(dd<bestD){ bestD=dd; px=qx; py=qy; }
+    }
+    if(bestD>300){ px=x; py=y; } // далеко от трассы — ставим как кликнули
+    // Опуск до устройства — только если оно на фальш-потолке (видно снизу);
+    // запотолочные датчики стоят прямо на основном потолке, кабель к ним
+    // без доп. опуска (тот же принцип, что и у светильников)
+    const devOl = _ssDevMount==='fal' ? (S.hfal||0) : 0;
+    g.ssdev.push({x:Math.round(px), y:Math.round(py), type:_ssDevPicked,
+      mount:_ssDevMount, ol:devOl, hpot:S.hpot, hfal:S.hfal,
+      _corr:S.correctionActiveTag||undefined});
+    const sys = ID_SYSTEMS[curSysKey()];
+    const d = sys?.ssDevices?.find(dd=>dd.key===_ssDevPicked);
+    tip('⊙ Установлено: '+(d?.name||_ssDevPicked)+(devOl>0?` (опуск до фальш-потолка ${(devOl/1000).toFixed(2)}м)`:' (запотолочный)'));
   }
   else if(S.t==='lamp'){
     // Светильник на фальш-потолке.
@@ -6756,6 +7121,7 @@ function eraseAt(x,y){
   S.schits=S.schits.filter(s=>Math.hypot(s.x-x,s.y-y)>R);
   // Ригели раньше вообще не стирались ластиком — добавил
   S.rigels=(S.rigels||[]).filter(rg=>Math.hypot((rg.x1+rg.x2)/2-x,(rg.y1+rg.y2)/2-y)>R);
+  S.zones=(S.zones||[]).filter(zn=>Math.hypot((zn.x1+zn.x2)/2-x,(zn.y1+zn.y2)/2-y)>R);
   for(const g of S.groups)rebuildGilzy(g);
   updCnt();render();
 }
@@ -6822,6 +7188,7 @@ function sT(t){
   if(t!=='cable')finDraw();
   if(t!=='wall'){S.wallDraw=false;S.wallP1=null;}
   if(t!=='rigel'){S.rigelDraw=false;S.rigelP1=null;}
+  if(t!=='zone'){S.zoneDraw=false;S.zoneP1=null;}
   S.t=t;
   document.querySelectorAll('.btn[id^="t-"]').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('t-'+t);if(el)el.classList.add('on');
@@ -6955,6 +7322,13 @@ function doRigel(){
   S.rigelH=+document.getElementById('mrig-h').value||400;
   S.rigelP1=null;closeM('mrig');sT('rigel');
   tip(`📏 Кликни первую точку ригеля (${S.rigelW}×${S.rigelH}мм)`);
+}
+function doZone(){
+  S.zoneDraw=true;
+  S.zoneH=+document.getElementById('mzone-h').value||3600;
+  S.zoneName=(document.getElementById('mzone-n').value||'Зона').trim();
+  S.zoneP1=null;closeM('mzone');sT('zone');
+  tip(`📐 Кликни первый угол зоны «${S.zoneName}» (потолок ${S.zoneH}мм)`);
 }
 
 // Превью в модале стены при смене типа
@@ -7396,7 +7770,7 @@ function exportDrawingWithLegend(){
   finDraw();
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
   const mat = calcMat(curSysKey(), S.groups);
-  const activeGroups = S.groups.filter(g=>g.segs.length>0);
+  const activeGroups = groupsForVed();
   if(!activeGroups.length){ tip('⚠️ Нечего экспортировать — сначала начерти хотя бы одну группу'); return; }
 
   // ── Рисуем сам чертёж на отдельном канвасе (без штампа/рамки А4 — печатная
@@ -7493,7 +7867,7 @@ function exportDrawingWithLegend(){
     <tr><td style="text-align:center;font-size:16px;font-weight:700;color:#1a4a8a">${sym}</td><td>${desc}</td></tr>`).join('');
 
   // ── Ведомость материалов (автозаполняемая, с формулами в примечании) ──
-  const vals = { cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
+  const vals = { ...mat, cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
     rozets:mat.rozets, rozet_device:mat.rozet_device, lamps:mat.lamps, switches:mat.switches, wago3:mat.wago3, wago5:mat.wago5,
     gilzy_cap:mat.gilzy_cap, gilzy_perg:mat.gilzy_perg, pena:mat.pena, birki:mat.birki, drilling:mat.drilling, shtroba:mat.shtroba, console100:mat.console100, console200:mat.console200, cryshka100:mat.cryshka100, cryshka200:mat.cryshka200, lotok100_sht:mat.lotok100_sht, lotok200_sht:mat.lotok200_sht };
@@ -7583,37 +7957,41 @@ ${matRows}
 // ══════════════════════════════════════════════════════════════
 // ТАБЛИЦА ВЫСОТ МОНТАЖА (для ведомости и PDF-штампа)
 // ══════════════════════════════════════════════════════════════
-function getHeightsTable(){
+function getHeightsTable(mat){
   const hpot  = S.hpot || 3100;   // основной потолок, мм
-  const hfal  = S.hfal || 0;      // фальш-потолок, мм
+  const hfal  = S.hfal || 0;      // ГЛУБИНА зазора до фальш-потолка, мм (0 = нет)
   const hGof  = hpot;             // гофра по потолку
-  const hFal  = hfal > 0 ? hfal  : null;
-  const hLamp = hfal > 0 ? hfal  : hpot; // светильник на фальш или на осн.
-  // Стандартные высоты
+  // Абсолютная высота фальш-потолка/светильника от пола = основной потолок
+  // МИНУС глубину зазора (hfal теперь хранит именно зазор, не абсолютную
+  // высоту — см. правку опуска светильника; здесь эта же поправка).
+  const hLamp = hfal > 0 ? (hpot-hfal) : hpot; // светильник на фальш или на осн.
+  mat = mat || {};
+  const q = v => (v===undefined||v===null||v<=0) ? '—' : v;
+  // Стандартные высоты + объёмы из фактического расчёта материалов (mat)
   return [
-    {name:'Кабель (трасса)',         unit:'мм', h:`${hGof} (потолок)`, note:'на основном потолке, в гофре'},
-    {name:'Гофра потолок',           unit:'мм', h:`${hGof}`, note:'ось трубы от пола'},
-    {name:'Гофра штроба (у щита)',   unit:'мм', h:`200–${hGof}`, note:'от верха щита до потолка'},
-    {name:'Гофра штроба (к розетке)',unit:'мм', h:`${hGof}–300`, note:'от потолка до подрозетника'},
-    {name:'Щит ЩС1',                unit:'мм', h:'200–1500', note:'низ–верх щита от пола'},
-    {name:'Коробка IP55 / FR',       unit:'мм', h:`${hGof}`, note:'на уровне трассы (потолок)'},
-    {name:'Клипсы крепёжные',        unit:'мм', h:`${hGof}`, note:'шаг 0.5м, на потолке'},
-    {name:'Подрозетник С3Е3',        unit:'мм', h:'300', note:'ось от пола (стандарт)'},
-    {name:'Светильник встраиваемый', unit:'мм', h:`${hLamp}`, note:hfal>0?`в фальш-потолке ${hfal}мм`:'в потолке'},
-    {name:'Гильза ВГП (кап.стена)',  unit:'мм', h:`${hGof}`, note:'L=550мм, на уровне потолка'},
-    {name:'Гильза ВГП (перегородка)',unit:'мм', h:`${hGof}`, note:'L=300мм, на уровне потолка'},
-    {name:'Бирки кабельные',         unit:'мм', h:`${hGof}`, note:'на трассе (потолок)'},
-    ...(hfal>0?[{name:'Фальш-потолок',unit:'мм',h:`${hfal}`,note:'запотолочное пространство '+(hGof-hfal)+'мм'}]:[]),
+    {name:'Кабель (трасса)',         unit:'мм', h:`${hGof} (потолок)`, qty:q(mat.cable), qunit:'м', note:'на основном потолке, в гофре'},
+    {name:'Гофра потолок',           unit:'мм', h:`${hGof}`, qty:q(mat.gofra), qunit:'м', note:'ось трубы от пола'},
+    {name:'Гофра штроба (у щита)',   unit:'мм', h:`200–${hGof}`, qty:q(mat.gofra_sthr), qunit:'м', note:'от верха щита до потолка'},
+    {name:'Гофра штроба (к розетке)',unit:'мм', h:`${hGof}–300`, qty:q(mat.shtroba), qunit:'м', note:'от потолка до подрозетника'},
+    {name:'Щит ЩС1',                unit:'мм', h:'200–1500', qty:q(S.schits?.length), qunit:'шт', note:'низ–верх щита от пола'},
+    {name:'Коробка IP55 / FR',       unit:'мм', h:`${hGof}`, qty:q(mat.boxes), qunit:'шт', note:'на уровне трассы (потолок)'},
+    {name:'Клипсы крепёжные',        unit:'мм', h:`${hGof}`, qty:q(mat.clips), qunit:'шт', note:'шаг 0.5м, на потолке'},
+    {name:'Подрозетник С3Е3',        unit:'мм', h:'300', qty:q(mat.rozets), qunit:'шт', note:'ось от пола (стандарт)'},
+    {name:'Светильник встраиваемый', unit:'мм', h:`${hLamp}`, qty:q(mat.lamps), qunit:'шт', note:hfal>0?`в фальш-потолке, зазор ${hfal}мм`:'в потолке'},
+    {name:'Гильза ВГП (кап.стена)',  unit:'мм', h:`${hGof}`, qty:q(mat.gilzy_cap), qunit:'шт', note:'L=550мм, на уровне потолка'},
+    {name:'Гильза ВГП (перегородка)',unit:'мм', h:`${hGof}`, qty:q(mat.gilzy_perg), qunit:'шт', note:'L=300мм, на уровне потолка'},
+    {name:'Бирки кабельные',         unit:'мм', h:`${hGof}`, qty:q(mat.birki), qunit:'шт', note:'на трассе (потолок)'},
+    ...(hfal>0?[{name:'Фальш-потолок',unit:'мм',h:`${hpot-hfal}`,qty:q(hfal),qunit:'мм зазор',note:'запотолочное пространство '+hfal+'мм'}]:[]),
   ];
 }
 
 // HTML-блок высот для ведомости
-function heightsTableHTML(){
-  const rows = getHeightsTable();
+function heightsTableHTML(mat){
+  const rows = getHeightsTable(mat);
   return `<h3>3. Высоты монтажа оборудования и материалов</h3>
 <table>
-<tr><th>Материал / Оборудование</th><th>Высота от пола, мм</th><th>Примечание</th></tr>
-${rows.map(r=>`<tr><td>${r.name}</td><td style="text-align:center;font-weight:700;color:#1a4a8a">${r.h}</td><td style="font-size:9px;color:#64748b">${r.note}</td></tr>`).join('')}
+<tr><th>Материал / Оборудование</th><th>Высота от пола, мм</th><th>Объём</th><th>Примечание</th></tr>
+${rows.map(r=>`<tr><td>${r.name}</td><td style="text-align:center;font-weight:700;color:#1a4a8a">${r.h}</td><td style="text-align:center;font-weight:700;color:#166534">${r.qty}${r.qty!=='—'?' '+r.qunit:''}</td><td style="font-size:9px;color:#64748b">${r.note}</td></tr>`).join('')}
 </table>
 <div class="note">
 Высоты указаны по оси монтажа (по нормативам ВСН 59-88, ПУЭ, ГОСТ Р 50571).<br>
@@ -7651,10 +8029,15 @@ function buildCableJournal(groups){
     // Закладная металлическая труба = гильзы ВГП
     const Lgil = g.gilzy.reduce((s,gl)=>s+(gl.len||0.3),0);
 
-    // Гофрированная труба (потолок + перемычки к стенам)
+    // Гофрированная труба (потолок + перемычки к стенам + опуск светильника
+    // от осн. потолка до фальш-потолка + обход ригелей — все эти добавки
+    // учитываются в calcMat, и здесь должны совпадать один в один)
     const Lgof = g.segs
       .filter(sg=>(sg.mount||g.mount||'').startsWith('gof'))
-      .reduce((s,sg)=>s+Math.hypot(sg.x2-sg.x1,sg.y2-sg.y1)/1000, 0);
+      .reduce((s,sg)=>s+Math.hypot(sg.x2-sg.x1,sg.y2-sg.y1)/1000, 0)
+      + g.lamps.reduce((s,l)=>s+(l.ol||0)/1000, 0)
+      + (g.ssdev||[]).reduce((s,dv)=>s+(dv.ol||0)/1000, 0)
+      + gRigelExtra(g).m;
 
     // Металлорукав — не используем, всегда 0
     const Lruk = 0;
@@ -7974,6 +8357,7 @@ function _mvedAutoSplit(){
     if(!groupsOfSys.length) continue;
 
     const vals = {
+      ...mat,
       cable:mat.cable, boxes_ip55:mat.boxCounts?.ip55||0, boxes_fr:mat.boxCounts?.fr||0,
       boxes:mat.boxes, gofra:mat.gofra, gofra_sthr:mat.gofra_sthr, clips:mat.clips, clips_fr:mat.clips_fr,
       rozets:mat.rozets, rozet_device:mat.rozet_device, lamps:mat.lamps, switches:mat.switches,
@@ -8051,7 +8435,7 @@ function _doExpV(){
   const sys = ID_SYSTEMS[CUR_SYS] || ID_SYSTEMS.ros;
   const mat = calcMat(curSysKey(), S.groups);
   const birki = mat.birki;
-  const activeGroups = S.groups.filter(g=>g.segs.length>0);
+  const activeGroups = groupsForVed();
 
   // ── Чертёж с выносками групп (тот же приём, что и в отдельном экспорте) ──
   let drawingDataURL = '', groupCallouts = '', groupCalloutCards = [], groupCalloutsOverflow = '';
@@ -8242,9 +8626,8 @@ function _doExpV(){
       // Светильники
       if(g.lamps.length>0){
         const hf=g.lamps[0].hfal||S.hfal||0;
-        const hp=g.lamps[0].hpot||S.hpot||3100;
         if(hf>0)
-          lines.push(`<span style="color:#a78bfa">○ светильники фальш ${(hf/1000).toFixed(2)}м, оп.${((hp-hf)/1000).toFixed(2)}м</span>`);
+          lines.push(`<span style="color:#a78bfa">○ светильники, фальш-зазор ${(hf/1000).toFixed(2)}м, опуск в гофре ${(hf/1000).toFixed(2)}м</span>`);
       }
       return lines.join('<br>');
     })();
@@ -8263,6 +8646,7 @@ function _doExpV(){
   let matRows='';
   // Считаем значения для calc-кодов
   const vals = {
+    ...mat,
     cable:      mat.cable,
     boxes_ip55: mat.boxCounts?.ip55||0,
     boxes_fr:   mat.boxCounts?.fr||0,
@@ -8457,7 +8841,7 @@ ${_gostStamp('Выноски групп, продолжение', 1, 3, sys, _st
 
 <div class="sheet-page sheet-break"><div class="sheet-content">
 <h3>1. Кабельный журнал</h3>
-${buildCableJournal(S.groups)}
+${buildCableJournal(groupsForVed())}
 
 <h3 style="margin-top:16px">2. Прокладка по типу монтажа (сводная)</h3>
 <table>
@@ -8506,7 +8890,7 @@ ${_gostStamp('Ведомость материалов', 3, 3, sys, _stampShifr, 
 </div>
 <\/body><\/html>`;
   // Добавляем таблицу высот монтажа перед закрывающим тегом
-  const hWithHeights = h.replace('<\/body>', heightsTableHTML() + '<\/body>');
+  const hWithHeights = h.replace('<\/body>', heightsTableHTML(mat) + '<\/body>');
   // window.open+document.write ненадёжно работает в мобильных браузерах, особенно
   // с крупной картинкой чертежа внутри — страница может остаться пустой без
   // предупреждения. Используем проверенное скачивание файла (как для PNG/DXF).
@@ -8752,6 +9136,7 @@ function exportPDF(){
 
 function exportVedFile(){
   finDraw();
+  const mat = calcMat(curSysKey(), S.groups);
   let gC=0,gP=0;
   const totK=S.groups.reduce((s,g)=>s+gLF(g),0);
   const cableByMark={};const gofraCeil={};const gofraSthr={};const lotokT={};
@@ -8905,7 +9290,7 @@ tr:last-child td{border-bottom:none}
 <\/body><\/html>`;
 
   // Вставляем таблицу высот перед <\/body>
-  const htmlWithH = html.replace('<\/body>', heightsTableHTML() + '<\/body>');
+  const htmlWithH = html.replace('<\/body>', heightsTableHTML(mat) + '<\/body>');
   const fn='ЭОМ_ведомость_'+date.replace(/\./g,'-')+'.html';
   dl(htmlWithH,'text/html;charset=utf-8',fn);
   tip('📱 Ведомость HTML скачана — открывается на телефоне');
@@ -9342,15 +9727,21 @@ function mergeLayers(){
 // ── Общая ведомость всех слоёв ───────────────────────────────
 function showMergeVed(){
   // Собираем группы из всех слоёв
-  const allGroups=[];
+  const allGroupsRaw=[];
   for(const layer of S.layers){
     if(layer.snap?.groups)
-      allGroups.push(...JSON.parse(JSON.stringify(layer.snap.groups)));
+      allGroupsRaw.push(...JSON.parse(JSON.stringify(layer.snap.groups)));
   }
-  allGroups.push(...JSON.parse(JSON.stringify(S.groups)));
+  allGroupsRaw.push(...JSON.parse(JSON.stringify(S.groups)));
+
+  // Фильтр по текущей системе — иначе totK/cableByMark/гильзы считались бы
+  // по ВСЕМ системам сразу, а mat (используемый в этих же строках ниже)
+  // уже фильтрует внутри себя по системе — расхождение чисел в одной таблице
+  const sysKey = curSysKey();
+  const allGroups = allGroupsRaw.filter(g => !g.sys || g.sys===sysKey);
 
   // Используем calcMat по всем группам
-  const mat=calcMat(curSysKey(), allGroups);
+  const mat=calcMat(sysKey, allGroups);
   const birki=calcBirki(allGroups);
   let gC=0,gP=0,totK=0;
   allGroups.forEach(g=>{totK+=gLF(g);g.gilzy?.forEach(gl=>gl.wt==='cap'?gC++:gP++);});
@@ -9366,7 +9757,7 @@ function showMergeVed(){
   let layerRows='';
   const allLayers=[...S.layers,{name:`Слой ${S.curLayer+1} (текущий)`,snap:{groups:S.groups},sys:CUR_SYS}];
   allLayers.forEach((layer,li)=>{
-    const lg=layer.snap?.groups||[];
+    const lg=(layer.snap?.groups||[]).filter(g => !g.sys || g.sys===sysKey);
     const lK=lg.reduce((s,g)=>s+gLF(g),0);
     const lGof=lg.reduce((s,g)=>s+gCeilLenGof(g),0);
     const lBox=lg.reduce((s,g)=>s+g.boxes.length,0);
@@ -10044,11 +10435,17 @@ function load1CDemo(){
 // Сравнение ИД (чертёж) vs ЛФУ (1С) vs Склад (1С)
 function getIDQty(){
   // Собираем текущие объёмы из всех слоёв + текущего
-  const allGroups=[];
-  for(const layer of S.layers) if(layer.snap?.groups) allGroups.push(...layer.snap.groups);
-  allGroups.push(...S.groups);
+  const allGroupsRaw=[];
+  for(const layer of S.layers) if(layer.snap?.groups) allGroupsRaw.push(...layer.snap.groups);
+  allGroupsRaw.push(...S.groups);
 
-  const mat = calcMat(curSysKey(), allGroups);
+  // Фильтруем по текущей системе — иначе сюда попадали бы и кабели, и
+  // гильзы, и бирки других систем/марок (та же проблема, что решалась
+  // раньше для calcMat/кабельного журнала — здесь была не исправлена)
+  const sysKey = curSysKey();
+  const allGroups = allGroupsRaw.filter(g => !g.sys || g.sys===sysKey);
+
+  const mat = calcMat(sysKey, allGroups);
   const birki = calcBirki(allGroups);
   let gC=0,gP=0;
   allGroups.forEach(g=>g.gilzy?.forEach(gl=>gl.wt==='cap'?gC++:gP++));
@@ -10173,7 +10570,7 @@ function exportDXF(){
   const H_GILZA = H_POT;            // гильза на уровне потолка
   const H_BOX   = H_POT;            // коробка на потолке
   const H_BIRKA = H_POT + 50;       // бирка чуть выше трассы
-  const H_LAMP  = H_FAL > 0 ? H_FAL : H_POT; // светильник в фальше
+  const H_LAMP  = H_FAL > 0 ? (H_POT-H_FAL) : H_POT; // светильник в фальше (абс. высота от пола)
   const H_SCH_TOP = 1500;           // верх щита
   const H_SCH_BOT = 200;            // низ щита
   const H_POD   = 300;              // подрозетник
@@ -10464,7 +10861,7 @@ function exportDXF(){
     [H_POD,    '#a78bfa','Розетка\n0.30м'],
     [H_SCH_BOT,'#06b6d4','Щит низ\n0.20м'],
     [H_SCH_TOP,'#06b6d4','Щит верх\n1.50м'],
-    ...(H_FAL?[[H_FAL,'#60a5fa',`Фальш\n${(H_FAL/1000).toFixed(2)}м`]]:[]),
+    ...(H_FAL?[[H_POT-H_FAL,'#60a5fa',`Фальш\n${((H_POT-H_FAL)/1000).toFixed(2)}м (зазор ${(H_FAL/1000).toFixed(2)}м)`]]:[]),
     [H_TRASE,  '#94a3b8',`Потолок\n${(H_TRASE/1000).toFixed(2)}м`],
   ];
   // Вертикальная ось
@@ -11284,10 +11681,11 @@ function _buildVedHTML(sys,mat,projectName,stages){
   S.groups.forEach(g=>g.gilzy.forEach(gl=>gl.wt==='cap'?gC++:gP++));
   const totK=S.groups.reduce((s,g)=>s+gLF(g),0);
 
-  const journalHtml=buildCableJournal(S.groups);
-  const heightsHtml=heightsTableHTML();
+  const journalHtml=buildCableJournal(groupsForVed());
+  const heightsHtml=heightsTableHTML(mat);
 
   const vals={
+    ...mat,
     cable:mat.cable,boxes_ip55:mat.boxCounts?.ip55||0,boxes_fr:mat.boxCounts?.fr||0,
     boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
     clips:mat.clips,clips_fr:mat.clips_fr,rozets:mat.rozets,rozet_device:mat.rozet_device,lamps:mat.lamps,switches:mat.switches,
@@ -11965,8 +12363,8 @@ async function _buildSharePageWithDraft(name, author){
   // Строим страницу с чертежом
   const sys=ID_SYSTEMS[CUR_SYS]||ID_SYSTEMS.ros;
   const mat=calcMat(curSysKey(),S.groups);
-  const journalHtml=buildCableJournal(S.groups);
-  const heightsHtml=heightsTableHTML();
+  const journalHtml=buildCableJournal(groupsForVed());
+  const heightsHtml=heightsTableHTML(mat);
 
   // Шифр ИД и АОСР из полей модала
   const proj  =(document.getElementById('share-project')?.value||'').trim().toUpperCase();
@@ -11982,7 +12380,7 @@ async function _buildSharePageWithDraft(name, author){
     : '';
 
   let matRows='';
-  const vals={cable:mat.cable,boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
+  const vals={...mat,cable:mat.cable,boxes:mat.boxes,gofra:mat.gofra,gofra_sthr:mat.gofra_sthr,
     clips:mat.clips,rozets:mat.rozets,rozet_device:mat.rozet_device,lamps:mat.lamps,switches:mat.switches,wago3:mat.wago3,wago5:mat.wago5,
     gilzy_cap:mat.gilzy_cap,gilzy_perg:mat.gilzy_perg,pena:mat.pena,birki:mat.birki,drilling:mat.drilling,shtroba:mat.shtroba,console100:mat.console100,console200:mat.console200,cryshka100:mat.cryshka100,cryshka200:mat.cryshka200,lotok100_sht:mat.lotok100_sht,lotok200_sht:mat.lotok200_sht};
   sys.materials.forEach((item,i)=>{
@@ -12223,10 +12621,16 @@ function renderMobjSysBody(){
   const rows = [_mobjRazdelHtml()];
   if(_mobjRazdel==='ss'){
     rows.push('<div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px">СЛАБОТОЧНЫЕ СИСТЕМЫ (СС)</div>');
+    // Готовые системы (свой шаблон черчения/устройств/материалов)
+    Object.entries(ID_SYSTEMS).forEach(([key,sys])=>{
+      if(sys.group!=='ss') return;
+      rows.push(_mobjSysBtnHtml(key, sys.marka, sys.markaFull, sys.color, true));
+    });
+    // Ещё не готовые — общий шаблон КЛ-заглушка
     Object.entries(ID_SYSTEMS_SS).forEach(([key,g])=>{
       rows.push(_mobjSysBtnHtml(key, g.marka, g.markaFull, g.color, false));
     });
-    rows.push('<div style="font-size:9.5px;color:#f59e0b;margin-top:4px;line-height:1.5">🚧 Шаблоны черчения и материалов для СС ещё разрабатываются — раздел за разделом. Марка в шифре ИД уже проставляется верно.</div>');
+    rows.push('<div style="font-size:9.5px;color:#f59e0b;margin-top:4px;line-height:1.5">🚧 Остальные системы СС (без пометки готовности) ещё разрабатываются — раздел за разделом. Марка в шифре ИД уже проставляется верно.</div>');
     box.innerHTML = rows.join('');
     return;
   }
@@ -12253,6 +12657,26 @@ function _mobjPickSys(key){
     const k = b.id.replace('mobj-sys-btn-','');
     b.style.opacity = k===key ? '1' : '0.55';
   });
+}
+
+// ── Режим «Шаблон здания» ────────────────────────────────────────────
+// Отдельный шаг перед черчением конкретной системы: мастер один раз
+// рисует общий каркас объекта (стены, ригели, зоны разной высоты
+// потолка) в правильном масштабе. Так как S.walls/S.rigels/S.zones не
+// привязаны к конкретной системе (в отличие от кабельных групп, у
+// которых есть g.sys), этот каркас автоматически доступен во ВСЕХ
+// системах — переключение системы (setSys/setMarkaByKey) их не трогает.
+function enterShellMode(){
+  S.shellMode = true;
+  document.body.classList.add('shell-mode');
+  tip('🏗 Режим «Шаблон здания» — черти стены, ригели, зоны. Кабели и устройства пока скрыты.');
+}
+function finishShellMode(){
+  S.shellMode = false;
+  document.body.classList.remove('shell-mode');
+  finDraw();
+  sT('cable');
+  tip('✅ Шаблон здания готов и прикреплён ко всем системам этого объекта — начинай чертить кабели');
 }
 
 function openStartModal(){
@@ -12481,6 +12905,14 @@ function closeStartModalAndDraw(){
   // источник как раз той путаницы, из-за которой всплывал старый чертёж.
   if(_pendingObjectLink && _urlSlug()!==_pendingObjectSlug){
     location.href = _pendingObjectLink;
+    return;
+  }
+  // Если у объекта ещё нет каркаса (стен/ригелей/зон) — предлагаем начертить
+  // его один раз, до перехода к конкретной системе. Каркас общий для ВСЕХ
+  // систем этого объекта (не привязан к g.sys, в отличие от кабельных
+  // групп), так что дальше при переключении системы его не нужно повторять.
+  if(!S.walls.length && !S.rigels.length && !S.zones.length){
+    enterShellMode();
   }
 }
 function dl(c,m,n){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:m}));a.download=n;a.click();}
@@ -12491,7 +12923,7 @@ function tip(m){const el=document.getElementById('tip');el.textContent=m;el.clas
 // ══════════════════════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key==='z'){e.preventDefault();undo();return;}
-  if(e.key==='Escape'){finDraw();S.wallDraw=false;S.wallP1=null;S.rigelDraw=false;S.rigelP1=null;S.opPend=null;S.schPend=null;if(S.calibMode)cancelCalib();render();return;}
+  if(e.key==='Escape'){finDraw();S.wallDraw=false;S.wallP1=null;S.rigelDraw=false;S.rigelP1=null;S.zoneDraw=false;S.zoneP1=null;S.opPend=null;S.schPend=null;if(S.calibMode)cancelCalib();render();return;}
   if(e.key==='Enter'&&S.draw){finDraw();return;}
   if(!e.ctrlKey&&!e.altKey&&!e.shiftKey){
     const k={c:'cable',b:'box',r:'rozet',l:'lamp',o:'opusk',w:'wall',x:'er'};
