@@ -976,7 +976,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 <div class="mbg" id="mh"><div class="mbox">
   <h3>📐 Высоты помещения</h3>
   <label>Высота потолка, мм</label><input id="mh-m" type="number" value="3100" onfocus="_maybeShowNumpad(this,'Высота потолка, мм')">
-  <label>Фальш-потолок, мм (0 = нет)</label><input id="mh-f" type="number" value="0" onfocus="_maybeShowNumpad(this,'Фальш-потолок, мм')">
+  <label>Глубина фальш-потолка (зазор), мм (0 = нет)</label><input id="mh-f" type="number" value="0" onfocus="_maybeShowNumpad(this,'Глубина фальш-потолка, мм')">
   <div class="mbtns">
     <button class="btn b-grn" onclick="doHpot()">✅ Применить</button>
     <button class="btn b-gray" onclick="closeM('mh')">✕ Отмена</button>
@@ -1067,17 +1067,21 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 </div></div>
 
 <div class="mbg" id="mved-stage"><div class="mbox">
-  <h3>📋 Этапы ведомости и чертежа</h3>
-  <div style="font-size:10.5px;color:#94a3b8;margin-bottom:10px;line-height:1.5">
-    Выбери, что включить в ведомость и на чертёж — можно один этап, несколько или все сразу.
+  <h3>📋 Ведомость и чертёж</h3>
+  <div style="font-size:10.5px;color:#94a3b8;margin-bottom:8px;line-height:1.5">
+    Выбери, какие системы и какие этапы включить.
   </div>
+  <div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:4px">СИСТЕМЫ</div>
+  <div id="mved-sys-body" style="margin-bottom:10px"></div>
+  <div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:4px">ЭТАПЫ</div>
   <div id="mved-stage-body"></div>
   <div style="display:flex;gap:8px;margin-top:6px">
     <button class="btn b-gray" style="flex:1;padding:8px;font-size:11px" onclick="_mvedAll()">☑️ Все этапы</button>
+    <button class="btn b-gray" style="flex:1;padding:8px;font-size:11px" onclick="_mvedSysAll()">☑️ Все системы</button>
   </div>
   <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
     <button class="btn b-grn" style="padding:10px" onclick="_mvedConfirm()">📋 Сформировать (текущая система)</button>
-    <button class="btn b-blue" style="padding:10px" onclick="_mvedAutoSplit()" title="Автоматически разложит по всем системам, встречающимся в чертеже, и по выбранным этапам — отдельный раздел на каждую пару, с шифром по регламенту">📚 Разложить по системам и этапам</button>
+    <button class="btn b-blue" style="padding:10px" onclick="_mvedAutoSplit()" title="Автоматически разложит по выбранным системам и этапам — отдельный раздел на каждую пару, с шифром по регламенту">📚 Разложить по выбранным системам и этапам</button>
     <button class="btn b-gray" style="padding:10px" onclick="closeM('mved-stage')">✕ Отмена</button>
   </div>
 </div></div>
@@ -1331,7 +1335,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openM('msys');renderSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="6" selected="">Гр.1с</option><option value="7">Гр.2с</option><option value="8">Гр.1о</option><option value="7">Гр.4</option><option value="8">Гр.5</option><option value="9">Гр.6</option><option value="10">Гр.1о</option><option value="12">Гр.8</option><option value="13">Гр.9</option><option value="18">Гр.10</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1368,7 +1372,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">1%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
   </label>
   </span>
 
@@ -1565,79 +1569,47 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <!-- Счётчики -->
     <div id="cnt">
       <div style="font-size:8.5px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📊 Итого</div>
-      Кабель: <b id="ck">353.2м</b><br>
-      ×1.06: <b id="ckz">374.4м</b><br>
-      Коробок: <b id="cb2">48</b><br>
+      Кабель: <b id="ck">0.0м</b><br>
+      ×1.06: <b id="ckz">0.0м</b><br>
+      Коробок: <b id="cb2">0</b><br>
       Розеток: <b id="cr">0</b><br>
-      <span style="color:#10b981">Подрозетники:</span> <b id="cpr">16</b><br>
-      Светильн.: <b id="cl">22 (фальш 0.50м, оп.2.60м)</b><br>
-      Гильзы: <b id="cg" class="warn">12</b><br>
-      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">230.6м</b><br>
-      <span style="color:#c084fc">Гофра штроба:</span> <b id="csthr">46.8м</b><br>
+      <span style="color:#10b981">Подрозетники:</span> <b id="cpr">0</b><br>
+      Светильн.: <b id="cl">0</b><br>
+      Гильзы: <b id="cg" class="warn">0</b><br>
+      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">0.0м</b><br>
+      <span style="color:#c084fc">Гофра штроба:</span> <b id="csthr">0.0м</b><br>
       <span style="color:#818cf8">Лоток:</span> <b id="clot">0.0м</b><br>
-      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">272</b><br>
-      Несвязан: <b id="ce" class="warn">4</b><br>
-      <span style="color:#a78bfa">Опусков:</span> <b id="co">26</b><br>
-      <span style="color:#facc15">Бирки:</span> <b id="cbk">37</b>
+      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">0</b><br>
+      Несвязан: <b id="ce" class="warn">0</b><br>
+      <span style="color:#a78bfa">Опусков:</span> <b id="co">0</b><br>
+      <span style="color:#facc15">Бирки:</span> <b id="cbk">0</b>
     </div>
 
     <div style="margin-top:5px">
       <div style="font-size:9px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📋 Группы</div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(6)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
-      <div><div class="mn">Гр.1с</div>
-      <div class="ms">53.8м</div>
+      <div style="flex:1"><div class="mn">Гр.1с</div>
+      <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(7)">
+      <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
-      <div><div class="mn">Гр.2с</div>
+      <div style="flex:1"><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(8)">
+      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
       <div class="md" style="background:#f59e0b"></div>
-      <div><div class="mn">Гр.1о</div>
+      <div style="flex:1"><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
       </div>
-    </div><div class="gi" style="border-color:#3bf7f4" onclick="swG(7)">
-      <div class="md" style="background:#3bf7f4"></div>
-      <div><div class="mn">Гр.4</div>
-      <div class="ms">0.0м</div>
-      </div>
-    </div><div class="gi" style="border-color:#3bf7f4" onclick="swG(8)">
-      <div class="md" style="background:#3bf7f4"></div>
-      <div><div class="mn">Гр.5</div>
-      <div class="ms">0.0м</div>
-      </div>
-    </div><div class="gi" style="border-color:#3bf7f4" onclick="swG(9)">
-      <div class="md" style="background:#3bf7f4"></div>
-      <div><div class="mn">Гр.6 ⚠</div>
-      <div class="ms">41.0м</div>
-      </div>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(10)">
-      <div class="md" style="background:#f59e0b"></div>
-      <div><div class="mn">Гр.1о</div>
-      <div class="ms">0.0м</div>
-      </div>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(12)">
-      <div class="md" style="background:#f59e0b"></div>
-      <div><div class="mn">Гр.8 ⚠</div>
-      <div class="ms">43.3м</div>
-      </div>
-    </div><div class="gi" style="border-color:#31f50a" onclick="swG(13)">
-      <div class="md" style="background:#31f50a"></div>
-      <div><div class="mn">Гр.9 ⚠</div>
-      <div class="ms">56.0м</div>
-      </div>
-    </div><div class="gi" style="border-color:#ef4444" onclick="swG(18)">
-      <div class="md" style="background:#ef4444"></div>
-      <div><div class="mn">Гр.10 ⚠</div>
-      <div class="ms">36.5м</div>
-      </div>
+      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div></div>
     </div>
   </div>
 
-  <div id="cw"><canvas id="cv" width="390" height="600"></canvas></div>
+  <div id="cw"><canvas id="cv" width="1760" height="819"></canvas></div>
 </div>
 
 <div id="st">
@@ -1672,7 +1644,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <button class="mb more-tools" onclick="exportVedFile()" style="display:none;color:#93c5fd">📱<span>HTML</span></button>
   <button class="mb" onclick="exportDXF()" style="color:#a78bfa">📐<span>DXF</span></button>
   <button class="mb pur" onclick="openLayerModal()">📑<span>Слой</span></button>
-  <button class="mb" onclick="startCorrection()" style="color:#fca5a5">🔄<span>Корр.</span></button>
+  <button class="mb" onclick="startCorrectionSelect()" style="color:#fca5a5">🔄<span>Корр.</span></button>
   <button class="mb" onclick="exportDraft()" style="color:#60a5fa" title="Скачать чертёж PNG">🖼<span>Чертёж</span></button>
   <button class="mb" onclick="exportDrawingWithLegend()" style="color:#4ade80" title="Чертёж + подписи групп + УГО + ведомость">📐<span>+Ведом.</span></button>
   <button class="mb grn" onclick="showReady()">✅<span>Готово</span></button>
@@ -4313,7 +4285,9 @@ function rebuildBirki(g){
     // Отступ должен гарантированно выносить бирку ЗА пределы стены (не внутрь
     // неё) — берём половину толщины стены в этом месте + запас, а не
     // фиксированные 400мм (для капитальной стены 500мм этого может не хватить)
-    const OFFSET=Math.max(400, (gl.thick||100)/2+250); // мм
+    // Вплотную к стене — сразу за её гранью, а не где-то поодаль (мастер
+    // просил именно «вплотную к гильзе», а не на 400мм в сторону)
+    const OFFSET=(gl.thick||100)/2+60; // мм: половина толщины стены + небольшой запас
     g.birki.push({x:gl.x-ux*OFFSET,y:gl.y-uy*OFFSET,
       label:`${g.name}
 пер.гильзу`,num:num++,type:'before_gilza'});
@@ -4444,7 +4418,16 @@ function _pointInRigelG(px,py,rg){
   const ux=bdx/blen, uy=bdy/blen, nx=-uy, ny=ux;
   const relX=px-rg.x1, relY=py-rg.y1;
   const along=relX*ux+relY*uy, across=relX*nx+relY*ny;
-  return along>=-15 && along<=blen+15 && Math.abs(across)<=rg.w/2+15;
+  if(!(along>=-15 && along<=blen+15 && Math.abs(across)<=rg.w/2+15)) return false;
+  // Ригель обычно рисуют «от стены до стены» в одном помещении/коридоре —
+  // если между проверяемой точкой и серединой ригеля стоит стена, значит
+  // точка на самом деле в СОСЕДНЕМ помещении, где физически этого ригеля
+  // нет, и его не нужно огибать, даже если 2D-координаты формально совпали
+  const midX=(rg.x1+rg.x2)/2, midY=(rg.y1+rg.y2)/2;
+  for(const w of (S.walls||[])){
+    if(_segXsegX(px,py,midX,midY, w.x1,w.y1,w.x2,w.y2)) return false;
+  }
+  return true;
 }
 // Пересекает ли отрезок кабеля прямоугольник (полосу) ригеля — сэмплируем
 // точки вдоль отрезка, это надёжно работает при любом угле, включая почти
@@ -4526,11 +4509,26 @@ function rList(){
     }
     return`<div class="gi${g.id===S.cur?' on':''}" style="border-color:${g.color}" onclick="swG(${g.id})">
       <div class="md" style="background:${g.color}"></div>
-      <div><div class="mn">${g.name}${err?' ⚠':''}</div>
+      <div style="flex:1"><div class="mn">${g.name}${err?' ⚠':''}</div>
       <div class="ms">${gL(g).toFixed(1)}м</div>
       ${progressHtml}</div>
+      <button onclick="event.stopPropagation();delGroup(${g.id})" title="Удалить группу «${g.name}» вместе со всей трассой"
+        style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div>`;
   }).join('');
+}
+// Удаление группы целиком — со всей трассой, коробками, опусками, светильниками
+// и т.д. Раньше такой возможности не было вообще, даже стартовые/демо-группы
+// нельзя было убрать, если они не нужны в проекте.
+function delGroup(id){
+  const g = S.groups.find(gr=>gr.id===id);
+  if(!g) return;
+  if(!confirm(`Удалить группу «${g.name}» (${gL(g).toFixed(1)}м кабеля) целиком? Это нельзя отменить.`)) return;
+  push();
+  S.groups = S.groups.filter(gr=>gr.id!==id);
+  if(S.cur===id) S.cur = S.groups.length ? S.groups[0].id : null;
+  rSel(); rList(); updCnt(); updMountBtns(); render();
+  tip(`🗑 Группа «${g.name}» удалена`);
 }
 // Быстрое редактирование плана количества розеток/светильников прямо из списка
 function editGroupPlan(id){
@@ -5091,7 +5089,7 @@ function render(){
     for(const l of g.lamps){
       const hfal = l.hfal||S.hfal||0;
       const hpot = l.hpot||S.hpot||3100;
-      const ol   = l.ol||(hfal>0?hpot-hfal:hpot);
+      const ol   = l.ol||(hfal>0?hfal:0);
 
       // ── Символ светильника — панель Армстронг 500×500мм (реальный масштаб) ──
       const LSZ=250; // половина стороны 500мм панели, в мм плана
@@ -5548,12 +5546,24 @@ function _layToggle(key){
   if(S.hiddenSystems.has(key)) S.hiddenSystems.delete(key);
   else S.hiddenSystems.add(key);
   render();
+  _refresh3DIfOpen();
 }
 function _layAll(show){
   const keys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
   if(show) S.hiddenSystems.clear();
   else keys.forEach(k=>S.hiddenSystems.add(k));
   openLayersPanel(); render();
+  _refresh3DIfOpen();
+}
+// Если открыт «Участок в 3D» — перестраиваем сцену с учётом текущих
+// скрытых слоёв (иначе слои влияли только на 2D-чертёж, а в 3D всё равно
+// показывались все системы)
+function _refresh3DIfOpen(){
+  if(!_m3dLastRect) return;
+  const wrap = document.getElementById('m3d-canvas-wrap');
+  if(!wrap || wrap.offsetParent===null) return; // панель закрыта — не трогаем
+  wrap.innerHTML = '';
+  try{ _build3DScene(_m3dLastRect, wrap); }catch(e){ /* библиотека 3D недоступна и т.п. — молча пропускаем */ }
 }
 
 function toggleLabels(){
@@ -5853,6 +5863,7 @@ function _build3DScene(rect, wrap){
   const legendItems = [];
   // ── Кабельные трассы (на высоте потолка) + опуски/розетки (вертикали) ──
   for(const g of (S.groups||[])){
+    if(S.hiddenSystems && g.sys && S.hiddenSystems.has(g.sys)) continue; // скрытый слой системы — как и в 2D
     const col = new THREE.Color(g.color||'#3b82f6');
     let any=false;
     const lineMat = new THREE.LineBasicMaterial({color:col, linewidth:2});
@@ -5925,6 +5936,22 @@ function _build3DScene(rect, wrap){
         ];
         const geo = new THREE.BufferGeometry().setFromPoints(pts);
         scene.add(new THREE.Line(geo, lineMat));
+        // Размеры обвода ригеля — высота нырка и длина участка под ним,
+        // тоже показываются кнопкой «📐 Включить размеры» и участвуют в
+        // расчёте (это те же точки, что вошли в gRigelExtra)
+        if(detour){
+          for(let i=1;i<detour.length-2;i++){
+            const p1=detour[i], p2=detour[i+1];
+            const segLen3=p1.distanceTo(p2);
+            if(segLen3<0.05) continue;
+            const isVertical = Math.abs(p1.x-p2.x)<0.005 && Math.abs(p1.z-p2.z)<0.005;
+            const dimSpr2 = _makeTextSprite(segLen3.toFixed(2)+(isVertical?'м (обвод ригеля)':'м (под ригелем)'), '#fca5a5');
+            dimSpr2.position.set((p1.x+p2.x)/2 + 0.06, (p1.y+p2.y)/2, (p1.z+p2.z)/2);
+            dimSpr2.visible = _m3dDimsOn;
+            scene.add(dimSpr2);
+            _m3dDimObjects.push(dimSpr2);
+          }
+        }
       }
       // Размерная подпись длины сегмента — по умолчанию скрыта, показывается
       // кнопкой «📐 Включить размеры»
@@ -6155,16 +6182,13 @@ function _build3DScene(rect, wrap){
     scene.add(m);
   }
 
-  // Проверка «точка внутри прямоугольника ригеля» (по его длине И ширине —
-  // раньше проверялась только полоса по ширине БЕЗ учёта длины самого
-  // ригеля, а пересечение линий давало null, если кабель шёл почти
-  // параллельно ригелю — из-за этого нырок иногда вообще не появлялся)
+  // Проверка «точка внутри прямоугольника ригеля» — используем общую (global)
+  // функцию _pointInRigelG, которая ещё и учитывает стены между точкой и
+  // ригелем (см. её определение) — раньше здесь была отдельная копия без
+  // этой проверки, и кабель за стеной, где ригеля физически нет, всё равно
+  // считался «под ригелем»
   function _pointInRigel(px,py,rg){
-    const bdx=rg.x2-rg.x1, bdy=rg.y2-rg.y1, blen=Math.hypot(bdx,bdy)||1;
-    const ux=bdx/blen, uy=bdy/blen, nx=-uy, ny=ux;
-    const relX=px-rg.x1, relY=py-rg.y1;
-    const along=relX*ux+relY*uy, across=relX*nx+relY*ny;
-    return along>=-15 && along<=blen+15 && Math.abs(across)<=rg.w/2+15;
+    return _pointInRigelG(px,py,rg);
   }
   // Пересечение отрезка кабеля с прямоугольником ригеля — сэмплируем точки
   // вдоль кабеля (надёжно работает при любом угле, включая почти параллельный
@@ -6650,18 +6674,21 @@ function placeSymbol(x,y){
   }
   else if(S.t==='lamp'){
     // Светильник на фальш-потолке.
-    // Опуск = от основного потолка ДО фальш-потолка (запотолочное пространство)
-    // Если фальш не задан — опуск = полная высота потолка
+    // ВАЖНО: «Фальш-потолок, мм» — это глубина запотолочного пространства
+    // (зазор между основным потолком и фальш-потолком), а НЕ абсолютная
+    // высота фальш-потолка от пола. Раньше здесь считалось hpot-hfal, и при
+    // вводе 300 или 500 (то есть реальной глубины зазора) опуск ошибочно
+    // получался ~2.8м (hpot минус введённое число) вместо самих 300/500мм.
     const hpot = S.hpot;           // высота основного потолка, мм
-    const hfal = S.hfal;           // высота фальш-потолка, мм (0 = нет)
-    const ol   = hfal>0 ? (hpot-hfal) : hpot;  // длина опуска кабеля в штробе
+    const hfal = S.hfal;           // ГЛУБИНА зазора до фальш-потолка, мм (0 = нет фальш-потолка)
+    const ol   = hfal>0 ? hfal : 0;  // длина опуска светильника = сам зазор
 
     const bt = g.boxType||boxTypeForSys(CUR_SYS);
     // Сохраняем оба размера — для правильного отображения на чертеже
     g.lamps.push({x, y,
-      ol,          // длина опуска (основной→фальш), мм
+      ol,          // длина опуска (глубина запотолочного пространства), мм
       hpot,        // высота основного потолка, мм
-      hfal,        // высота фальш-потолка, мм
+      hfal,        // глубина зазора до фальш-потолка, мм
       cnt: 1,      // количество (будущее расширение)
       _corr: S.correctionActiveTag||undefined
     });
@@ -6727,6 +6754,8 @@ function eraseAt(x,y){
   }
   S.walls=S.walls.filter(w=>Math.hypot((w.x1+w.x2)/2-x,(w.y1+w.y2)/2-y)>R);
   S.schits=S.schits.filter(s=>Math.hypot(s.x-x,s.y-y)>R);
+  // Ригели раньше вообще не стирались ластиком — добавил
+  S.rigels=(S.rigels||[]).filter(rg=>Math.hypot((rg.x1+rg.x2)/2-x,(rg.y1+rg.y2)/2-y)>R);
   for(const g of S.groups)rebuildGilzy(g);
   updCnt();render();
 }
@@ -6771,7 +6800,7 @@ function updCnt(){
   const lampLabel=document.getElementById('cl');
   if(lampLabel){
     if(tL>0&&S.hfal>0){
-      lampLabel.textContent=tL+' (фальш '+( S.hfal/1000).toFixed(2)+'м, оп.'+(( S.hpot-S.hfal)/1000).toFixed(2)+'м)';
+      lampLabel.textContent=tL+' (фальш-зазор '+( S.hfal/1000).toFixed(2)+'м, оп.'+(S.hfal/1000).toFixed(2)+'м)';
     }else{
       lampLabel.textContent=tL;
     }
@@ -7841,24 +7870,57 @@ function _rigelNodesHtml(){
 
 // Точка входа с кнопки «📋» — сперва спрашиваем, какие этапы включить в
 // ведомость/чертёж, потом строим саму ведомость через _doExpV()
+let _selectedVedSystems = new Set(); // пусто = ещё не инициализировано (заполнится всеми найденными)
 function expV(){
   finDraw();
-  const box = document.getElementById('mved-stage-body');
-  if(box){
-    box.innerHTML = Object.entries(VED_STAGES).map(([key,st])=>`
+  const stageBox = document.getElementById('mved-stage-body');
+  if(stageBox){
+    stageBox.innerHTML = Object.entries(VED_STAGES).map(([key,st])=>`
       <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;
         background:#0d1117;border:1px solid ${st.color};border-radius:6px;cursor:pointer">
         <input type="checkbox" id="mved-st-${key}" ${_vedStages[key]?'checked':''} style="width:16px;height:16px">
         <span style="font-weight:700;color:${st.color}">${st.label}</span>
       </label>`).join('');
   }
+  const sysKeys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
+  if(!sysKeys.length) sysKeys.push(curSysKey());
+  if(!_selectedVedSystems.size) sysKeys.forEach(k=>_selectedVedSystems.add(k)); // по умолчанию — все найденные
+  const sysBox = document.getElementById('mved-sys-body');
+  if(sysBox){
+    sysBox.innerHTML = sysKeys.map(key=>{
+      const col = sysDisplayColor(key);
+      const checked = _selectedVedSystems.has(key);
+      const cnt = S.groups.filter(g=>g.sys===key).length;
+      return `<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:5px;
+        background:#0d1117;border:1px solid ${col};border-radius:6px;cursor:pointer">
+        <input type="checkbox" id="mved-sys-${key}" ${checked?'checked':''} style="width:16px;height:16px">
+        <span style="font-weight:700;color:${col};flex:1">${sysDisplayName(key)}</span>
+        <span style="font-size:9px;color:#64748b">${cnt} гр.</span>
+      </label>`;
+    }).join('');
+  }
   openM('mved-stage');
+}
+function _mvedSysAll(){
+  const sysKeys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
+  _selectedVedSystems = new Set(sysKeys);
+  expV();
+}
+function _readSelectedSystems(){
+  const sysKeys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
+  if(!sysKeys.length) sysKeys.push(curSysKey());
+  _selectedVedSystems = new Set(sysKeys.filter(key=>{
+    const cb=document.getElementById('mved-sys-'+key);
+    return cb ? cb.checked : true;
+  }));
+  return _selectedVedSystems;
 }
 function _mvedConfirm(){
   Object.keys(VED_STAGES).forEach(key=>{
     const cb=document.getElementById('mved-st-'+key);
     _vedStages[key] = cb ? cb.checked : true;
   });
+  _readSelectedSystems();
   if(!Object.values(_vedStages).some(Boolean)){
     tip('⚠️ Выбери хотя бы один этап');
     return;
@@ -7888,8 +7950,8 @@ function _mvedAutoSplit(){
   const selStages = Object.keys(VED_STAGES).filter(k=>_vedStages[k]);
   if(!selStages.length){ tip('⚠️ Выбери хотя бы один этап'); return; }
 
-  const sysKeys = [...new Set(S.groups.map(g=>g.sys).filter(Boolean))];
-  if(!sysKeys.length) sysKeys.push(curSysKey());
+  const sysKeys = [..._readSelectedSystems()];
+  if(!sysKeys.length){ tip('⚠️ Выбери хотя бы одну систему'); return; }
 
   const proj=(document.getElementById('share-project')?.value||document.getElementById('aosr-project')?.value||'').trim().toUpperCase();
   const korpus=(document.getElementById('share-korpus')?.value||document.getElementById('aosr-korpus')?.value||'').trim().toUpperCase();
@@ -8361,7 +8423,7 @@ ${(S.correctionGhosts&&S.correctionGhosts.length) ? `<div style="background:#7f1
   в объёмах ниже. Строки, отмеченные значком 🆕, — новая/изменённая часть, которую нужно проверить.
 </div>` : ''}
 <h2>Кабельный журнал | 1 этаж</h2>
-<div class="meta">Потолок: ${S.hpot}мм${S.hfal?' | Фальш: '+S.hfal+'мм':''} | ${new Date().toLocaleDateString('ru')} | Групп: ${S.groups.length}</div>
+<div class="meta">Потолок: ${S.hpot}мм${S.hfal?' | Фальш-зазор: '+S.hfal+'мм':''} | ${new Date().toLocaleDateString('ru')} | Групп: ${S.groups.length} | Система: ${sys.name} | Этапы: ${Object.keys(VED_STAGES).filter(k=>_vedStages[k]).map(k=>VED_STAGES[k].label).join(', ')||'—'}</div>
 
 ${drawingDataURL ? `
 <h3>Чертёж кабельных трасс</h3>
@@ -8491,7 +8553,7 @@ function showReady(){
     `<span style="font-size:11px;color:${_sys.color};font-weight:700">${_sys.name}</span><br>`+
     `<b style="color:#4ade80">Кабель нетто:</b> ${S.groups.reduce((s,g)=>s+gLF(g),0).toFixed(2)}м → ×1.06 = ${(S.groups.reduce((s,g)=>s+gLF(g),0)*1.06).toFixed(2)}м<br>`+
     `<b style="color:#4ade80">Групп:</b> ${S.groups.length} | Коробок: ${S.groups.reduce((s,g)=>s+g.boxes.length,0)} шт<br>`+
-    (S.hfal>0?`<b style="color:#a78bfa">Фальш-потолок: ${(S.hfal/1000).toFixed(2)}м | Опуск светильника: ${((S.hpot-S.hfal)/1000).toFixed(2)}м</b><br>`:`<span style="color:#64748b">Фальш-потолок: не задан</span><br>`)+
+    (S.hfal>0?`<b style="color:#a78bfa">Фальш-потолок (зазор): ${(S.hfal/1000).toFixed(2)}м | Опуск светильника: ${(S.hfal/1000).toFixed(2)}м</b><br>`:`<span style="color:#64748b">Фальш-потолок: не задан</span><br>`)+
     `<b style="color:#f97316">Гильз (авто):</b> ${S.groups.reduce((s,g)=>s+g.gilzy.length,0)} шт<br>`+
     `<b style="color:#0891b2">Гофра потолок:</b> ${_mat.gofra_net}м → ×1.06=${_mat.gofra}м<br>`+
     `<b style="color:#c084fc">Гофра штроба:</b> ${_mat.gofra_sthr_net||'0'}м → ×1.06=${_mat.gofra_sthr||'0'}м<br>`+
@@ -11616,6 +11678,27 @@ function _drawQR(url, container){
   }catch(e){ container.textContent='QR: '+e.message; }
 }
 
+// Кнопки «📋 Копировать» и «🌐 Открыть и проверить» существовали в разметке,
+// но самих функций не было вообще — клик по ним просто ничего не делал
+// (это и была настоящая причина «ссылка не работает»/«не появляется»).
+function copyShareUrl(){
+  const inp = document.getElementById('share-url');
+  if(!inp || !inp.value){ tip('⚠️ Сначала получи ссылку'); return; }
+  navigator.clipboard.writeText(inp.value).then(()=>{
+    tip('📋 Ссылка скопирована');
+  }).catch(()=>{
+    // Фоллбек для браузеров/контекстов без Clipboard API
+    inp.select(); inp.setSelectionRange(0, 99999);
+    try{ document.execCommand('copy'); tip('📋 Ссылка скопирована'); }
+    catch(e){ tip('⚠️ Не удалось скопировать — выдели и скопируй вручную'); }
+  });
+}
+function openShareUrl(){
+  const inp = document.getElementById('share-url');
+  if(!inp || !inp.value){ tip('⚠️ Сначала получи ссылку'); return; }
+  window.open(inp.value, '_blank');
+}
+
 async function createShareLink(){
   const name   = document.getElementById('share-name').value.trim()  || 'Проект ЭОМ';
   const author = document.getElementById('share-author').value.trim()|| 'Мастер';
@@ -12492,19 +12575,6 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
-
-<script>
-// Автозаполнение шифра при первом открытии этого именного шаблона объекта
-window.addEventListener('load', function(){
-  try{
-    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
-    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
-    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
-    if(typeof updateShifrPreview==='function') updateShifrPreview();
-    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
-  }catch(e){}
-});
-</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
