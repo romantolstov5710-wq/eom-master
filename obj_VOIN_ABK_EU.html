@@ -1445,7 +1445,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="8" selected="">Гр.1с</option><option value="9">Гр.2с</option><option value="10">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1730,24 +1730,24 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
         <span style="font-size:9px;color:#60a5fa;text-transform:uppercase">📋 Группы</span>
         <button onclick="quickDupGroup()" title="Создать новую группу с теми же настройками (щит/кабель/монтаж), что и у текущей — без модалки" style="font-size:9px;padding:2px 6px;border-radius:4px;background:#334155;color:#93c5fd;border:none;cursor:pointer">+ Ещё такую же</button>
       </div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(8)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(8)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(9)">
+      <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(9)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(10)">
+      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
       <div class="md" style="background:#f59e0b"></div>
       <div style="flex:1"><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(10)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div></div>
     </div>
   </div>
@@ -13629,20 +13629,25 @@ function _voiceRevealIfNeeded(el){
   if(secKl && getComputedStyle(secKl).display==='none'){ setUISection('kl'); return true; }
   return false;
 }
-let _voiceRec=null, _voiceOn=false;
+let _voiceRec=null, _voiceOn=false, _voiceStarting=false;
 function toggleVoice(){
-  if(_voiceOn){ _voiceStop(); return; }
+  if(_voiceOn || _voiceStarting){ _voiceStop(); return; }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){
     tip('⚠️ Голосовое управление работает только в браузере Chrome (на ПК или телефоне)');
     return;
   }
+  _voiceStarting=true; // ставим СРАЗУ (синхронно) — onstart сработает позже
+  // асинхронно, и без этого флага быстрый повторный клик до его срабатывания
+  // создавал ВТОРОЙ параллельный распознаватель поверх первого, отсюда
+  // случайные «то работает, то нет»
   _voiceRec = new SR();
   _voiceRec.lang='ru-RU';
   _voiceRec.continuous=true;
   _voiceRec.interimResults=true;
   _voiceRec.onstart=()=>{
     _voiceOn=true;
+    _voiceStarting=false;
     document.body.classList.add('voice-listening');
     document.getElementById('voice-indicator').style.display='block';
     document.getElementById('voice-status').textContent='🎤 Слушаю…';
@@ -13652,7 +13657,9 @@ function toggleVoice(){
       const b=document.getElementById(id); if(b){ b.style.background='#7c3aed'; b.style.color='#fff'; }
     });
   };
+  let _voiceErrStreak=0;
   _voiceRec.onresult=(ev)=>{
+    _voiceErrStreak=0; // получили результат — счётчик ошибок подряд сбрасывается
     let finalText='', interimText='';
     for(let i=ev.resultIndex;i<ev.results.length;i++){
       const t=ev.results[i][0].transcript;
@@ -13662,19 +13669,36 @@ function toggleVoice(){
     if(finalText) _voiceExecute(finalText.trim());
   };
   _voiceRec.onerror=(ev)=>{
+    // Раньше обрабатывались только 'no-speech' и 'not-allowed' — любая другая
+    // ошибка (самая частая в жизни — 'network': Chrome распознаёт речь через
+    // сервер Google, и при обрыве связи/VPN/блокировщиках это выдаёт именно
+    // 'network') просто молча ничего не делала — голос «переставал работать»
+    // без единой подсказки почему.
     if(ev.error==='no-speech') return; // тишина — это нормально, просто ждём дальше
-    if(ev.error==='not-allowed'){
-      tip('⚠️ Нет доступа к микрофону — разреши в настройках браузера');
+    if(ev.error==='aborted') return; // это мы сами остановили — не ошибка
+    _voiceErrStreak++;
+    if(ev.error==='not-allowed' || ev.error==='service-not-allowed'){
+      tip('⚠️ Нет доступа к микрофону — разреши его в настройках браузера (значок замка/микрофона в адресной строке)');
       _voiceStop();
+    }else if(ev.error==='network'){
+      tip('⚠️ Голос не может достучаться до сервера распознавания — проверь интернет (VPN/блокировщики иногда мешают)');
+      if(_voiceErrStreak>=3) _voiceStop(); // не зацикливаемся молча, если сеть правда не работает
+    }else if(ev.error==='audio-capture'){
+      tip('⚠️ Не найден микрофон — проверь, что он подключён и разрешён для этой вкладки');
+      _voiceStop();
+    }else{
+      tip('⚠️ Голосовое распознавание сбилось ('+ev.error+') — попробуй нажать ещё раз');
+      if(_voiceErrStreak>=3) _voiceStop();
     }
   };
   _voiceRec.onend=()=>{
     if(_voiceOn){ try{ _voiceRec.start(); }catch(e){} } // авто-перезапуск (браузер иногда сам останавливает через паузу)
   };
-  try{ _voiceRec.start(); }catch(e){ tip('⚠️ Не удалось запустить микрофон'); }
+  try{ _voiceRec.start(); }catch(e){ _voiceStarting=false; tip('⚠️ Не удалось запустить микрофон'); }
 }
 function _voiceStop(){
   _voiceOn=false;
+  _voiceStarting=false;
   if(_voiceRec){ try{ _voiceRec.stop(); }catch(e){} _voiceRec=null; }
   document.body.classList.remove('voice-listening');
   document.getElementById('voice-indicator').style.display='none';
