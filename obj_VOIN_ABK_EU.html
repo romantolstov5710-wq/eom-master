@@ -39,16 +39,19 @@ body.shell-mode .tool-shell{outline:2px solid #14b8a6;outline-offset:1px}
 body.shell-mode #shell-banner{display:flex}
 
 /* ── Чёрно-белый режим панели во время голосового распознавания ────
-   Пока слушает микрофон, вся панель инструментов гаснет и обесцвечивается,
-   чтобы не отвлекать — а кнопка, которую голос реально нашёл и нажал,
-   на миг вспыхивает цветом и подсвечивается рамкой поверх серого фона. */
-body.voice-listening #bar,
-body.voice-listening #mob{filter:grayscale(1) brightness(0.55);transition:filter .2s}
-body.voice-listening #bar .voice-hit,
-body.voice-listening #mob .voice-hit{
-  filter:grayscale(0) brightness(1.35)!important;
+   Пока слушает микрофон, все кнопки гаснут и обесцвечиваются по одной —
+   а не контейнер целиком (filter на родителе применяется ко ВСЕМ дочерним
+   пикселям как единый слой, и filter:none на потомке его не отменяет —
+   поэтому раньше нужная кнопка оставалась серой). Кнопка, которую голос
+   реально нашёл и нажал, остаётся в цвете и подсвечивается рамкой. */
+body.voice-listening #bar button,
+body.voice-listening #mob button{filter:grayscale(1) brightness(0.55);transition:filter .2s}
+body.voice-listening #bar button.voice-hit,
+body.voice-listening #mob button.voice-hit{
+  filter:none!important;
   outline:3px solid #a78bfa; outline-offset:1px;
   position:relative; z-index:20;
+  transform:scale(1.08);
 }
 
 /* ── Полоса этапов ── */
@@ -1442,7 +1445,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
 
   <button class="btn" id="sys-badge" onclick="openSysModal()" style="padding: 4px 10px; font-size: 11px; font-weight: 700; background: rgb(30, 58, 95); color: rgb(59, 130, 246); border: 1px solid rgb(59, 130, 246); border-radius: 5px; white-space: nowrap;">🔌 Розетки</button>
   <div id="grp-row">
-    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="5" selected="">Гр.1с</option><option value="6">Гр.2с</option><option value="7">Гр.1о</option></select>
+    <select id="gsel" onchange="swG(+this.value)" style="min-width:88px"><option value="8" selected="">Гр.1с</option><option value="9">Гр.2с</option><option value="10">Гр.1о</option></select>
     <span id="gdot" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(59, 130, 246); flex-shrink: 0;"></span>
     <button class="btn b-blue" onclick="openNewGroupModal()" title="Новая группа">＋</button>
   </div>
@@ -1727,24 +1730,24 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
         <span style="font-size:9px;color:#60a5fa;text-transform:uppercase">📋 Группы</span>
         <button onclick="quickDupGroup()" title="Создать новую группу с теми же настройками (щит/кабель/монтаж), что и у текущей — без модалки" style="font-size:9px;padding:2px 6px;border-radius:4px;background:#334155;color:#93c5fd;border:none;cursor:pointer">+ Ещё такую же</button>
       </div>
-      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
+      <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(8)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.1с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
+      <button onclick="event.stopPropagation();delGroup(8)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#3b82f6" onclick="swG(9)">
       <div class="md" style="background:#3b82f6"></div>
       <div style="flex:1"><div class="mn">Гр.2с</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(6)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
-    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(7)">
+      <button onclick="event.stopPropagation();delGroup(9)" title="Удалить группу «Гр.2с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+    </div><div class="gi" style="border-color:#f59e0b" onclick="swG(10)">
       <div class="md" style="background:#f59e0b"></div>
       <div style="flex:1"><div class="mn">Гр.1о</div>
       <div class="ms">0.0м</div>
       </div>
-      <button onclick="event.stopPropagation();delGroup(7)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
+      <button onclick="event.stopPropagation();delGroup(10)" title="Удалить группу «Гр.1о» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div></div>
     </div>
   </div>
