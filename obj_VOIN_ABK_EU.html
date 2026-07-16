@@ -13586,47 +13586,60 @@ function _voiceNorm(s){
 // прохода, если среди ВИДИМЫХ кнопок совпадения не нашлось (см. _voiceMatch) —
 // так голос «видит» и кнопки из другого раздела (Кабельные линии/Оборудование),
 // а не только то, что сейчас на экране.
-function _buildVoiceIndex(includeHidden){
+let _voiceIndexCache=null, _voiceIndexCacheTime=0;
+// Строит список «подпись кнопки → элемент» — раньше это пересканирование
+// ВСЕХ ~230 кнопок (для каждой ещё и чтение offsetParent, что вызывает
+// синхронный пересчёт вёрстки браузера) происходило заново на КАЖДУЮ
+// голосовую команду, причём дважды подряд при промахе (сначала видимые,
+// потом скрытые) — отсюда и была заметная задержка между «сказал» и
+// «сработало». Теперь список подписей строится не чаще раза в 4 секунды и
+// переиспользуется между командами.
+function _buildVoiceIndex(){
+  const now=Date.now();
+  if(_voiceIndexCache && now-_voiceIndexCacheTime<4000) return _voiceIndexCache;
   const idx=[];
   document.querySelectorAll('button[onclick], button[id]').forEach(btn=>{
-    if(!includeHidden && btn.offsetParent===null) return;
     if(btn.id==='voice-btn'||btn.id==='voice-btn-m'||btn.id==='voice-fab') return;
-    const raw = btn.textContent||'';
-    const norm = _voiceNorm(raw);
+    const norm=_voiceNorm(btn.textContent||'');
     if(!norm) return;
-    idx.push({label:norm, el:btn, hidden: btn.offsetParent===null});
+    idx.push({label:norm, el:btn});
   });
+  _voiceIndexCache=idx; _voiceIndexCacheTime=now;
   return idx;
 }
 // Ищет лучшее совпадение: точное > один из индекса начинается с фразы >
 // фраза содержится в подписи кнопки (самая короткая подходящая подпись —
-// чтобы «стена» не путалась с более длинной «зона потолка»). Сначала ищем
-// только среди ВИДИМЫХ кнопок; если ничего не нашли — расширяем поиск на
-// скрытые (например, «розетка» лежит в разделе «Оборудование», а сейчас
-// открыт раздел «Кабельные линии») и сами переключаем раздел.
+// чтобы «стена» не путалась с более длинной «зона потолка»). Видимость
+// (offsetParent — единственное дорогое чтение, форсирующее вёрстку)
+// проверяется ТОЛЬКО у уже отобранных кандидатов с достаточным баллом,
+// а не у всех кнопок подряд — это и убирает задержку.
 function _voiceMatch(phrase){
-  const tryIdx=(idx)=>{
-    let best=null, bestScore=-1;
-    for(const item of idx){
-      let score=-1;
-      if(item.label===phrase) score=100;
-      else if(item.label.startsWith(phrase+' ')||phrase.startsWith(item.label+' ')) score=80;
-      else if(item.label.includes(phrase)) score=60-item.label.length*0.1;
-      else if(phrase.includes(item.label)&&item.label.length>2) score=50-item.label.length*0.1;
-      if(score>bestScore){ bestScore=score; best=item; }
-    }
-    return bestScore>=40 ? best : null;
-  };
-  return tryIdx(_buildVoiceIndex(false)) || tryIdx(_buildVoiceIndex(true));
+  const idx=_buildVoiceIndex();
+  const scored=[];
+  for(const item of idx){
+    let score=-1;
+    if(item.label===phrase) score=100;
+    else if(item.label.startsWith(phrase+' ')||phrase.startsWith(item.label+' ')) score=80;
+    else if(item.label.includes(phrase)) score=60-item.label.length*0.1;
+    else if(phrase.includes(item.label)&&item.label.length>2) score=50-item.label.length*0.1;
+    if(score>=40) scored.push({item,score});
+  }
+  if(!scored.length) return null;
+  scored.sort((a,b)=>b.score-a.score);
+  // Среди набравших балл — сперва ищем видимую кнопку, и только если видимых
+  // вообще нет — берём лучшую скрытую (сработает автопереключение раздела)
+  for(const {item} of scored) if(item.el.offsetParent!==null) return item;
+  return scored[0].item;
 }
 // Если найденная кнопка сейчас скрыта разделом «Кабельные линии»/«Оборудование»
 // (span.sec-kl / span.sec-ob с display:none) — переключаем раздел, чтобы
-// кнопка стала кликабельной, ПЕРЕД тем как её нажать
+// кнопка стала кликабельной, ПЕРЕД тем как её нажать. offsetParent вместо
+// getComputedStyle — тоже дешевле (не форсирует пересчёт стилей отдельно).
 function _voiceRevealIfNeeded(el){
   const secOb = el.closest('.sec-ob');
   const secKl = el.closest('.sec-kl');
-  if(secOb && getComputedStyle(secOb).display==='none'){ setUISection('ob'); return true; }
-  if(secKl && getComputedStyle(secKl).display==='none'){ setUISection('kl'); return true; }
+  if(secOb && secOb.offsetParent===null){ setUISection('ob'); return true; }
+  if(secKl && secKl.offsetParent===null){ setUISection('kl'); return true; }
   return false;
 }
 let _voiceRec=null, _voiceOn=false, _voiceStarting=false;
