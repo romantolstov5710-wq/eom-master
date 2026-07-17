@@ -1486,7 +1486,7 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <label style="font-size:10px;display:flex;align-items:center;gap:3px">
     <span style="color:#64748b">Масштаб:</span>
     <input type="range" id="szm" min="30" max="500" value="100" style="width:60px;accent-color:#3b82f6">
-    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">3%</span>
+    <span id="vzm" style="color:#93c5fd;font-size:9px;min-width:30px">5%</span>
   </label>
   </span>
 
@@ -1503,15 +1503,15 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
   <!-- Строка 2: МОНТАЖ (только для раздела КЛ — при рисовании кабельных трасс) -->
   <div class="mount-row sec-kl" title="Способ прокладки текущей группы">
     <span class="mnt-label">Монтаж:</span>
-    <span id="cur-mount-badge" title="Текущий способ прокладки — переключай прямо во время рисования" style="display: inline-block; padding: 1px 8px; border-radius: 9px; font-size: 10px; font-weight: 700; background: rgb(23, 37, 84); color: rgb(147, 197, 253); border: 1px solid rgb(147, 197, 253); margin-right: 3px; vertical-align: middle; cursor: help;">гф.д20</span>
-    <button class="mnt-btn on" id="mnt-gof20" style="color:#3b82f6" onclick="setMount('gof20')">🔄 Гофра d20</button>
+    <span id="cur-mount-badge" title="Текущий способ прокладки — переключай прямо во время рисования" style="display: inline-block; padding: 1px 8px; border-radius: 9px; font-size: 10px; font-weight: 700; background: rgb(23, 37, 84); color: rgb(99, 102, 241); border: 1px solid rgb(99, 102, 241); margin-right: 3px; vertical-align: middle; cursor: help;">лт.200</span>
+    <button class="mnt-btn" id="mnt-gof20" style="color:#3b82f6" onclick="setMount('gof20')">🔄 Гофра d20</button>
     <button class="mnt-btn" id="mnt-gof16" style="color:#8b5cf6" onclick="setMount('gof16')">Гофра d16</button>
     <button class="mnt-btn" id="mnt-gof25" style="color:#06b6d4" onclick="setMount('gof25')">Гофра d25</button>
     <button class="mnt-btn" id="mnt-gof32" style="color:#0ea5e9" onclick="setMount('gof32')">Гофра d32</button>
     <button class="mnt-btn" id="mnt-sthr20" style="color:#f59e0b" onclick="setMount('sthr20')">▌ Штроба d20</button>
     <button class="mnt-btn" id="mnt-sthr16" style="color:#f97316" onclick="setMount('sthr16')">Штроба d16</button>
     <button class="mnt-btn" id="mnt-lotok" style="color:#10b981" onclick="setMount('lotok')">═ Лоток 100</button>
-    <button class="mnt-btn" id="mnt-lotok200" style="color:#10b981" onclick="setMount('lotok200')">Лоток 200</button>
+    <button class="mnt-btn on" id="mnt-lotok200" style="color:#10b981" onclick="setMount('lotok200')">Лоток 200</button>
     <button class="mnt-btn" id="mnt-open" style="color:#9ca3af" onclick="setMount('open')">— Открыто</button>
   </div>
 
@@ -1709,20 +1709,20 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
     <!-- Счётчики -->
     <div id="cnt">
       <div style="font-size:8.5px;color:#60a5fa;text-transform:uppercase;margin-bottom:3px">📊 Итого</div>
-      Кабель: <b id="ck">0.0м</b><br>
-      ×1.06: <b id="ckz">0.0м</b><br>
+      Кабель: <b id="ck">11.0м</b><br>
+      ×1.06: <b id="ckz">11.7м</b><br>
       Коробок: <b id="cb2">0</b><br>
       Розеток: <b id="cr">0</b><br>
       <span style="color:#10b981">Подрозетники:</span> <b id="cpr">0</b><br>
       Светильн.: <b id="cl">0</b><br>
-      Гильзы: <b id="cg" class="warn">0</b><br>
-      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">0.0м</b><br>
+      Гильзы: <b id="cg" class="warn">1</b><br>
+      <span style="color:#0891b2">Гофра потолок:</span> <b id="cgof">7.5м</b><br>
       <span style="color:#c084fc">Гофра штроба:</span> <b id="csthr">0.0м</b><br>
-      <span style="color:#818cf8">Лоток:</span> <b id="clot">0.0м</b><br>
-      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">0</b><br>
-      Несвязан: <b id="ce" class="warn">0</b><br>
+      <span style="color:#818cf8">Лоток:</span> <b id="clot">3.5м</b><br>
+      <span style="color:#8b5cf6">Клипсы:</span> <b id="ckl">15</b><br>
+      Несвязан: <b id="ce" class="warn">1</b><br>
       <span style="color:#a78bfa">Опусков:</span> <b id="co">0</b><br>
-      <span style="color:#facc15">Бирки:</span> <b id="cbk">0</b>
+      <span style="color:#facc15">Бирки:</span> <b id="cbk">5</b>
     </div>
 
     <div style="margin-top:5px">
@@ -1732,8 +1732,8 @@ select{background:#1e293b;color:#e2e8f0;border:1px solid #334155;
       </div>
       <div id="glist"><div class="gi on" style="border-color:#3b82f6" onclick="swG(5)">
       <div class="md" style="background:#3b82f6"></div>
-      <div style="flex:1"><div class="mn">Гр.1с</div>
-      <div class="ms">0.0м</div>
+      <div style="flex:1"><div class="mn">Гр.1с ⚠</div>
+      <div class="ms">11.0м</div>
       </div>
       <button onclick="event.stopPropagation();delGroup(5)" title="Удалить группу «Гр.1с» вместе со всей трассой" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div><div class="gi" style="border-color:#3b82f6" onclick="swG(6)">
@@ -13880,6 +13880,19 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;
 </script>
 
 
+
+<script>
+// Автозаполнение шифра при первом открытии этого именного шаблона объекта
+window.addEventListener('load', function(){
+  try{
+    var sp=document.getElementById('share-project'); if(sp) sp.value="ВОИН";
+    var sk=document.getElementById('share-korpus');  if(sk) sk.value="АБК";
+    var sm=document.getElementById('share-marka');   if(sm) sm.value="ЭУ";
+    if(typeof updateShifrPreview==='function') updateShifrPreview();
+    if(typeof tip==='function') tip('📐 Шаблон объекта: '+"ВОИН/АБК — ЭУ");
+  }catch(e){}
+});
+</script>
 
 <script>
 // Автозаполнение шифра при первом открытии этого именного шаблона объекта
